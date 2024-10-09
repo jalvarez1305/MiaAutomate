@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MiaAutomate": {
+      "commandName": "Project",
+      "commandLineArgs": "123 MiPlantilla \"SELECT * FROM Tabla\""
+    }
+  }
+}
