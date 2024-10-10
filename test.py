@@ -1,6 +1,6 @@
-from CW_Automations import SendBlast
-from CW_Conversations import ChatwootSenders, envia_mensaje_plantilla, get_open_conversation, send_conversation_message
-from SQL_Helpers import execute_query, get_template_body
+from PyLibrary.CW_Automations import SendBlast
+from PyLibrary.CW_Conversations import ChatwootSenders, envia_mensaje_plantilla, get_open_conversation, send_conversation_message
+
 
 """
 Probar get_open_conversation

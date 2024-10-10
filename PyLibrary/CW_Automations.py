@@ -1,47 +1,33 @@
-# Importar los módulos necesarios
-import sys
-import os
-from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
-from datetime import datetime, timedelta
+from PyLibrary.SQL_Helpers import get_template_body, execute_query
+from PyLibrary.CW_Conversations import envia_mensaje_plantilla, ChatwootSenders
 
-# Asegurarse de que Airflow puede encontrar la carpeta PyLibrary
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'PyLibrary')))
+def SendBlast(template_name, buzon: ChatwootSenders, bot_name=None, query=None):
+    """
+    Envía un mensaje en blast a los contactos obtenidos desde el resultado de la consulta,
+    usando la plantilla y parámetros proporcionados.
 
-# Importar la función SendBlast desde CW_Automations.py
-from CW_Automations import SendBlast
+    :param template_name: Nombre de la plantilla a utilizar.
+    :param buzon: Instancia de la clase ChatwootSenders que indica el buzón (Medicos = 2, Pacientes = 4).
+    :param bot_name: Nombre del bot (puede ser None).
+    :param query: Consulta SQL que debe retornar un DataFrame con los contactos y sus parámetros.
+    """
+    # 1. Ejecutar get_template_body para obtener el body de la plantilla
+    body = get_template_body(template_name)
+    if body is None:
+        print(f"No se encontró el body de la plantilla '{template_name}'.")
+        return
 
-# Definir los parámetros de la DAG
-default_args = {
-    'owner': 'Pablo Alvarez',
-    'start_date': datetime(2024, 10, 10),  # Fecha en la que el DAG empieza
-    'retries': 1,  # Número de intentos de reintento en caso de fallo
-    'retry_delay': timedelta(minutes=5),  # Tiempo entre intentos
-    'catchup': False,  # Si es False, no ejecutará las tareas que quedaron pendientes antes de la fecha de start_date
-}
+    # 2. Ejecutar el query para obtener el DataFrame
+    df = execute_query(query)
+    if df is None or df.empty:
+        print("No se obtuvieron resultados de la consulta o el resultado no es una tabla.")
+        return
 
-# Definir el DAG
-dag = DAG(
-    'send_blast_daily',
-    default_args=default_args,
-    description='DAG para enviar blast diarios usando SendBlast',
-    schedule_interval='0 8 * * *',  # Ejecutar todos los días a las 8 a.m.
-    catchup=False,
-)
+    # 3. Iterar sobre cada fila del DataFrame
+    for index, row in df.iterrows():
+        # 3.1 Crear la lista de parámetros sin incluir la primera columna (contacto_id)
+        parametros = [str(param) for param in row[1:]]  # Ignorar la primera columna (contacto_id)
 
-# Función que ejecuta SendBlast
-def send_blast_daily():
-    template_name = 'agenda_manana'  # Ajusta el nombre de la plantilla
-    buzon = 4  # Ajusta el buzón según lo que necesites, usando ChatwootSenders.Pacientes
-    bot_name = None  # O el nombre del bot, si es necesario
-    query = """SELECT contacto_id, nombre, email FROM contactos WHERE activo = 1"""  # Ajusta la query a tu necesidad
-    
-    # Ejecuta SendBlast
-    SendBlast(template_name, buzon, bot_name, query)
-
-# Definir la tarea que ejecutará la función
-send_blast_task = PythonOperator(
-    task_id='send_blast_daily_task',
-    python_callable=send_blast_daily,
-    dag=dag,
-)
+        # 4. Enviar mensaje usando la función envia_mensaje_plantilla
+        contacto_id = row[0]  # Primera columna es contacto_id
+        envia_mensaje_plantilla(contacto_id, body, parametros, buzon, bot_name)
