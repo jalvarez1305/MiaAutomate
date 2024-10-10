@@ -1,2 +1,5 @@
 requests
+pandas
 python-dotenv
+numpy
+pymssql

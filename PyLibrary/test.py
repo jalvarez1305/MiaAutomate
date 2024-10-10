@@ -1,4 +1,6 @@
+from CW_Automations import SendBlast
 from CW_Conversations import ChatwootSenders, envia_mensaje_plantilla, get_open_conversation, send_conversation_message
+from SQL_Helpers import execute_query, get_template_body
 
 """
 Probar get_open_conversation
@@ -21,7 +23,7 @@ if __name__ == "__main__":
     send_conversation_message(conversation_id, message, is_private, buzon)
 """
 
-
+'''
 contacto_id = 162  # Reemplaza con el ID del contacto
 plantilla = """Hola {{1}}, queremos ser siempre mejores para ti. Nos podrias decir como calificarías la atención brindada por tu medico {{2}}?
 
@@ -31,5 +33,38 @@ buzon = ChatwootSenders.Pacientes  # O ChatwootSenders.Medicos
 bot_name = "Notificacion"
 
 envia_mensaje_plantilla(contacto_id, plantilla, parametros, buzon, bot_name)
+'''
+'''
+query = """
+SELECT TOP (1000) [ID],
+      [Descripcion],
+      [Comision]
+  FROM [Clinica].[dbo].[MetodosPago]
+"""
+
+# Ejecutar la consulta y obtener el resultado como DataFrame
+result = execute_query(query)
+
+if result is not None:
+    print(result)
+else:
+    print("No se obtuvieron resultados o el resultado no es una tabla.")
+'''
+'''
+template_name = 'agenda_manana'
+body = get_template_body(template_name)
+if body:
+    print(f"El Body de la plantilla '{template_name}' es: {body}")
+else:
+    print(f"No se encontró el Body de la plantilla '{template_name}'.")
+'''
+
+template_name = 'agenda_sumary2'
+buzon = ChatwootSenders.Medicos  # Instancia de la clase ChatwootSenders
+bot_name = 'AgendaMedico'  # Si no deseas usar un bot, puedes pasar None
+query = """SELECT 162 as ContactID,'Pablo' Nombre,'Mañana' Dia,'13:20' Inicio,'14:19' Fin"""
+
+SendBlast(template_name, buzon, bot_name, query)
+
 
 

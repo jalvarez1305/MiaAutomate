@@ -60,7 +60,15 @@ def envia_mensaje_plantilla(contacto_id, plantilla, parametros=None, buzon=Chatw
                 "contact_id": contacto_id,
                 "inbox_id": buzon,
                 "message": {
-                    "content": text_to_send
+                    "content": text_to_send,  # Corregido: eliminada la comilla extra
+                    "template_params": {
+                        "name": "sorteo_240430",  # Nombre de la plantilla
+                        "category": "UTILITY",    # Categoría de la plantilla
+                        "language": "en_US",      # Idioma de la plantilla
+                        "processed_params": {     # Parámetros procesados
+                            "Orlans": "Orlans"    # Parámetro procesado, ajusta según sea necesario
+                        }
+                    }
                 }
             }
         else:
@@ -69,10 +77,18 @@ def envia_mensaje_plantilla(contacto_id, plantilla, parametros=None, buzon=Chatw
                 "contact_id": contacto_id,
                 "inbox_id": buzon,
                 "message": {
-                    "content": text_to_send
+                    "content": text_to_send,  # Corregido: eliminada la comilla extra
+                    "template_params": {
+                        "name": "sorteo_240430",  # Nombre de la plantilla
+                        "category": "UTILITY",    # Categoría de la plantilla
+                        "language": "en_US",      # Idioma de la plantilla
+                        "processed_params": {     # Parámetros procesados
+                            "Orlans": "Orlans"    # Parámetro procesado, ajusta según sea necesario
+                        }
+                    }
                 },
                 "custom_attributes": {
-                    "bot": bot_name
+                    "bot": bot_name  # Atributos personalizados para el bot
                 }
             }
 
