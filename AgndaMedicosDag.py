@@ -1,19 +1,14 @@
 # Importar los módulos necesarios
-import sys
-import os
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from datetime import datetime, timedelta
 
-# Asegurarse de que Airflow puede encontrar la carpeta PyLibrary
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'PyLibrary')))
-
-# Importar la función SendBlast desde CW_Automations.py
+# Importa la función SendBlast desde el archivo donde la definiste
 from CW_Automations import SendBlast
 
 # Definir los parámetros de la DAG
 default_args = {
-    'owner': 'Pablo Alvarez',
+    'owner': 'airflow',
     'start_date': datetime(2024, 10, 10),  # Fecha en la que el DAG empieza
     'retries': 1,  # Número de intentos de reintento en caso de fallo
     'retry_delay': timedelta(minutes=5),  # Tiempo entre intentos
@@ -45,3 +40,4 @@ send_blast_task = PythonOperator(
     python_callable=send_blast_daily,
     dag=dag,
 )
+
