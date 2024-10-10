@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 # Importa la función SendBlast desde el archivo donde la definiste
 from PyLibrary.CW_Automations import SendBlast
+from PyLibrary.CW_Conversations import ChatwootSenders
 
 # Definir los parámetros de la DAG
 default_args = {
@@ -25,11 +26,18 @@ dag = DAG(
 )
 
 # Función que ejecuta SendBlast
-def send_blast_daily():
+def send_agenda_manana():
     template_name = 'agenda_manana'  # Ajusta el nombre de la plantilla
-    buzon = 4  # Ajusta el buzón según lo que necesites, usando ChatwootSenders.Pacientes
+    buzon = ChatwootSenders.Medico  # Ajusta el buzón según lo que necesites, usando ChatwootSenders.Pacientes
     bot_name = None  # O el nombre del bot, si es necesario
-    query = """SELECT contacto_id, nombre, email FROM contactos WHERE activo = 1"""  # Ajusta la query a tu necesidad
+    query = """SELECT        MedicoId,
+			  MedicoNickName,
+			  'Mañana' as Dia,
+			  MIN(FORMAT(start_datetime, 'HH:mm'))  AS Inicio,
+			  MAX(FORMAT(start_datetime, 'HH:mm'))  AS Fin
+FROM            dbo.vwCalendario
+WHERE        (CONVERT(date, start_datetime) = CONVERT(date, GETDATE() + 1))
+GROUP BY MedicoID,MedicoNickName"""  # Ajusta la query a tu necesidad
     
     # Ejecuta SendBlast
     SendBlast(template_name, buzon, bot_name, query)
@@ -37,7 +45,8 @@ def send_blast_daily():
 # Definir la tarea que ejecutará la función
 send_blast_task = PythonOperator(
     task_id='send_blast_daily_task',
-    python_callable=send_blast_daily,
+    python_callable=send_agenda_manana,
     dag=dag,
 )
 
+send_blast_task
