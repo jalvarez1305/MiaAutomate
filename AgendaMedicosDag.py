@@ -1,11 +1,12 @@
 # Importar los módulos necesarios
 from airflow import DAG
-from airflow.operators import PythonOperator
+from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
-
+import sys
+sys.path.insert(0, '/root/airflow/dags/PyLibrary')
 # Importa la función SendBlast desde el archivo donde la definiste
-from PyLibrary.CW_Automations import SendBlast
-from PyLibrary.CW_Conversations import ChatwootSenders
+from CW_Automations import SendBlast
+from CW_Conversations import ChatwootSenders
 
 # Definir los parámetros de la DAG
 default_args = {

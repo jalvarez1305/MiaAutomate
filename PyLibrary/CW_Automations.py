@@ -1,5 +1,5 @@
-from PyLibrary.SQL_Helpers import get_template_body, execute_query
-from PyLibrary.CW_Conversations import envia_mensaje_plantilla, ChatwootSenders
+from SQL_Helpers import get_template_body, execute_query
+from CW_Conversations import envia_mensaje_plantilla, ChatwootSenders
 
 def SendBlast(template_name, buzon: ChatwootSenders, bot_name=None, query=None):
     """
