@@ -2,6 +2,7 @@ import requests
 import os
 from dotenv import load_dotenv
 import json
+from twilio.rest import Client
 
 # Cargar las variables de entorno desde el archivo .env
 load_dotenv()
@@ -9,11 +10,40 @@ load_dotenv()
 # Obtener la BASE_URL y CW_TOKEN desde el .env
 cw_token = os.getenv('CW_TOKEN')
 base_url = os.getenv('BASE_URL')
+twilio_account_sid = os.getenv('TWILIO_ACCOUNT_SID')
+twilio_auth_token = os.getenv('TWILIO_AUTH_TOKEN')
+twilio_from_number = os.getenv('TWILIO_FROM_NUMBER')
 
 # Enumeración en Python para los buzones
 class ChatwootSenders:
     Medicos = 2  
     Pacientes = 4  
+
+def send_content_builder(to, content_sid, media_url, body):
+    """
+    Envía un mensaje utilizando una plantilla de Twilio Content Builder.
+    
+    :param to: El número de destino en formato internacional (ej. "+523331830952").
+    :param content_sid: El Content Template SID para el mensaje.
+    :param media_url: La URL de la imagen que se enviará.
+    :param body: El mensaje adicional que se enviará.
+    """
+    
+    # Inicializar el cliente de Twilio
+    client = Client(twilio_account_sid, twilio_auth_token)
+
+    try:
+        # Enviar el mensaje usando la plantilla de Content Builder
+        message = client.messages.create(
+            to=f"whatsapp:{to}",  # El número de destino (México)
+            from_=twilio_from_number,  # Número de Twilio registrado en tu cuenta
+            content_sid=content_sid,  # Content Template SID
+            body=body,  # Mensaje adicional
+            media_url=media_url,  # URL de la imagen
+        )
+        print(f"Mensaje enviado con SID: {message.sid}")
+    except Exception as e:
+        print(f"Error al enviar el mensaje: {e}")
 
 def envia_mensaje_plantilla(contacto_id, plantilla, parametros=None, buzon=ChatwootSenders.Pacientes, bot_name=None):
     """

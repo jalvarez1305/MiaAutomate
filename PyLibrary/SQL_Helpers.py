@@ -12,7 +12,7 @@ database = os.getenv('SQL_DATABASE')
 username = os.getenv('SQL_USERNAME')
 password = os.getenv('SQL_PASSWORD')
 
-def get_template_body(template_name):
+def get_template_body(template_sid):
     """
     Obtiene el cuerpo de una plantilla desde la base de datos por su nombre.
     
@@ -23,7 +23,7 @@ def get_template_body(template_name):
     query = f"""
     SELECT [Body]
     FROM [cfg].[WS_Templates]
-    WHERE [name] = '{template_name}'
+    WHERE [sid] = '{template_name}'
     """
     
     # Ejecutar la consulta y obtener el resultado
