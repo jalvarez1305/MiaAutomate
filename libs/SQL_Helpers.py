@@ -23,7 +23,7 @@ def get_template_body(template_sid):
     query = f"""
     SELECT [Body]
     FROM [cfg].[WS_Templates]
-    WHERE [sid] = '{template_name}'
+    WHERE [sid] = '{template_sid}'
     """
     
     # Ejecutar la consulta y obtener el resultado

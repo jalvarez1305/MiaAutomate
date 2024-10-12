@@ -1,6 +1,3 @@
-from PyLibrary.CW_Conversations import ChatwootSenders, envia_mensaje_plantilla, get_open_conversation, send_content_builder, send_conversation_message
-
-
 """
 Probar get_open_conversation
 if __name__ == "__main__":
@@ -57,15 +54,24 @@ if body:
 else:
     print(f"No se encontró el Body de la plantilla '{template_name}'.")
 '''
-'''
+
+
+
+
+from libs.CW_Automations import SendBlast
+from libs.CW_Conversations import ChatwootSenders
+
+
 template_name = 'agenda_sumary2'
 buzon = ChatwootSenders.Medicos  # Instancia de la clase ChatwootSenders
 bot_name = 'AgendaMedico'  # Si no deseas usar un bot, puedes pasar None
 query = """SELECT 162 as ContactID,'Pablo' Nombre,'Mañana' Dia,'13:20' Inicio,'14:19' Fin"""
 
 SendBlast(template_name, buzon, bot_name, query)
-'''
-send_content_builder("+523331830952", "HXf242a71276efc4d46ac93f6d9e9f2055", "https://res.cloudinary.com/dkh1fgvnb/image/upload/v1728746286/cm_iavwfa.jpg", "Cuidate del cancer, por favor")
+
+
+
+#send_content_builder("+523331830952", "HXf242a71276efc4d46ac93f6d9e9f2055", "https://res.cloudinary.com/dkh1fgvnb/image/upload/v1728746286/cm_iavwfa.jpg", "Cuidate del cancer, por favor")
 
 
 # Ejemplo de uso:

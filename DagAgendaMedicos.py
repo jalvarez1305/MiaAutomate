@@ -3,10 +3,10 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
 import sys
-sys.path.insert(0, '/root/airflow/dags/PyLibrary')
+sys.path.insert(0, '/root/airflow/dags/libs')
 # Importa la función SendBlast desde el archivo donde la definiste
-from CW_Automations import SendBlast
-from CW_Conversations import ChatwootSenders
+from libs.CW_Automations import SendBlast
+from libs.CW_Conversations import ChatwootSenders
 
 # Definir los parámetros de la DAG
 default_args = {
@@ -28,21 +28,12 @@ dag = DAG(
 
 # Función que ejecuta SendBlast
 def send_agenda_manana():
-    template_name = 'agenda_manana'  # Ajusta el nombre de la plantilla
-    buzon = ChatwootSenders.Medico  # Ajusta el buzón según lo que necesites, usando ChatwootSenders.Pacientes
-    bot_name = None  # O el nombre del bot, si es necesario
-    query = """SELECT        MedicoId,
-			  MedicoNickName,
-			  'Mañana' as Dia,
-			  MIN(FORMAT(start_datetime, 'HH:mm'))  AS Inicio,
-			  MAX(FORMAT(start_datetime, 'HH:mm'))  AS Fin
-FROM            dbo.vwCalendario
-WHERE        (CONVERT(date, start_datetime) = CONVERT(date, GETDATE() + 1))
-GROUP BY MedicoID,MedicoNickName"""  # Ajusta la query a tu necesidad
-    
-    # Ejecuta SendBlast
-    SendBlast(template_name, buzon, bot_name, query)
+    template_name = 'agenda_sumary2'
+    buzon = ChatwootSenders.Medicos  # Instancia de la clase ChatwootSenders
+    bot_name = 'AgendaMedico'  # Si no deseas usar un bot, puedes pasar None
+    query = """SELECT 162 as ContactID,'Pablo' Nombre,'Mañana' Dia,'13:20' Inicio,'14:19' Fin"""
 
+    SendBlast(template_name, buzon, bot_name, query)
 # Definir la tarea que ejecutará la función
 send_blast_task = PythonOperator(
     task_id='send_blast_daily_task',
