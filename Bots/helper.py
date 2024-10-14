@@ -1,3 +1,10 @@
+import sys
+import os
+
+# Añadir la ruta a libs al path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../libs')))
+from CW_Conversations import get_conversation_messages
+
 def parse_conversation_payload(payload):
     """
     Procesa el payload de una conversación y extrae la información relevante.
@@ -5,36 +12,27 @@ def parse_conversation_payload(payload):
     :param payload: Diccionario que contiene la información de la conversación.
     :return: Objeto con la información estructurada de la conversación.
     """
+    # Extraer información principal de la conversación
+    conversation = payload.get("conversation", {})
+    meta = conversation.get("meta", {})
+    sender_info = meta.get("sender", {})
+
+    # Crear un diccionario para almacenar la información de la conversación
     conversation_info = {
-        "conversation_id": payload.get("id"),
-        "contact_id": payload.get("meta", {}).get("sender", {}).get("id"),
-        "bot_attribute": payload.get("custom_attributes", {}).get("bot"),
-        "messages": []
+        "conversation_id": conversation.get("id"),
+        "contact_id": sender_info.get("id"),
+        "contact_name": sender_info.get("name"),
+        "bot_attribute": conversation.get("custom_attributes", {}).get("bot")
     }
 
-    # Extraer mensajes
-    messages = payload.get("messages", [])
-    last_sender = None
-    last_message_text = None
+    # Extraer mensajes de la conversación
+    messages = get_conversation_messages(conversation_info['conversation_id'])  # Obtener mensajes
+    conversation_info['messages'] = messages
 
-    for message in messages:
-        sender_type = "agente" if message.get("sender_type") == "agent" else "contacto"
-        message_info = {
-            "sender": sender_type,
-            "text": message.get("content")
-        }
-        conversation_info["messages"].append(message_info)
-
-        # Actualizar información del último mensaje
-        if message.get("created_at"):  # Si hay una fecha de creación
-            if last_sender is None or message.get("created_at") > last_message_text:
-                last_sender = sender_type
-                last_message_text = message.get("content")
-
-    # Añadir el último mensaje al objeto de conversación
-    conversation_info["last_message"] = {
-        "sender": last_sender,
-        "text": last_message_text
-    }
+    # Asegurarse de que hay mensajes antes de intentar acceder al último
+    if messages:  # Comprobar que la lista de mensajes no esté vacía
+        conversation_info["last_message"] = messages[-1]  # Guardar el último mensaje
+    else:
+        conversation_info["last_message"] = None  # Si no hay mensajes, establecer como None
 
     return conversation_info

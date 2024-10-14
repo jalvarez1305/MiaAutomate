@@ -270,3 +270,48 @@ def get_conv_from_contact(response_data, contact_id):
         print(f"Error al procesar la respuesta: {str(ex)}")
     
     return None
+
+def get_conversation_messages(conversation_id):
+    """
+    Obtiene los mensajes de una conversación en Chatwoot.
+
+    :param conversation_id: ID de la conversación de la cual se desean obtener los mensajes.
+    :return: Un arreglo con los mensajes, cada uno conteniendo el 'Sender' y el 'Content'.
+    """
+    url = f"{base_url}/conversations/{conversation_id}/messages"
+    headers = {
+        "api_access_token": cw_token
+    }
+    messages = []  # Lista para almacenar los mensajes
+
+    try:
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            response_data = response.json()
+            # Acceder a 'payload' para obtener los mensajes
+            for message in response_data.get('payload', []):
+                try:
+                    sender = message.get('sender', {}).get('type')  # 'Agent' o 'Contact'
+                    content = message.get('content')  # Contenido del mensaje
+
+                    # Añadir el mensaje a la lista si tanto 'sender' como 'content' están presentes
+                    if sender and content:
+                        messages.append({
+                            'Sender': sender,
+                            'Content': content
+                        })
+
+                except Exception as inner_ex:
+                    print(f"Excepción al procesar mensaje: {str(inner_ex)}")
+        
+            print("Mensajes extraídos con éxito.")
+        else:
+            print(f"Error al obtener mensajes: {response.text}")
+
+    except Exception as ex:
+        print(f"Excepción al obtener mensajes: {str(ex)}")
+
+    return messages
+
+

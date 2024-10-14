@@ -73,7 +73,7 @@ SendBlast(template_name, buzon, bot_name, query)
 
 
 from libs.CW_Automations import send_blast_image
-from libs.CW_Conversations import send_content_builder
+from libs.CW_Conversations import get_conversation_messages, send_content_builder
 
 # Llamar a la función send_content_builder con los parámetros correctos
 '''
@@ -113,7 +113,10 @@ No usar productos en axilas o mamas (desodorante, crema, perfumes).
 
 
 #send_blast_image("HX4780f22a4a93827a4f37e9e003bbf76d", "AgendaBot", "SELECT 162 as ContactID,'Pablo' Nombre,'Mañana' Dia,'13:20' Inicio,'14:19' Fin")
-
+'''
 query=""" SELECT id,[phone_number],[name]
   FROM [dbo].[CW_Contacts]"""
 send_blast_image("eco_mamario_2024", bot_name="eco_mamario", query=query)
+'''
+
+print(get_conversation_messages(578))
