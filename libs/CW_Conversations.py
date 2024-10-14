@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 import json
 from twilio.rest import Client
+from datetime import datetime, timedelta
 
 # Cargar las variables de entorno desde el archivo .env
 load_dotenv()
@@ -344,3 +345,47 @@ def get_conversation_messages(conversation_id):
     return messages
 
 
+# Constante para la duración de inactividad permitida
+DURACION_INACTIVIDAD = timedelta(hours=16)
+
+def cerrar_conversaciones_inactivas():
+    """
+    Cierra todas las conversaciones abiertas que han estado inactivas por más de 16 horas.
+    """
+    try:
+        url = f"{base_url}/conversations?status=open"
+        headers = {
+            "api_access_token": cw_token
+        }
+        
+        response = requests.get(url, headers=headers)
+        
+        # Comprobar si la respuesta fue exitosa
+        if response.status_code == 200:
+            try:
+                # Intenta deserializar la respuesta JSON
+                conversations = response.json().get('data', [])
+                now = datetime.utcnow()
+
+                for conversation in conversations['payload']:  # Cambiado a conversations directamente
+                    last_activity_at = conversation.get('last_activity_at')
+                    
+                    if last_activity_at:
+                        # Asegúrate de que last_activity_at esté en segundos
+                        last_activity_time = datetime.fromtimestamp(last_activity_at)
+                        inactivity_duration = now - last_activity_time
+                        
+                        # Verificar si la conversación está abierta y ha estado inactiva por más de 16 horas
+                        if conversation.get('status') == 'open' and inactivity_duration > DURACION_INACTIVIDAD:
+                            try:
+                                cerrar_conversacion(conversation.get('id'))
+                            except Exception as cerr_error:
+                                print(f"Error al cerrar la conversación {conversation.get('id')}: {str(cerr_error)}")
+            except ValueError as json_error:
+                print(f"Error al procesar el JSON de la respuesta: {str(json_error)}")
+                print("Respuesta de la API:", response.text)  # Muestra la respuesta completa para depuración
+        else:
+            print(f"Error al obtener las conversaciones: {response.status_code} - {response.text}")
+    
+    except Exception as ex:
+        print(f"Error al cerrar conversaciones inactivas: {str(ex)}")

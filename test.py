@@ -72,8 +72,7 @@ SendBlast(template_name, buzon, bot_name, query)
 
 
 
-from libs.CW_Automations import send_blast_image
-from libs.CW_Conversations import get_conversation_messages, send_content_builder
+
 
 # Llamar a la función send_content_builder con los parámetros correctos
 '''
@@ -119,4 +118,7 @@ query=""" SELECT id,[phone_number],[name]
 send_blast_image("eco_mamario_2024", bot_name="eco_mamario", query=query)
 '''
 
-print(get_conversation_messages(578))
+from libs.CW_Conversations import cerrar_conversaciones_inactivas
+
+
+cerrar_conversaciones_inactivas()
