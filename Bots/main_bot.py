@@ -15,14 +15,14 @@ def chatwoot_webhook():
     data = request.get_json()
 
     if not data:
-        logging.error("No se recibió un cuerpo JSON válido.")
+        #logging.error("No se recibió un cuerpo JSON válido.")
         return jsonify({"error": "Invalid JSON payload"}), 400
 
     split_data = parse_conversation_payload(data)
     
     # Verificar que split_data tiene las claves necesarias
     if not isinstance(split_data, dict):
-        logging.error("El payload no tiene el formato esperado.")
+        #logging.error("El payload no tiene el formato esperado.")
         return jsonify({"error": "Unexpected payload format"}), 400
 
     # Evalúa los bots
@@ -31,7 +31,7 @@ def chatwoot_webhook():
     # Verificar la existencia de claves antes de acceder
     if 'bot_attribute' in split_data and 'Sender' in last_message:
         if split_data['bot_attribute'] != "" and last_message.get('Sender') == "contact":  # Asegúrate de que "Contact" sea la cadena correcta
-            logging.info("El atributo del bot está presente y el último mensaje es de contacto.")            
+            #logging.info("El atributo del bot está presente y el último mensaje es de contacto.")            
             # Usar match-case para evaluar el atributo del bot
             match split_data["bot_attribute"]:
                 case "AgendaMedico":
@@ -47,4 +47,4 @@ def chatwoot_webhook():
     return jsonify({"message": "Webhook received!"}), 200
 
 if __name__ == '__main__':
-    app.run(port=5000)  # Cambia el puerto según sea necesario
+    app.run(host='74.208.33.184', port=5000)  # Cambia el puerto según sea necesario
