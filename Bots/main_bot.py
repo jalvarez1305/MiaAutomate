@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import logging
 
+from agenda_bot import AgendaBot
 from helper import parse_conversation_payload
 
 app = Flask(__name__)
@@ -35,7 +36,7 @@ def chatwoot_webhook():
             match split_data["bot_attribute"]:
                 case "AgendaMedico":
                     logging.info(f"Se ejecuta BOT {split_data['bot_attribute']}")
-                    # Aquí puedes agregar más lógica para la ejecución del bot
+                    AgendaBot(split_data)
                 case _:
                     logging.warning("Bot no reconocido.")
         else:

@@ -12,6 +12,30 @@ database = os.getenv('SQL_DATABASE')
 username = os.getenv('SQL_USERNAME')
 password = os.getenv('SQL_PASSWORD')
 
+def GetParametersFromQuery(query):
+    """
+    Ejecuta un query SQL y devuelve los valores de la primera fila como una lista.
+
+    :param query: El query SQL a ejecutar.
+    :return: Una lista con los valores de cada columna de la primera fila del resultado o None si no se encuentra ninguna fila o si ocurre un error.
+    """
+    try:
+        # Ejecutar la consulta y obtener el resultado
+        result = execute_query(query)
+
+        # Verificar si el resultado existe y tiene datos
+        if result is not None and not result.empty:
+            # Crear una lista con los valores de la primera fila
+            parametros = result.iloc[0].tolist()  # Convierte la fila en una lista
+            return parametros
+        else:
+            return None  # Devolver None si no se encuentra ninguna fila
+
+    except Exception as e:
+        logging.error(f"Error al ejecutar la consulta: {str(e)}")  # Manejo de errores con logging
+        return None  # Devolver None si ocurre un error
+
+
 def GetTemplateDetails(template_name):
     """
     Obtiene los detalles de una plantilla desde la base de datos por su nombre.
