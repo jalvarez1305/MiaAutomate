@@ -34,7 +34,7 @@ def SendBlast(template_name, buzon: ChatwootSenders, bot_name=None, query=None):
         body = template_details['Body']
         envia_mensaje_plantilla(contacto_id, body, parametros, buzon, bot_name)
 
-def send_blast_image(template_name, bot_name, query):
+def send_blast_image(template_name, bot_name=None, query=None):
     """
     Envía un mensaje en blast a los contactos obtenidos desde el resultado de la consulta,
     usando la plantilla y parámetros proporcionados.
@@ -44,9 +44,9 @@ def send_blast_image(template_name, bot_name, query):
     :param query: Consulta SQL que debe retornar un DataFrame con los contactos y sus parámetros.
     """
     # 1. Ejecutar get_template_body para obtener el body de la plantilla
-    body = get_template_body(content_sid)  # Cambié el nombre a get_template_body para reflejar el uso correcto.
-    if body is None:
-        print(f"No se encontró el body de la plantilla '{content_sid}'.")
+    template_details = GetTemplateDetails(template_name)  # Cambié el nombre a get_template_body para reflejar el uso correcto.
+    if template_details is None:
+        print(f"No se encontró el body de la plantilla '{template_name}'.")
         return
 
     # 2. Ejecutar el query para obtener el DataFrame
@@ -63,16 +63,17 @@ def send_blast_image(template_name, bot_name, query):
         parametros = [str(param) for param in row[2:]]  # Restantes columnas son parámetros
 
         # 4. Preparar el mensaje para enviar
-        text_to_send = body  # Inicializar con el body de la plantilla
+        text_to_send = template_details['Body']  # Inicializar con el body de la plantilla
 
         # 4.1 Reemplazar los parámetros en el texto
         for ii, param in enumerate(parametros, 1):
             text_to_send = text_to_send.replace(f"{{{{{ii}}}}}", param)
-        
+        content_sid=template_details['sid']
+        url=template_details['url']
         # 5. Llamar a la función send_content_builder
-        send_content_builder(telefono, content_sid, "https://res.cloudinary.com/dkh1fgvnb/image/upload/v1728676112/Participa-Sorteo_ppy38z.jpg", text_to_send)
+        send_content_builder(telefono, content_sid, url, text_to_send)
 
         # 6. Si no hay error, llamar a la función envia_mensaje_plantilla
-        envia_mensaje_plantilla(contacto_id, body, parametros, ChatwootSenders.Pacientes, bot_name)
+        envia_mensaje_plantilla(contacto_id, text_to_send, parametros, ChatwootSenders.Pacientes, bot_name,is_private=True)
 
     print("Mensajes enviados correctamente.")

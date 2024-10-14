@@ -89,7 +89,7 @@ def send_content_builder(to, content_sid, media_url, body):
     except Exception as e:
         print(f"Error al enviar el mensaje: {e}")
 
-def envia_mensaje_plantilla(contacto_id, plantilla, parametros=None, buzon=ChatwootSenders.Pacientes, bot_name=None):
+def envia_mensaje_plantilla(contacto_id, plantilla, parametros=None, buzon=ChatwootSenders.Pacientes, bot_name=None,is_private=False):
     """
     Envía un mensaje usando una plantilla en Chatwoot.
     
@@ -117,7 +117,7 @@ def envia_mensaje_plantilla(contacto_id, plantilla, parametros=None, buzon=Chatw
     # Verificar si se encontró una conversación abierta
     if open_conv:
         print(f"Se enlaza a la conversación: {open_conv}")
-        send_conversation_message(open_conv, text_to_send, buzon=buzon)
+        send_conversation_message(open_conv, text_to_send, buzon=buzon,is_private=is_private)
     else:
         print(f"No se encontró conversación para el contacto ID: {contacto_id}")
 
@@ -135,6 +135,7 @@ def envia_mensaje_plantilla(contacto_id, plantilla, parametros=None, buzon=Chatw
                 "inbox_id": buzon,
                 "message": {
                     "content": text_to_send,  # Corregido: eliminada la comilla extra
+                    "private": is_private,
                     "template_params": {
                         "name": "sorteo_240430",  # Nombre de la plantilla
                         "category": "UTILITY",    # Categoría de la plantilla
@@ -151,7 +152,8 @@ def envia_mensaje_plantilla(contacto_id, plantilla, parametros=None, buzon=Chatw
                 "contact_id": contacto_id,
                 "inbox_id": buzon,
                 "message": {
-                    "content": text_to_send,  # Corregido: eliminada la comilla extra
+                    "content": text_to_send,
+                    "private": is_private,  # Corregido: eliminada la comilla extra
                     "template_params": {
                         "name": "sorteo_240430",  # Nombre de la plantilla
                         "category": "UTILITY",    # Categoría de la plantilla
