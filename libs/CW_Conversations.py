@@ -16,8 +16,52 @@ twilio_from_number = os.getenv('TWILIO_FROM_NUMBER')
 
 # Enumeración en Python para los buzones
 class ChatwootSenders:
-    Medicos = 2  
-    Pacientes = 4  
+    Medicos = 10  
+    Pacientes = 11  
+
+def assign_agent_to_conversation(conversation_id, agent_id):
+    """
+    Asigna un agente a una conversación en Chatwoot.
+    
+    :param conversation_id: ID de la conversación a la que se asignará el agente.
+    :param agent_id: ID del agente que se asignará a la conversación.
+    """
+    url = f"{base_url}/conversations/{conversation_id}/assign"
+    headers = {
+        "Content-Type": "application/json",
+        "api_access_token": cw_token
+    }
+    
+    body = {
+        "assignee_id": agent_id  # ID del agente a asignar
+    }
+
+    response = requests.post(url, json=body, headers=headers)
+
+    if response.status_code == 200:
+        print(f"Agente {agent_id} asignado a la conversación {conversation_id} con éxito.")
+    else:
+        print(f"Error al asignar agente: {response.status_code} - {response.text}")
+
+def remove_bot_attribute(conversation_id):
+    """
+    Elimina el atributo personalizado 'bot' de una conversación en Chatwoot.
+    
+    :param conversation_id: ID de la conversación de la que se eliminará el atributo.
+    """
+    attribute_key = "bot"  # Clave del atributo que se desea eliminar
+    url = f"{base_url}/api/v1/conversations/{conversation_id}/custom_attributes/{attribute_key}"
+    headers = {
+        "Content-Type": "application/json",
+        "api_access_token": cw_token
+    }
+
+    response = requests.delete(url, headers=headers)
+
+    if response.status_code == 204:
+        print(f"Atributo '{attribute_key}' eliminado con éxito de la conversación {conversation_id}.")
+    else:
+        print(f"Error al eliminar el atributo: {response.status_code} - {response.text}")
 
 def send_content_builder(to, content_sid, media_url, body):
     """

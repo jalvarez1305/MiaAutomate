@@ -33,7 +33,7 @@ def SendBlast(template_name, buzon: ChatwootSenders, bot_name=None, query=None):
         contacto_id = row[0]  # Primera columna es contacto_id
         envia_mensaje_plantilla(contacto_id, body, parametros, buzon, bot_name)
 
-def send_blast_image(content_sid, bot_name, query):
+def send_blast_image(template_name, bot_name, query):
     """
     Envía un mensaje en blast a los contactos obtenidos desde el resultado de la consulta,
     usando la plantilla y parámetros proporcionados.
@@ -61,11 +61,17 @@ def send_blast_image(content_sid, bot_name, query):
         telefono = row[1]  # Segunda columna es el teléfono
         parametros = [str(param) for param in row[2:]]  # Restantes columnas son parámetros
 
+        # 4. Preparar el mensaje para enviar
+        text_to_send = body  # Inicializar con el body de la plantilla
+
+        # 4.1 Reemplazar los parámetros en el texto
         for ii, param in enumerate(parametros, 1):
             text_to_send = text_to_send.replace(f"{{{{{ii}}}}}", param)
-            
+        
         # 5. Llamar a la función send_content_builder
-        send_content_builder(telefono, content_sid, "https://i.postimg.cc/3xmykgkj/Participa-Sorteo.jpg", text_to_send)
+        send_content_builder(telefono, content_sid, "https://res.cloudinary.com/dkh1fgvnb/image/upload/v1728676112/Participa-Sorteo_ppy38z.jpg", text_to_send)
 
         # 6. Si no hay error, llamar a la función envia_mensaje_plantilla
         envia_mensaje_plantilla(contacto_id, body, parametros, ChatwootSenders.Pacientes, bot_name)
+
+    print("Mensajes enviados correctamente.")

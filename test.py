@@ -56,7 +56,7 @@ else:
 '''
 
 
-
+'''
 
 from libs.CW_Automations import SendBlast
 from libs.CW_Conversations import ChatwootSenders
@@ -68,14 +68,49 @@ bot_name = 'AgendaMedico'  # Si no deseas usar un bot, puedes pasar None
 query = """SELECT 162 as ContactID,'Pablo' Nombre,'Mañana' Dia,'13:20' Inicio,'14:19' Fin"""
 
 SendBlast(template_name, buzon, bot_name, query)
+'''
 
 
 
-#send_content_builder("+523331830952", "HXf242a71276efc4d46ac93f6d9e9f2055", "https://res.cloudinary.com/dkh1fgvnb/image/upload/v1728746286/cm_iavwfa.jpg", "Cuidate del cancer, por favor")
+from libs.CW_Conversations import send_content_builder
+
+# Llamar a la función send_content_builder con los parámetros correctos
+send_content_builder(
+    "+523310406768",  # Número de teléfono
+    "HX005f7ed59a6213d208838a82389797f5",  # Content SID
+    "https://res.cloudinary.com/dkh1fgvnb/image/upload/v1728918507/cancer_d9aoyx.jpg",  # URL de la imagen
+    """
+🌸 Promoción Eco Mamario - Mia Clínicas de la Mujer 🌸
+
+🗓 Horarios:
+Jueves de octubre, de 11:00 a 16:00 hrs.
+
+💰 Promoción:
+De $799 a $399 + Asesoría Ginecológica gratuita si tu eco presenta algún resultado fuera de los rangos normales.
+
+👩‍⚕ Dirigido a:
+Mujeres mayores de 20 años.
+
+✅ Beneficios del eco mamario:
+
+No invasivo
+Sin radiación
+Duración: 15 minutos
+📍 Indicaciones:
+
+Llegar 15 minutos antes de la cita.
+Usar prendas fáciles de quitar para que el eco sea más rápido.
+No usar productos en axilas o mamas (desodorante, crema, perfumes).
+¡Agenda tu cita hoy! 
+    """  # Mensaje adicional
+)
 
 
 # Ejemplo de uso:
-# send_blast_image("HX4780f22a4a93827a4f37e9e003bbf76d", "NombreBot", "SELECT contacto_id, telefono, param1, param2, param3 FROM tu_tabla")
+#from libs.CW_Automations import send_blast_image
+
+
+#send_blast_image("HX4780f22a4a93827a4f37e9e003bbf76d", "AgendaBot", "SELECT 162 as ContactID,'Pablo' Nombre,'Mañana' Dia,'13:20' Inicio,'14:19' Fin")
 
 
 
