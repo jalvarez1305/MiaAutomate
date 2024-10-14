@@ -12,29 +12,37 @@ database = os.getenv('SQL_DATABASE')
 username = os.getenv('SQL_USERNAME')
 password = os.getenv('SQL_PASSWORD')
 
-def get_template_body(template_sid):
+def GetTemplateDetails(template_name):
     """
-    Obtiene el cuerpo de una plantilla desde la base de datos por su nombre.
+    Obtiene los detalles de una plantilla desde la base de datos por su nombre.
     
     :param template_name: El nombre de la plantilla a buscar.
-    :return: El contenido del body de la plantilla o None si no se encuentra.
+    :return: Un diccionario con los detalles de la plantilla (Name, Body, sid, url) o None si no se encuentra.
     """
-    # Consulta SQL para obtener el Body de la plantilla
+    # Consulta SQL para obtener los detalles de la plantilla
     query = f"""
-    SELECT [Body]
-    FROM [cfg].[WS_Templates]
-    WHERE [sid] = '{template_sid}'
+    SELECT TOP 1 
+           [Name],
+           [Body],
+           [sid],
+           [url]
+      FROM [cfg].[WS_Templates]
+     WHERE [name] = '{template_name}'
     """
     
     # Ejecutar la consulta y obtener el resultado
     result = execute_query(query)
     
-    # Verificar si el resultado existe y tiene un body
+    # Verificar si el resultado existe y tiene datos
     if result is not None and not result.empty:
-        return result.iloc[0]['Body']
+        return {
+            'Name': result.iloc[0]['Name'],
+            'Body': result.iloc[0]['Body'],
+            'sid': result.iloc[0]['sid'],
+            'url': result.iloc[0]['url']
+        }
     else:
         return None
-
 
 def execute_query(query):
     """

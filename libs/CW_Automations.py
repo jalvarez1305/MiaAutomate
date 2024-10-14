@@ -1,5 +1,5 @@
 from .CW_Conversations import ChatwootSenders, envia_mensaje_plantilla, send_content_builder
-from .SQL_Helpers import execute_query, get_template_body
+from .SQL_Helpers import GetTemplateDetails, execute_query
 
 
 def SendBlast(template_name, buzon: ChatwootSenders, bot_name=None, query=None):
@@ -13,8 +13,8 @@ def SendBlast(template_name, buzon: ChatwootSenders, bot_name=None, query=None):
     :param query: Consulta SQL que debe retornar un DataFrame con los contactos y sus parámetros.
     """
     # 1. Ejecutar get_template_body para obtener el body de la plantilla
-    body = get_template_body(template_name)
-    if body is None:
+    template_details = GetTemplateDetails(template_name)
+    if template_details is None:
         print(f"No se encontró el body de la plantilla '{template_name}'.")
         return
 
@@ -31,6 +31,7 @@ def SendBlast(template_name, buzon: ChatwootSenders, bot_name=None, query=None):
 
         # 4. Enviar mensaje usando la función envia_mensaje_plantilla
         contacto_id = row[0]  # Primera columna es contacto_id
+        body = template_details['Body']
         envia_mensaje_plantilla(contacto_id, body, parametros, buzon, bot_name)
 
 def send_blast_image(template_name, bot_name, query):

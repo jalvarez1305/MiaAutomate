@@ -7,3 +7,4 @@ PyLibrary/.env
 .env
 PyLibrary/.env
 PyLibrary/.env
+/libs/__pycache__
