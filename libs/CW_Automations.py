@@ -2,7 +2,7 @@ from .CW_Conversations import ChatwootSenders, envia_mensaje_plantilla, send_con
 from .SQL_Helpers import GetTemplateDetails, execute_query
 
 
-def SendBlast(template_name, buzon: ChatwootSenders, bot_name=None, query=None):
+def SendBlast(template_name, buzon: ChatwootSenders, bot_name=None, query=None,force_new=False):
     """
     Envía un mensaje en blast a los contactos obtenidos desde el resultado de la consulta,
     usando la plantilla y parámetros proporcionados.

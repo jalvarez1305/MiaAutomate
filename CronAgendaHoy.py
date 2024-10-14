@@ -14,4 +14,4 @@ query = """SELECT        MedicoId,
         WHERE        (CONVERT(date, start_datetime) = CONVERT(date, GETDATE()))
         GROUP BY MedicoID,MedicoNickName""" 
 
-SendBlast(template_name, buzon, bot_name, query)
+SendBlast(template_name, buzon, bot_name, query,force_new=True)
