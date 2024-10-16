@@ -14,26 +14,29 @@ password = os.getenv('SQL_PASSWORD')
 
 def GetParametersFromQuery(query):
     """
-    Ejecuta un query SQL y devuelve los valores de la primera fila como una lista.
+    Ejecuta una consulta SQL y devuelve los valores de la primera fila como una lista.
 
     :param query: El query SQL a ejecutar.
-    :return: Una lista con los valores de cada columna de la primera fila del resultado o None si no se encuentra ninguna fila o si ocurre un error.
+    :return: Una lista con los valores de cada columna de la primera fila del resultado o None si no se encuentra ninguna fila.
+    :raises Exception: Si ocurre un error durante la ejecución del query.
     """
     try:
-        # Ejecutar la consulta y obtener el resultado
+        # Ejecutar la consulta y obtener el resultado (solo la primera fila)
         result = execute_query(query)
 
         # Verificar si el resultado existe y tiene datos
         if result is not None and not result.empty:
-            # Crear una lista con los valores de la primera fila
-            parametros = result.iloc[0].tolist()  # Convierte la fila en una lista
+            # Convertir los valores de la primera fila a una lista de cadenas, manejando None
+            parametros = [str(param) if param is not None else '' for param in result]
             return parametros
         else:
             return None  # Devolver None si no se encuentra ninguna fila
 
     except Exception as e:
-        logging.error(f"Error al ejecutar la consulta: {str(e)}")  # Manejo de errores con logging
-        return None  # Devolver None si ocurre un error
+        # Registrar el error para debugging
+        print(f"Error ejecutando la consulta: {e}")
+        raise  # Propagar la excepción para manejo externo
+
 
 
 def GetTemplateDetails(template_name):
