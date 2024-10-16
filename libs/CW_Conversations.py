@@ -223,7 +223,7 @@ def cerrar_conversacion(conv_id):
     }
     
     body = {
-        "status": "closed"  # Cambiamos el estado a 'closed'
+        "status": "resolved"  # Cambiamos el estado a 'closed'
     }
 
     response = requests.post(url, json=body, headers=headers)
@@ -346,7 +346,7 @@ def get_conversation_messages(conversation_id):
 
 
 # Constante para la duración de inactividad permitida
-DURACION_INACTIVIDAD = timedelta(hours=16)
+DURACION_INACTIVIDAD = timedelta(hours=24)
 
 def cerrar_conversaciones_inactivas():
     """
@@ -376,7 +376,7 @@ def cerrar_conversaciones_inactivas():
                         inactivity_duration = now - last_activity_time
                         
                         # Verificar si la conversación está abierta y ha estado inactiva por más de 16 horas
-                        if conversation.get('status') == 'open' and inactivity_duration > DURACION_INACTIVIDAD:
+                        if inactivity_duration > DURACION_INACTIVIDAD:
                             try:
                                 cerrar_conversacion(conversation.get('id'))
                             except Exception as cerr_error:

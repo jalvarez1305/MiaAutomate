@@ -118,7 +118,67 @@ query=""" SELECT id,[phone_number],[name]
 send_blast_image("eco_mamario_2024", bot_name="eco_mamario", query=query)
 '''
 
-from libs.CW_Conversations import cerrar_conversaciones_inactivas
+'''from libs.CW_Conversations import cerrar_conversaciones_inactivas
 
 
-cerrar_conversaciones_inactivas()
+cerrar_conversaciones_inactivas()'''
+
+from datetime import datetime
+import logging
+
+from libs.CW_Conversations import ChatwootSenders, envia_mensaje_plantilla
+from libs.SQL_Helpers import GetParametersFromQuery
+
+
+def AgendaBot():
+    try:
+        contact_id = 165
+
+        # Obtener la hora actual
+        current_hour = datetime.now().hour
+        dia = "Hoy" if current_hour < 16 else "Mañana"
+        dia_condition = "CONVERT(date, start_datetime) = CONVERT(date, GETDATE())" if current_hour < 16 else "CONVERT(date, start_datetime) = CONVERT(date, GETDATE() + 1)"
+        
+        plantilla_body = """Hola {{1}}, este es un resumen de tus citas de {{2}}:
+{{3}}
+Saludos!"""
+
+        consulta = f"""                
+                SELECT 
+                    [MedicoNickName],
+                    '{dia}' as Dia,
+                    STRING_AGG(Citas,'\n') as Agenda
+                FROM 
+                    (
+                        SELECT top 100
+                            [MedicoNickName],
+                            CONCAT(
+                                FORMAT(start_datetime, 'HH:mm'), 
+                                ' - ', -- Añadido un separador para mejor legibilidad
+                                [Paciente], 
+                                ' - ', -- Añadido un separador para mejor legibilidad
+                                CASE 
+                                    WHEN [Status Paciente] = 0 THEN 'Agendada' 
+                                    ELSE 'Confirmada' 
+                                END
+                            ) AS Citas
+                        FROM 
+                            [dbo].[vwCalendario]
+                        WHERE 
+                            MedicoId = {contact_id} 
+                            AND {dia_condition} 
+                        ORDER BY start_datetime
+                    ) as concatedCitas
+                GROUP BY 
+                    [MedicoNickName]
+                """
+
+
+        
+        parametros = GetParametersFromQuery(consulta)
+        envia_mensaje_plantilla(contact_id, plantilla_body, parametros=parametros, buzon=ChatwootSenders.Medicos)
+
+    except Exception as e:
+        logging.error(f"Error en AgendaBot: {str(e)}")  # Manejo de errores con logging
+
+AgendaBot()

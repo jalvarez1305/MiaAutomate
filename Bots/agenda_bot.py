@@ -30,15 +30,30 @@ Saludos!"""
 
         query = f"""
                 SELECT 
-                    [MedicoNickName], 
-                    '{dia}' AS dia,
-                    STRING_AGG(FORMAT(start_datetime, 'HH:mm') + ' - ' + [Paciente] + 
-                    ' - ' + CASE WHEN [Status Paciente] = 0 THEN 'Agendada' ELSE 'Confirmada' END+'\n', CHAR(10)) AS Detalles
+                    [MedicoNickName],
+                    '{dia}' as Dia,
+                    STRING_AGG(Citas,'\n') as Agenda
                 FROM 
-                    [dbo].[vwCalendario]
-                WHERE 
-                    {dia_condition} 
-                    AND MedicoID = {contact_id}
+                    (
+                        SELECT top 100
+                            [MedicoNickName],
+                            CONCAT(
+                                FORMAT(start_datetime, 'HH:mm'), 
+                                ' - ', -- Añadido un separador para mejor legibilidad
+                                [Paciente], 
+                                ' - ', -- Añadido un separador para mejor legibilidad
+                                CASE 
+                                    WHEN [Status Paciente] = 0 THEN 'Agendada' 
+                                    ELSE 'Confirmada' 
+                                END
+                            ) AS Citas
+                        FROM 
+                            [dbo].[vwCalendario]
+                        WHERE 
+                            MedicoId = {contact_id} 
+                            AND {dia_condition} 
+                        ORDER BY start_datetime
+                    ) as concatedCitas
                 GROUP BY 
                     [MedicoNickName]
                 """

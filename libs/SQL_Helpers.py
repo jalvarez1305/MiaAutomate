@@ -26,8 +26,8 @@ def GetParametersFromQuery(query):
 
         # Verificar si el resultado existe y tiene datos
         if result is not None and not result.empty:
-            # Convertir los valores de la primera fila a una lista de cadenas, manejando None
-            parametros = [str(param) if param is not None else '' for param in result]
+            # Acceder a la primera fila y convertir los valores a una lista
+            parametros = [str(param) if param is not None else '' for param in result.iloc[0]]
             return parametros
         else:
             return None  # Devolver None si no se encuentra ninguna fila
@@ -36,8 +36,6 @@ def GetParametersFromQuery(query):
         # Registrar el error para debugging
         print(f"Error ejecutando la consulta: {e}")
         raise  # Propagar la excepción para manejo externo
-
-
 
 def GetTemplateDetails(template_name):
     """
