@@ -22,7 +22,7 @@ def AgendaBot(Detalles):
         # Obtener la hora actual
         current_hour = datetime.now().hour
         dia = "Hoy" if current_hour < 16 else "Mañana"
-        dia_condition = "CONVERT(date, start_datetime) = CONVERT(date, GETDATE())" if current_hour < 16 else "CONVERT(date, start_datetime + 1) = CONVERT(date, GETDATE() + 1)"
+        dia_condition = "CONVERT(date, start_datetime) = CONVERT(date, GETDATE())" if current_hour < 16 else "CONVERT(date, start_datetime) = CONVERT(date, GETDATE() + 1)"
         
         plantilla_body = """Hola {{1}}, este es un resumen de tus citas de {{2}}:
 {{3}}
