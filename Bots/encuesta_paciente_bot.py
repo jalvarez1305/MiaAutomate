@@ -27,8 +27,8 @@ def EncuestaPacienteBot(Detalles):
             logging.error("conversation_id no está presente en Detalles.")
             return
         
+        calificacion=0
         if '★' in last_message_content:
-            calificacion=0
             match last_message_content:
                 case "★":
                     calificacion=1
@@ -38,11 +38,14 @@ def EncuestaPacienteBot(Detalles):
                     calificacion=5
                 case _:
                     logging.warning("Bot no reconocido.")
-            send_conversation_message(contact_id, respuesta, is_private=True, buzon=ChatwootSenders.Pacientes)
+            if calificacion == 5:
+                send_conversation_message(conversation_id, respuesta, is_private=False, buzon=ChatwootSenders.Pacientes)
+            else:
+                send_conversation_message(conversation_id, '@Pablo soy Robot, revisa esta calificacion', is_private=False, buzon=ChatwootSenders.Pacientes)
             update_query=f"EXEC CalificaConsulta ({calificacion}, {contact_id})"
             execute_query(update_query)
         else:
-            send_conversation_message(conversation_id, '@Pablo, no puedo responder esto', is_private=True, buzon=ChatwootSenders.Pacientes)
+            send_conversation_message(conversation_id, '@Pablo soy Robot, no puedo responder esto', is_private=True, buzon=ChatwootSenders.Pacientes)
             remove_bot_attribute(conversation_id)
 
     except Exception as e:
