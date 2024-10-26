@@ -3,7 +3,7 @@ from libs.CW_Conversations import ChatwootSenders
 
 
 template_name = 'confirmacion'
-buzon = ChatwootSenders.Medicos  # Instancia de la clase ChatwootSenders
+buzon = ChatwootSenders.Pacientes  # Instancia de la clase ChatwootSenders
 bot_name = None # Si no deseas usar un bot, puedes pasar None
 query = """SELECT      [Paciente ID],
             Especialidad,
