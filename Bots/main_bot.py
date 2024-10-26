@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import logging
 
+from confirmar_cita_bot import ConfirmarCitaBot
 from encuesta_paciente_bot import EncuestaPacienteBot
 from agenda_bot import AgendaBot
 from helper import parse_conversation_payload
@@ -41,6 +42,9 @@ def chatwoot_webhook():
                 case "EncuestaPacienteBot":
                     logging.info(f"Se ejecuta BOT {split_data['bot_attribute']}")
                     EncuestaPacienteBot(split_data)
+                case "ConfirmarCitaBot":
+                    logging.info(f"Se ejecuta BOT {split_data['bot_attribute']}")
+                    ConfirmarCitaBot(split_data)
                 case _:
                     logging.warning("Bot no reconocido.")
         else:

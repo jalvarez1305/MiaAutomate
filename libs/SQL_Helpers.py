@@ -95,3 +95,34 @@ def execute_query(query):
     finally:
         # Cerrar la conexión
         conn.close()
+
+def ExecuteScalar(query):
+    """
+    Ejecuta una consulta SQL que retorna un solo valor y devuelve ese valor como string,
+    o None si no hay un resultado o si ocurre un error.
+
+    :param query: La consulta SQL a ejecutar.
+    :return: Un string con el valor devuelto por la consulta o None si no hay resultados o se produce un error.
+    """
+    try:
+        # Establecer la conexión a la base de datos usando pymssql
+        conn = pymssql.connect(server=server, user=username, password=password, database=database)
+        
+        # Crear un cursor y ejecutar la consulta
+        cursor = conn.cursor()
+        cursor.execute(query)
+        
+        # Obtener el resultado de la consulta
+        result = cursor.fetchone()
+        
+        # Verificar si hay un resultado y retornarlo como string
+        if result:
+            return str(result[0])
+        else:
+            return None
+    except Exception as e:
+        print(f"Error al ejecutar la consulta: {e}")
+        return None
+    finally:
+        # Cerrar la conexión
+        conn.close()

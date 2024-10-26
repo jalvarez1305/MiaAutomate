@@ -4,7 +4,7 @@ from libs.CW_Conversations import ChatwootSenders
 
 template_name = 'confirmacion'
 buzon = ChatwootSenders.Pacientes  # Instancia de la clase ChatwootSenders
-bot_name = None # Si no deseas usar un bot, puedes pasar None
+bot_name = "ConfirmarCitaBot" # Si no deseas usar un bot, puedes pasar None
 query = """SELECT      [Paciente ID],
             Especialidad,
             FORMAT(start_datetime, 'HH:mm') AS Hora,
