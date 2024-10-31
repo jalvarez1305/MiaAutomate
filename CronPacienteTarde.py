@@ -11,8 +11,9 @@ query = """SELECT
             FROM 
                 [dbo].[vwCalendario]
             WHERE 
-                DATEDIFF(MINUTE, [start_datetime], GETDATE()) > 10 
+                DATEDIFF(MINUTE, [start_datetime], GETDATE()) > 3
+                AND DATEDIFF(MINUTE, [start_datetime], GETDATE()) < 15
                 AND CONVERT(DATE, [start_datetime]) = CONVERT(DATE, GETDATE())
-                AND [EstatusGeneral] = 0;""" 
+                AND [EstatusGeneral] = 0""" 
 
 SendBlast(template_name, buzon, bot_name, query,force_new=True)

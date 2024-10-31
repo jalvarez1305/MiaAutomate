@@ -99,27 +99,29 @@ def execute_query(query):
 def ExecuteScalar(query):
     """
     Ejecuta una consulta SQL que retorna un solo valor y devuelve ese valor como string,
-    o None si no hay un resultado o si ocurre un error.
+    o None si no hay un resultado o si ocurre un error. También permite ejecutar consultas
+    que no devuelvan ningún resultado, como actualizaciones, eliminaciones o ejecuciones de procedimientos almacenados.
 
     :param query: La consulta SQL a ejecutar.
-    :return: Un string con el valor devuelto por la consulta o None si no hay resultados o se produce un error.
+    :return: Un string con el valor devuelto por la consulta, None si no hay resultados,
+             o None en caso de consultas de tipo UPDATE, INSERT, DELETE o EXEC.
     """
     try:
-        # Establecer la conexión a la base de datos usando pymssql
+        # Establecer la conexión a la base de datos
         conn = pymssql.connect(server=server, user=username, password=password, database=database)
         
         # Crear un cursor y ejecutar la consulta
-        cursor = conn.cursor()
-        cursor.execute(query)
-        
-        # Obtener el resultado de la consulta
-        result = cursor.fetchone()
-        
-        # Verificar si hay un resultado y retornarlo como string
-        if result:
-            return str(result[0])
-        else:
-            return None
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+
+            # Si la consulta es de lectura (SELECT), obtener el primer resultado
+            if query.strip().lower().startswith("select"):
+                result = cursor.fetchone()
+                return str(result[0]) if result else None
+            else:
+                # Hacer commit explícito para consultas de escritura o ejecución de procedimientos (EXEC)
+                conn.commit()
+                return None  # No hay un valor para devolver en consultas de escritura o procedimientos
     except Exception as e:
         print(f"Error al ejecutar la consulta: {e}")
         return None

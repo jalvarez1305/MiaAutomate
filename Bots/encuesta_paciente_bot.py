@@ -43,7 +43,7 @@ def EncuestaPacienteBot(Detalles):
             else:
                 send_conversation_message(conversation_id, 'Que lamentable, me puedes comentar un poco de tu experiencia?, por favor', is_private=False, buzon=ChatwootSenders.Pacientes)
                 send_conversation_message(conversation_id, '@Pablo soy Robot, revisa esta calificacion', is_private=True, buzon=ChatwootSenders.Pacientes)
-            update_query=f"EXEC CalificaConsulta ({calificacion}, {contact_id})"
+            update_query=f"EXEC CalificaConsulta {calificacion}, {contact_id}"
             execute_query(update_query)
         else:
             send_conversation_message(conversation_id, '@Pablo soy Robot, no puedo responder esto', is_private=True, buzon=ChatwootSenders.Pacientes)

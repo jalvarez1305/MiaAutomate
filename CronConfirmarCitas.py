@@ -11,6 +11,7 @@ query = """SELECT      [Paciente ID],
             UPPER(LEFT(FORMAT(start_datetime, 'dddd', 'es-ES'), 1)) + LOWER(SUBSTRING(FORMAT(start_datetime, 'dddd', 'es-ES'), 2, LEN(FORMAT(start_datetime, 'dddd', 'es-ES')) - 1)) AS Dia,
             FORMAT(start_datetime, 'yyyy-MM-dd') AS Fecha
 FROM        dbo.vwCalendario
-WHERE       (CONVERT(date, start_datetime) = CONVERT(date, GETDATE() + 1))""" 
+WHERE       (CONVERT(date, start_datetime) = CONVERT(date, GETDATE() + 1))
+and [Status Paciente]=0""" 
 
 SendBlast(template_name, buzon, bot_name, query,force_new=True)
