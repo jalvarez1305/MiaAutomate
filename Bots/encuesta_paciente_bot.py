@@ -5,7 +5,7 @@ import logging
 # Añadir la ruta a libs al path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../libs')))
 from CW_Conversations import send_conversation_message, ChatwootSenders, envia_mensaje_plantilla, remove_bot_attribute
-from SQL_Helpers import execute_query
+from SQL_Helpers import ejecutar_update
 from datetime import datetime
 
 # Configurar logging
@@ -44,7 +44,7 @@ def EncuestaPacienteBot(Detalles):
                 send_conversation_message(conversation_id, 'Que lamentable, me puedes comentar un poco de tu experiencia?, por favor', is_private=False, buzon=ChatwootSenders.Pacientes)
                 send_conversation_message(conversation_id, '@Pablo soy Robot, revisa esta calificacion', is_private=True, buzon=ChatwootSenders.Pacientes)
             update_query=f"EXEC CalificaConsulta {calificacion}, {contact_id}"
-            execute_query(update_query)
+            ejecutar_update(update_query)
         else:
             send_conversation_message(conversation_id, '@Pablo soy Robot, no puedo responder esto', is_private=True, buzon=ChatwootSenders.Pacientes)
             remove_bot_attribute(conversation_id)

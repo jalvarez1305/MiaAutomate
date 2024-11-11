@@ -5,7 +5,7 @@ import logging
 # Añadir la ruta a libs al path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../libs')))
 from CW_Conversations import send_conversation_message, ChatwootSenders, envia_mensaje_plantilla, remove_bot_attribute
-from SQL_Helpers import execute_query,ExecuteScalar
+from SQL_Helpers import execute_query,ExecuteScalar,ejecutar_update
 from datetime import datetime
 
 # Configurar logging
@@ -31,7 +31,7 @@ def ConfirmarCitaBot(Detalles):
             ultima_cita=ExecuteScalar(cmd)
             print(f"Ultima cita: {ultima_cita}")
             cmd=f"UPDATE [cal].[CalendarEvents] SET LocalUpdate=1,[summary]= REPLACE([summary], 'Agendada', 'Confirmada') WHERE ID='{ultima_cita}'"
-            ExecuteScalar(cmd)
+            ejecutar_update(cmd)
             print(f"update query: {cmd}")
             send_conversation_message(conversation_id, respuesta, is_private=False, buzon=ChatwootSenders.Pacientes)
             RevisaFormularios(conversation_id,contact_id)

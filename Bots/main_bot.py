@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 import logging
-
 from confirmar_cita_bot import ConfirmarCitaBot
 from encuesta_paciente_bot import EncuestaPacienteBot
 from agenda_bot import AgendaBot
@@ -50,7 +49,7 @@ def chatwoot_webhook():
         else:
             logging.info("No debe ser atendido por un bot.")
     else:
-        logging.error("Faltan datos necesarios en el payload.")
+        logging.error("Faltan datos necesarios en el payload.")    
 
     return jsonify({"message": "Webhook received!"}), 200
 

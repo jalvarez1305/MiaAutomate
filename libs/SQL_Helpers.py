@@ -128,3 +128,24 @@ def ExecuteScalar(query):
     finally:
         # Cerrar la conexión
         conn.close()
+
+def ejecutar_update(query):
+    try:
+        # Establece la conexión
+        conn = pymssql.connect(server=server, user=username, password=password, database=database)
+        cursor = conn.cursor()
+        
+        # Ejecuta el query
+        cursor.execute(query)
+        
+        # Confirma los cambios
+        conn.commit()
+        print("Actualización realizada exitosamente.")
+        
+    except Exception as e:
+        print("Error al ejecutar el query:", e)
+        
+    finally:
+        # Cierra la conexión
+        cursor.close()
+        conn.close()
