@@ -1,1 +1,0 @@
-relleno_labios = "¡Hola! Podrías darme más información sobre el relleno de labios"

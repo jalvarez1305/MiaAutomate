@@ -5,6 +5,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../libs')))
 from CW_Conversations import get_conversation_messages
 
+
 def parse_conversation_payload(payload):
     """
     Procesa el payload de una conversación y extrae la información relevante.
@@ -22,7 +23,7 @@ def parse_conversation_payload(payload):
         "conversation_id": conversation.get("id"),
         "contact_id": sender_info.get("id"),
         "contact_name": sender_info.get("name"),
-        "bot_attribute": conversation.get("custom_attributes", {}).get("bot")
+        "bot_attribute": meta.get("labels", [None])[0] if "labels" in meta else conversation.get("custom_attributes", {}).get("bot")
     }
 
     # Extraer mensajes de la conversación

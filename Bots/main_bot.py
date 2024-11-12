@@ -1,9 +1,12 @@
 from flask import Flask, request, jsonify
 import logging
+import socket
+from relleno_labios_bot import RellenoLabiosBot
 from confirmar_cita_bot import ConfirmarCitaBot
 from encuesta_paciente_bot import EncuestaPacienteBot
 from agenda_bot import AgendaBot
 from helper import parse_conversation_payload
+from Bots_Config import relleno_labios
 
 app = Flask(__name__)
 
@@ -12,28 +15,20 @@ logging.basicConfig(level=logging.INFO)
 
 @app.route('/webhook/chatwoot', methods=['POST'])
 def chatwoot_webhook():
-    # Obtener el cuerpo de la solicitud
     data = request.get_json()
 
     if not data:
-        #logging.error("No se recibió un cuerpo JSON válido.")
         return jsonify({"error": "Invalid JSON payload"}), 400
 
     split_data = parse_conversation_payload(data)
     
-    # Verificar que split_data tiene las claves necesarias
     if not isinstance(split_data, dict):
-        #logging.error("El payload no tiene el formato esperado.")
         return jsonify({"error": "Unexpected payload format"}), 400
 
-    # Evalúa los bots
     last_message = split_data.get("last_message", {})
 
-    # Verificar la existencia de claves antes de acceder
     if 'bot_attribute' in split_data and 'Sender' in last_message:
-        if split_data['bot_attribute'] != "" and last_message.get('Sender') == "contact":  # Asegúrate de que "Contact" sea la cadena correcta
-            #logging.info("El atributo del bot está presente y el último mensaje es de contacto.")            
-            # Usar match-case para evaluar el atributo del bot
+        if split_data['bot_attribute'] != "" and last_message.get('Sender') == "contact":
             match split_data["bot_attribute"]:
                 case "AgendaMedico":
                     logging.info(f"Se ejecuta BOT {split_data['bot_attribute']}")
@@ -44,14 +39,31 @@ def chatwoot_webhook():
                 case "ConfirmarCitaBot":
                     logging.info(f"Se ejecuta BOT {split_data['bot_attribute']}")
                     ConfirmarCitaBot(split_data)
-                case _:
-                    logging.warning("Bot no reconocido.")
+                case _:                    
+                    if last_message.get('Sender') == "contact":
+                        new_msg = last_message.get('Content')                        
+                        if new_msg == relleno_labios:
+                            logging.info(f"Se ejecuta BOT {split_data.get('bot_attribute', 'RellenoLabiosBot')}")
+                            RellenoLabiosBot(split_data)
+                        else:
+                            logging.warning("Mensaje no reconocido.")
         else:
-            logging.info("No debe ser atendido por un bot.")
+            logging.warning("Bot no reconocido.")
     else:
         logging.error("Faltan datos necesarios en el payload.")    
 
     return jsonify({"message": "Webhook received!"}), 200
 
 if __name__ == '__main__':
-    app.run(host='74.208.33.184', port=5000)  # Cambia el puerto según sea necesario
+    host_ip = 'localhost'  # Default to localhost
+    try:
+        # Intentar enlazar a 74.208.33.184 para ver si está disponible
+        test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        test_socket.bind(('74.208.33.184', 0))  # Usa el puerto 0 para no necesitar uno específico
+        test_socket.close()
+        host_ip = '74.208.33.184'  # Si funciona, cambia a la IP especificada
+        logging.info("Ejecutando en 74.208.33.184")
+    except Exception as e:
+        logging.warning(f"No se puede enlazar a 74.208.33.184, se usará localhost: {e}")
+    
+    app.run(host=host_ip, port=5000)
