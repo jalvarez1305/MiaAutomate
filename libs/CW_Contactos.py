@@ -52,11 +52,11 @@ def actualizar_etiqueta(conv_id, label):
     }
     
     # Envío de la solicitud PATCH para actualizar el contacto
-    response = requests.put(url, json=data, headers=headers)
+    response = requests.post(url, json=data, headers=headers)
     
     # Verificación de la respuesta
     if response.status_code == 200:
         print("Etiqueta actualizada.")
     else:
-        print(f"Error al actualizar el atributo: {response.status_code}")
-        print(response.json())
+        print(f"Error al actualizar la etiqueta: {response.status_code}")
+        print(conv_id)
