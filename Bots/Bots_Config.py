@@ -1,1 +1,1 @@
-relleno_labios="¡Hola! Podrías darme más información de…"
+relleno_labios="¡Hola! Podrías darme más información de..."

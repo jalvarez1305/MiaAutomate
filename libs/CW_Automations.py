@@ -1,5 +1,5 @@
-from .CW_Conversations import ChatwootSenders, envia_mensaje_plantilla, send_content_builder
-from .SQL_Helpers import GetTemplateDetails, execute_query
+from CW_Conversations import ChatwootSenders, envia_mensaje_plantilla, send_content_builder
+from SQL_Helpers import GetTemplateDetails, execute_query,ExecuteScalar
 
 
 def SendBlast(template_name, buzon: ChatwootSenders, bot_name=None, query=None,force_new=False,is_private=False):
@@ -75,5 +75,30 @@ def send_blast_image(template_name, bot_name=None, query=None):
 
         # 6. Si no hay error, llamar a la función envia_mensaje_plantilla
         envia_mensaje_plantilla(contacto_id, text_to_send, parametros, ChatwootSenders.Pacientes, bot_name,is_private=True)
+
+    print("Mensajes enviados correctamente.")
+
+def send_content(template_name, contact_id,contact_phone):
+    """
+    Envia un mensaje a una conversacion existente, pero de plantilla del content builder
+
+    :param content_sid: SID de la plantilla de contenido a utilizar.
+    :param bot_name: Nombre del bot (puede ser None).
+    :param query: Consulta SQL que debe retornar un DataFrame con los contactos y sus parámetros.
+    """
+    # 1. Ejecutar get_template_body para obtener el body de la plantilla
+    template_details = GetTemplateDetails(template_name)  # Cambié el nombre a get_template_body para reflejar el uso correcto.
+    if template_details is None:
+        print(f"No se encontró el body de la plantilla '{template_name}'.")
+        return
+   
+    text_to_send = template_details['Body'] 
+    content_sid=template_details['sid']
+    url=template_details['url']
+    # 5. Llamar a la función send_content_builder
+    send_content_builder(contact_phone, content_sid, url, text_to_send)
+
+    # 6. Si no hay error, llamar a la función envia_mensaje_plantilla
+    envia_mensaje_plantilla(contact_id, text_to_send, None, ChatwootSenders.Pacientes,is_private=True)
 
     print("Mensajes enviados correctamente.")

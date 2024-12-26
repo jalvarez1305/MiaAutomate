@@ -5,6 +5,8 @@ import json
 from twilio.rest import Client
 from datetime import datetime, timedelta
 
+from CW_Contactos import actualizar_etiqueta, actualizar_interes_en
+
 # Cargar las variables de entorno desde el archivo .env
 load_dotenv()
 
@@ -378,6 +380,17 @@ def cerrar_conversaciones_inactivas():
                         # Verificar si la conversación está abierta y ha estado inactiva por más de 16 horas
                         if inactivity_duration > DURACION_INACTIVIDAD:
                             try:
+                                # Obtener el primer atributo de la lista de etiquetas en 'labels'
+                                labels = conversation.get("labels", [None])
+                                bot_attribute = labels[0] if labels else None
+
+                                # Verificar que el atributo y el ID del contacto existen antes de proceder
+                                if bot_attribute:
+                                    contact_meta = conversation.get("meta", {}).get("sender", {})
+                                    contact_id = contact_meta.get("id")
+                                    
+                                    if contact_id:  # Si `contact_id` existe, se actualiza el interés
+                                        actualizar_interes_en(contact_id, "https://miaclinicasdelamujer.com/aumento-labios/")
                                 cerrar_conversacion(conversation.get('id'))
                             except Exception as cerr_error:
                                 print(f"Error al cerrar la conversación {conversation.get('id')}: {str(cerr_error)}")

@@ -17,13 +17,16 @@ def parse_conversation_payload(payload):
     conversation = payload.get("conversation", {})
     meta = conversation.get("meta", {})
     sender_info = meta.get("sender", {})
+    labels = conversation.get("labels", [None])
+    label = labels[0] if labels else None
 
     # Crear un diccionario para almacenar la información de la conversación
     conversation_info = {
         "conversation_id": conversation.get("id"),
         "contact_id": sender_info.get("id"),
+        "contact_phone": sender_info.get("phone_number"),
         "contact_name": sender_info.get("name"),
-        "bot_attribute": meta.get("labels", [None])[0] if "labels" in meta else conversation.get("custom_attributes", {}).get("bot")
+        "bot_attribute": label or conversation.get("custom_attributes", {}).get("bot")
     }
 
     # Extraer mensajes de la conversación
