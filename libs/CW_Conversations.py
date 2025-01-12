@@ -91,6 +91,28 @@ def send_content_builder(to, content_sid, media_url, body):
         print(f"Mensaje enviado con SID: {message.sid}")
     except Exception as e:
         print(f"Error al enviar el mensaje: {e}")
+def send_audio_mp3_via_twilio(to_phone_number, media_url):
+    """
+    Envía un archivo MP3 a través de Twilio usando la API de mensajería.
+
+    :param to_phone_number: Número de teléfono del destinatario (con código de país, e.g., '+1234567890').
+    :param media_url: URL pública del archivo MP3 a enviar.
+    :param from_phone_number: Número de teléfono de Twilio desde el cual enviar el mensaje.
+    :param account_sid: SID de cuenta de Twilio.
+    :param auth_token: Token de autenticación de Twilio.
+    """
+    # Crear el cliente de Twilio
+    client = Client(twilio_account_sid, twilio_auth_token)
+
+    # Enviar el mensaje de audio
+    message = client.messages.create(
+        body="Aquí tienes el archivo de audio.",  # Mensaje de texto opcional
+        from_=twilio_from_number,  # Número de teléfono de Twilio
+        to=f"whatsapp:{to_phone_number}",  # Número de destinatario
+        media_url=[media_url]  # Lista con la URL del archivo MP3
+    )
+    # Imprimir el SID del mensaje para referencia
+    print(f"Mensaje enviado con SID: {message.sid}")
 
 def envia_mensaje_plantilla(contacto_id, plantilla, parametros=None, buzon=ChatwootSenders.Pacientes, bot_name=None,is_private=False,force_new=False):
     """
@@ -265,6 +287,53 @@ def send_conversation_message(conversation_id, message, is_private=False, buzon=
     else:
         print(f"Error al enviar mensaje: {response.text}")
 
+
+def send_conversation_file(conversation_id, file_url, is_private=False):
+    """
+    Envía un archivo adjunto a una conversación en Chatwoot desde una URL pública.
+    
+    :param conversation_id: ID de la conversación.
+    :param file_url: URL pública del archivo a enviar.
+    :param is_private: Si el mensaje es privado o público.
+    """
+    print(f"Descargando archivo desde {file_url}...")
+
+    # Descargar el archivo desde la URL
+    response = requests.get(file_url)
+    if response.status_code != 200:
+        print(f"Error al descargar el archivo: {response.status_code}, {response.text}")
+        return
+
+    # Guardar temporalmente el archivo
+    file_name = file_url.split("/")[-1]
+    with open(file_name, "wb") as temp_file:
+        temp_file.write(response.content)
+
+    # Endpoint de Chatwoot
+    url = f"{base_url}/conversations/{conversation_id}/messages"
+    headers = {
+        "Authorization": f"Bearer {cw_token}",  # Token de autenticación
+    }
+
+    # Enviar el archivo como adjunto
+    with open(file_name, "rb") as file:
+        files = {
+            "attachments[]": (file_name, file, "audio/mpeg")  # Asumimos que el archivo es de tipo audio
+        }
+        data = {
+            "private": str(is_private).lower()  # Convertir booleano a string ("true"/"false")
+        }
+
+        # Enviar la solicitud
+        response = requests.post(url, headers=headers, files=files, data=data)
+
+    # Manejar la respuesta
+    if response.status_code == 200:
+        print(f"Archivo enviado con éxito: {response.json()}")
+    else:
+        print(f"Error al enviar archivo: {response.status_code}, {response.text}")
+
+
 def get_open_conversation(contact_id):
     conv_id = None  # Inicia con None por si no se encuentra ninguna conversación
     url = f"{base_url}/conversations?status=open"
@@ -390,7 +459,7 @@ def cerrar_conversaciones_inactivas():
                                     contact_id = contact_meta.get("id")
                                     
                                     if contact_id:  # Si `contact_id` existe, se actualiza el interés
-                                        actualizar_interes_en(contact_id, "https://miaclinicasdelamujer.com/aumento-labios/")
+                                        actualizar_interes_en(contact_id, "https://miaclinicasdelamujer.com/gynecologia/")
                                 cerrar_conversacion(conversation.get('id'))
                             except Exception as cerr_error:
                                 print(f"Error al cerrar la conversación {conversation.get('id')}: {str(cerr_error)}")

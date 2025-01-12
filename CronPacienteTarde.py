@@ -18,6 +18,7 @@ query = """SELECT
                 DATEDIFF(MINUTE, [start_datetime], GETDATE()) > 3
                 AND DATEDIFF(MINUTE, [start_datetime], GETDATE()) < 15
                 AND CONVERT(DATE, [start_datetime]) = CONVERT(DATE, GETDATE())
-                AND [EstatusGeneral] = 0""" 
+                AND [EstatusGeneral] = 0
+                ANd not [Paciente ID] is null""" 
 
 SendBlast(template_name, buzon, bot_name, query,force_new=True)

@@ -1,3 +1,4 @@
+import math
 from CW_Conversations import ChatwootSenders, envia_mensaje_plantilla, send_content_builder
 from SQL_Helpers import GetTemplateDetails, execute_query,ExecuteScalar
 
@@ -31,8 +32,9 @@ def SendBlast(template_name, buzon: ChatwootSenders, bot_name=None, query=None,f
 
         # 4. Enviar mensaje usando la función envia_mensaje_plantilla
         contacto_id = row[0]  # Primera columna es contacto_id
-        body = template_details['Body']
-        envia_mensaje_plantilla(contacto_id, body, parametros, buzon, bot_name,force_new=force_new,is_private=is_private)
+        if not math.isnan(contacto_id):
+            body = template_details['Body']
+            envia_mensaje_plantilla(contacto_id, body, parametros, buzon, bot_name,force_new=force_new,is_private=is_private)
 
 def send_blast_image(template_name, bot_name=None, query=None):
     """

@@ -1,12 +1,12 @@
 from flask import Flask, request, jsonify
 import logging
 import socket
-from relleno_labios_bot import RellenoLabiosBot
+from gyne_general import GyneGeneralBot
 from confirmar_cita_bot import ConfirmarCitaBot
 from encuesta_paciente_bot import EncuestaPacienteBot
 from agenda_bot import AgendaBot
 from helper import parse_conversation_payload
-from Bots_Config import relleno_labios
+from Bots_Config import saludo_facebook
 
 app = Flask(__name__)
 
@@ -42,9 +42,9 @@ def chatwoot_webhook():
                 case _:                    
                     if last_message.get('Sender') == "contact":
                         new_msg = last_message.get('Content')                        
-                        if new_msg == relleno_labios:
-                            logging.info(f"Se ejecuta BOT {split_data.get('bot_attribute', 'RellenoLabiosBot')}")
-                            RellenoLabiosBot(split_data)
+                        if new_msg == saludo_facebook:
+                            logging.info(f"Se ejecuta BOT {split_data.get('bot_attribute', 'GyneGeneralBot')}")
+                            GyneGeneralBot(split_data)
                         else:
                             logging.warning("Mensaje no reconocido.")
         else:

@@ -1,4 +1,5 @@
-from CW_Conversations import send_content_builder
+from CW_Conversations import ChatwootSenders, send_audio_mp3_via_twilio,send_conversation_message
 
 
-send_content_builder("+523331830952", "HX15d5d503c9735e2ed60c560cedc79878", "https://res.cloudinary.com/dkh1fgvnb/video/upload/v1732133616/output_video_h264_gou96q.mp4", "🌸 ¿Como saber si estoy lista para un relleno de labios? 🌸")
+send_audio_mp3_via_twilio("+5213331830952","https://ik.imagekit.io/etqfkh9q2/AudioBienvenidaMp3.mp3?updatedAt=1736709411486")
+send_conversation_message(1926,"Se envio el audio preguntando por detalles",True)

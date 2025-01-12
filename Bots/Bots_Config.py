@@ -1,1 +1,1 @@
-relleno_labios="¡Hola! Podrías darme más información de..."
+saludo_facebook="¡Hola! Podrías darme más información de..."
