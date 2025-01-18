@@ -45,7 +45,9 @@ Saludos!"""
                                 CASE 
                                     WHEN [Status Paciente] = 0 THEN 'Agendada' 
                                     ELSE 'Confirmada' 
-                                END
+                                END,
+								' - ',
+								Notas
                             ) AS Citas
                         FROM 
                             [dbo].[vwCalendario]

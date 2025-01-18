@@ -6,7 +6,7 @@ from confirmar_cita_bot import ConfirmarCitaBot
 from encuesta_paciente_bot import EncuestaPacienteBot
 from agenda_bot import AgendaBot
 from helper import parse_conversation_payload
-from Bots_Config import saludo_facebook
+from Bots_Config import saludo_facebook,audio_gyne
 
 app = Flask(__name__)
 
@@ -48,7 +48,12 @@ def chatwoot_webhook():
                         else:
                             logging.warning("Mensaje no reconocido.")
         else:
-            logging.warning("Bot no reconocido.")
+            new_msg = last_message.get('Content')                        
+            if new_msg == audio_gyne:
+                logging.info(f"Se ejecuta BOT Gyne")
+                GyneGeneralBot(split_data)
+            else:
+                logging.warning("Bot no reconocido.")
     else:
         logging.error("Faltan datos necesarios en el payload.")    
 

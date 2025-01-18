@@ -91,6 +91,7 @@ def send_content_builder(to, content_sid, media_url, body):
         print(f"Mensaje enviado con SID: {message.sid}")
     except Exception as e:
         print(f"Error al enviar el mensaje: {e}")
+        
 def send_audio_mp3_via_twilio(to_phone_number, media_url):
     """
     Envía un archivo MP3 a través de Twilio usando la API de mensajería.
