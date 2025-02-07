@@ -418,14 +418,14 @@ def get_conversation_messages(conversation_id):
 
 
 # Constante para la duración de inactividad permitida
-DURACION_INACTIVIDAD = timedelta(hours=24)
+DURACION_INACTIVIDAD = timedelta(hours=23)
 
-def cerrar_conversaciones_inactivas():
+def cerrar_conversaciones_inactivas(page=0):
     """
     Cierra todas las conversaciones abiertas que han estado inactivas por más de 16 horas.
     """
     try:
-        url = f"{base_url}/conversations?status=open"
+        url = f"{base_url}/conversations?status=open&page={page}"
         headers = {
             "api_access_token": cw_token
         }

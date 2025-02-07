@@ -17,12 +17,11 @@ query = """SELECT        id, phone_number, name,GETDATE() as fecha,funel_state,'
             WHERE        (custom_attributes_es_prospecto = 1) 
                     AND (custom_attributes_interes_en = 'https://miaclinicasdelamujer.com/gynecologia/')
                     AND funel_state =0
-                    AND datediff(hh,DATEADD(ss, [last_activity_at], '1970-01-01 00:00:00'),getdate())  > 50
+                    AND datediff(hh,DATEADD(ss, [last_activity_at], '1970-01-01 00:00:00'),getdate())  > 60
                     AND id not in (SELECT [Paciente ID]
                                 FROM [Clinica].[dbo].[vw_CalendarEventsExtracted]
                                 where DATEADD(hh, - 6, [start_datetime])>getdate() 
                                 and not [Paciente ID] is null)
-
                     """ 
 
 #El query lleva, contacto, telefono y parametros
@@ -35,7 +34,7 @@ update_query ="""INSERT INTO [dbo].[FunnelHistory]
                 WHERE        (custom_attributes_es_prospecto = 1) 
                         AND (custom_attributes_interes_en = 'https://miaclinicasdelamujer.com/gynecologia/')
                         AND funel_state =0
-                        AND datediff(hh,DATEADD(ss, [last_activity_at], '1970-01-01 00:00:00'),getdate())  > 50
+                        AND datediff(hh,DATEADD(ss, [last_activity_at], '1970-01-01 00:00:00'),getdate())  > 60
                         AND id not in (SELECT [Paciente ID]
                                     FROM [Clinica].[dbo].[vw_CalendarEventsExtracted]
                                     where DATEADD(hh, - 6, [start_datetime])>getdate() 
