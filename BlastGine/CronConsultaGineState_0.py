@@ -3,7 +3,7 @@ import sys
 
 
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'libs')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../libs')))
 from CW_Automations import send_blast_image
 from CW_Conversations import ChatwootSenders
 from SQL_Helpers import ejecutar_update
