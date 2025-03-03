@@ -18,3 +18,6 @@ PyLibrary/.env
 /Bots/__pycache__
 *.pyc
 /libs
+/CW_Close_Conversations
+/libs/__pycache__
+/libs/__pycache__

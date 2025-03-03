@@ -472,3 +472,43 @@ def cerrar_conversaciones_inactivas(page=0):
     
     except Exception as ex:
         print(f"Error al cerrar conversaciones inactivas: {str(ex)}")
+
+def get_all_conversation_messages(conversation_id):
+    all_messages = []
+    headers = {"api_access_token": cw_token}
+    before = None  # Iniciamos sin un ID específico
+
+    first_iteration = True
+    while True:
+        url = f"{base_url}/conversations/{conversation_id}/messages"
+        params = {}  # Sin parámetros en la primera iteración
+        if not first_iteration:
+            params["before"] = before  # Usar el ID más bajo del lote anterior en iteraciones siguientes
+
+        response = requests.get(url, headers=headers, params=params)
+        if response.status_code != 200:
+            break  # Si hay error, salimos del bucle
+
+        data = response.json()
+        messages = data.get("payload", [])
+        if not messages:
+            break  # Si no hay más mensajes, terminamos
+
+        all_messages.extend([
+            {
+                "role": "assistant" if msg["sender"]["type"] == "user" else msg["sender"]["type"],
+                "content": msg.get("content", ""),
+                "created_at": msg.get("created_at", 0)
+            }
+            for msg in messages 
+            if not msg.get("private", False) and "type" in msg.get("sender", {})
+        ])
+
+        # Obtener el ID más bajo del lote actual para la siguiente petición
+        before = min(msg["id"] for msg in messages)
+        first_iteration = False  # Desactivar la bandera después de la primera iteración
+
+    # Ordenar los mensajes por created_at antes de retornarlos
+    all_messages.sort(key=lambda msg: msg["created_at"])
+    
+    return all_messages
