@@ -1,6 +1,4 @@
-from Blast.BlastHelper import SendBlast
-from CW_Conversations import ChatwootSenders, envia_mensaje_plantilla
+from CW_Conversations import send_audio_mp3_via_twilio
 
-parametros=None
 
-SendBlast(contacto_id=162,phone_number='+523331830952', content_sid='HX6ae7cdf4452ea019ac2f80d300ed653a', parametros=None, buzon=ChatwootSenders.Pacientes, bot_name=None,force_new=False)
+send_audio_mp3_via_twilio("+523331830952","https://ik.imagekit.io/etqfkh9q2/AudioBienvenidaMp3.mp3")

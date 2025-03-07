@@ -99,7 +99,28 @@ def send_content_builder(to, content_sid, media_url=None, params=None):
         print(f"Mensaje enviado con SID: {message.sid}")
     except Exception as e:
         print(f"Error al enviar el mensaje: {e}")
+def send_audio_mp3_via_twilio(to_phone_number, media_url):
+    """
+    Envía un archivo MP3 a través de Twilio usando la API de mensajería.
 
+    :param to_phone_number: Número de teléfono del destinatario (con código de país, e.g., '+1234567890').
+    :param media_url: URL pública del archivo MP3 a enviar.
+    :param from_phone_number: Número de teléfono de Twilio desde el cual enviar el mensaje.
+    :param account_sid: SID de cuenta de Twilio.
+    :param auth_token: Token de autenticación de Twilio.
+    """
+    # Crear el cliente de Twilio
+    client = Client(twilio_account_sid, twilio_auth_token)
+
+    # Enviar el mensaje de audio
+    message = client.messages.create(
+        body="Aquí tienes el archivo de audio.",  # Mensaje de texto opcional
+        from_=twilio_from_number,  # Número de teléfono de Twilio
+        to=f"whatsapp:{to_phone_number}",  # Número de destinatario
+        media_url=[media_url]  # Lista con la URL del archivo MP3
+    )
+    # Imprimir el SID del mensaje para referencia
+    print(f"Mensaje enviado con SID: {message.sid}")
 
 def envia_mensaje_plantilla(contacto_id,phone_number, content_sid, parametros=None, buzon=ChatwootSenders.Pacientes, bot_name=None,force_new=False):
     """
