@@ -16,7 +16,7 @@ query = """SELECT      [Paciente ID],
             FORMAT(start_datetime, 'yyyy-MM-dd') AS Fecha,
 			[MedicoNickName],
 			case 
-				when Especialidad = 'Cita Ginecologia' then 'Ropa ligera como vestido y zapatos facil de retirar como sandalia'
+				when Especialidad = 'Cita Ginecologia' then 'Ropa ligera como vestido y zapatos facil de retirar como sandalia'
 				when Especialidad = 'Cita Nutricion' then ''
 				else ''
 			END as Recomendaciones

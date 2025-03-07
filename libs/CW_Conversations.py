@@ -6,6 +6,7 @@ from twilio.rest import Client
 from datetime import datetime, timedelta
 
 from CW_Contactos import actualizar_etiqueta, actualizar_interes_en
+from SQL_Helpers import GetTemplateDetails
 
 # Cargar las variables de entorno desde el archivo .env
 load_dotenv()
@@ -19,8 +20,8 @@ twilio_from_number = os.getenv('TWILIO_FROM_NUMBER')
 
 # Enumeración en Python para los buzones
 class ChatwootSenders:
-    Medicos = 10  
-    Pacientes = 11  
+    Medicos = 12  
+    Pacientes = 12  
 
 def assign_agent_to_conversation(conversation_id, agent_id):
     """
@@ -66,56 +67,41 @@ def remove_bot_attribute(conversation_id):
     else:
         print(f"Error al eliminar el atributo: {response.status_code} - {response.text}")
 
-def send_content_builder(to, content_sid, media_url, body):
+def send_content_builder(to, content_sid, media_url=None, params=None):
     """
     Envía un mensaje utilizando una plantilla de Twilio Content Builder.
     
     :param to: El número de destino en formato internacional (ej. "+523331830952").
     :param content_sid: El Content Template SID para el mensaje.
-    :param media_url: La URL de la imagen que se enviará.
-    :param body: El mensaje adicional que se enviará.
+    :param media_url: La URL de la imagen que se enviará (opcional).
+    :param params: Arreglo de parámetros a pasar (opcional).
     """
     
     # Inicializar el cliente de Twilio
     client = Client(twilio_account_sid, twilio_auth_token)
 
     try:
+        # Construir los argumentos dinámicamente
+        message_args = {
+            "to": f"whatsapp:{to}",
+            "from_": twilio_from_number,
+            "content_sid": content_sid,
+        }
+        
+        if media_url:
+            message_args["media_url"] = media_url
+        
+        if params:
+            message_args["content_variables"] = {"variables": params}
+        
         # Enviar el mensaje usando la plantilla de Content Builder
-        message = client.messages.create(
-            to=f"whatsapp:{to}",  # El número de destino (México)
-            from_=twilio_from_number,  # Número de Twilio registrado en tu cuenta
-            content_sid=content_sid,  # Content Template SID
-            body=body,  # Mensaje adicional
-            media_url=media_url,  # URL de la imagen
-        )
+        message = client.messages.create(**message_args)
         print(f"Mensaje enviado con SID: {message.sid}")
     except Exception as e:
         print(f"Error al enviar el mensaje: {e}")
-        
-def send_audio_mp3_via_twilio(to_phone_number, media_url):
-    """
-    Envía un archivo MP3 a través de Twilio usando la API de mensajería.
 
-    :param to_phone_number: Número de teléfono del destinatario (con código de país, e.g., '+1234567890').
-    :param media_url: URL pública del archivo MP3 a enviar.
-    :param from_phone_number: Número de teléfono de Twilio desde el cual enviar el mensaje.
-    :param account_sid: SID de cuenta de Twilio.
-    :param auth_token: Token de autenticación de Twilio.
-    """
-    # Crear el cliente de Twilio
-    client = Client(twilio_account_sid, twilio_auth_token)
 
-    # Enviar el mensaje de audio
-    message = client.messages.create(
-        body="Aquí tienes el archivo de audio.",  # Mensaje de texto opcional
-        from_=twilio_from_number,  # Número de teléfono de Twilio
-        to=f"whatsapp:{to_phone_number}",  # Número de destinatario
-        media_url=[media_url]  # Lista con la URL del archivo MP3
-    )
-    # Imprimir el SID del mensaje para referencia
-    print(f"Mensaje enviado con SID: {message.sid}")
-
-def envia_mensaje_plantilla(contacto_id, plantilla, parametros=None, buzon=ChatwootSenders.Pacientes, bot_name=None,is_private=False,force_new=False):
+def envia_mensaje_plantilla(contacto_id,phone_number, content_sid, parametros=None, buzon=ChatwootSenders.Pacientes, bot_name=None,force_new=False):
     """
     Envía un mensaje usando una plantilla en Chatwoot.
     
@@ -124,14 +110,16 @@ def envia_mensaje_plantilla(contacto_id, plantilla, parametros=None, buzon=Chatw
     :param parametros: Lista de parámetros para reemplazar en la plantilla.
     :param buzon: El buzón desde el que se enviará el mensaje (Pacientes o Medicos).
     :param bot_name: Nombre del bot si es un mensaje automatizado.
+    :param url: Cuando el mensaje requiere una url
     """
+    #Paso 1, mandar la plantilla por whataspp
+    details=GetTemplateDetails(content_sid)
+    send_content_builder(phone_number, content_sid, media_url=details['url'], params=parametros)
     if parametros is None:
         parametros = []
 
-    print(f"Cantidad de parámetros: {len(parametros)} Texto: {plantilla} al contacto: {contacto_id} desde: {buzon}")
-
     # Reemplazar los parámetros en la plantilla
-    text_to_send = plantilla
+    text_to_send = details['Body']
     for ii, param in enumerate(parametros, 1):
         text_to_send = text_to_send.replace(f"{{{{{ii}}}}}", param)
 
@@ -146,7 +134,7 @@ def envia_mensaje_plantilla(contacto_id, plantilla, parametros=None, buzon=Chatw
     # Verificar si se encontró una conversación abierta
     if open_conv:
         print(f"Se enlaza a la conversación: {open_conv}")
-        send_conversation_message(open_conv, text_to_send, buzon=buzon,is_private=is_private)
+        send_conversation_message(open_conv, text_to_send, buzon=buzon,is_private=True)
     else:
         print(f"No se encontró conversación para el contacto ID: {contacto_id}")
 
@@ -164,7 +152,7 @@ def envia_mensaje_plantilla(contacto_id, plantilla, parametros=None, buzon=Chatw
                 "inbox_id": buzon,
                 "message": {
                     "content": text_to_send,  # Corregido: eliminada la comilla extra
-                    "private": is_private,
+                    "private": True,
                     "template_params": {
                         "name": "sorteo_240430",  # Nombre de la plantilla
                         "category": "UTILITY",    # Categoría de la plantilla
@@ -182,7 +170,7 @@ def envia_mensaje_plantilla(contacto_id, plantilla, parametros=None, buzon=Chatw
                 "inbox_id": buzon,
                 "message": {
                     "content": text_to_send,
-                    "private": is_private,  # Corregido: eliminada la comilla extra
+                    "private": True,  # Corregido: eliminada la comilla extra
                     "template_params": {
                         "name": "sorteo_240430",  # Nombre de la plantilla
                         "category": "UTILITY",    # Categoría de la plantilla

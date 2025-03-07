@@ -37,7 +37,7 @@ def GetParametersFromQuery(query):
         print(f"Error ejecutando la consulta: {e}")
         raise  # Propagar la excepción para manejo externo
 
-def GetTemplateDetails(template_name):
+def GetTemplateDetails(template_sid):
     """
     Obtiene los detalles de una plantilla desde la base de datos por su nombre.
     
@@ -52,7 +52,7 @@ def GetTemplateDetails(template_name):
            [sid],
            [url]
       FROM [cfg].[WS_Templates]
-     WHERE [name] = '{template_name}'
+     WHERE [sid] = '{template_sid}'
     """
     
     # Ejecutar la consulta y obtener el resultado
