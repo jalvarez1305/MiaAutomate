@@ -21,10 +21,10 @@ def EncuestaPacienteBot(Detalles):
         last_message_content = last_message.get('Content')
         conversation_id = Detalles.get('conversation_id')
         contact_id = Detalles.get('contact_id')
-        query="""SELECT TOP (1000) [id]
+        query=f"""SELECT [id]
                     ,[phone_number]
                 FROM [dbo].[CW_Contacts] with (Nolock)
-                where id=162"""
+                where id={contact_id}"""
 
 
         # Validar que las claves necesarias estén presentes
