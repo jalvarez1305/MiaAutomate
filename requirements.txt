@@ -3,6 +3,6 @@ pandas
 python-dotenv
 numpy
 pymssql
-apache-airflow
 twilio
 openai
+pinecone-client
