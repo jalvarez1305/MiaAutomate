@@ -76,7 +76,6 @@ def send_content_builder(to, content_sid, media_url=None, params=None):
     :param media_url: La URL de la imagen que se enviará (opcional).
     :param params: Arreglo de parámetros a pasar (opcional).
     """
-    
     # Inicializar el cliente de Twilio
     client = Client(twilio_account_sid, twilio_auth_token)
 
@@ -92,7 +91,9 @@ def send_content_builder(to, content_sid, media_url=None, params=None):
             message_args["media_url"] = media_url
         
         if params:
-            message_args["content_variables"] = {"variables": params}
+            #convertir los parametros
+            tw_params = {str(i+1): valor for i, valor in enumerate(params or [])}
+            message_args["content_variables"] = json.dumps(tw_params)
         
         # Enviar el mensaje usando la plantilla de Content Builder
         message = client.messages.create(**message_args)
