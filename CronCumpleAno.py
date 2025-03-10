@@ -1,15 +1,9 @@
-import os
-import sys
+from Blast.BlastHelper import SendBlast
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'libs')))
-from CW_Automations import SendBlast
-from CW_Conversations import ChatwootSenders
-
-
-template_name = 'cumple_paciente'
-buzon = ChatwootSenders.Pacientes  # Instancia de la clase ChatwootSenders
-bot_name = None # Si no deseas usar un bot, puedes pasar None
+template_id = 'HX5911d6b0e0c33f027b5473b447d6c84f'
+bot_name = None  # Si no deseas usar un bot, puedes pasar None
 query = """SELECT Cont.[id],
+		Cont.phone_number,
        Cont.custom_attributes_nickname,
 	   coalesce((SELECT top 1 
 						Med.custom_attributes_nickname
@@ -23,4 +17,5 @@ WHERE
 		MONTH(custom_attributes_cumple) = MONTH(GETDATE())
   AND DAY(custom_attributes_cumple) = DAY(GETDATE())""" 
 
-SendBlast(template_name, buzon, bot_name, query,force_new=False)
+#El query lleva, contacto, telefono y parametros
+SendBlast(template_id, bot_name=bot_name, query=query)

@@ -1,13 +1,6 @@
-import os
-import sys
+from Blast.BlastHelper import SendBlast
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'libs')))
-from CW_Automations import send_blast_image
-from CW_Conversations import ChatwootSenders
-
-
-template_name = 'cumple_mes'
-buzon = ChatwootSenders.Pacientes  # Instancia de la clase ChatwootSenders
+template_id = 'HXd881c200c7b75a813bc8509bc7b63e2c'
 bot_name = None  # Si no deseas usar un bot, puedes pasar None
 query = """SELECT [id]
       ,[phone_number]
@@ -16,4 +9,4 @@ query = """SELECT [id]
   WHERE MONTH(custom_attributes_cumple) = MONTH(GETDATE())""" 
 
 #El query lleva, contacto, telefono y parametros
-send_blast_image(template_name, bot_name=bot_name, query=query)
+SendBlast(template_id, bot_name=bot_name, query=query)
