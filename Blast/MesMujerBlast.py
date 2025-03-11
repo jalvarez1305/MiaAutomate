@@ -8,7 +8,7 @@ query = """SELECT id, phone_number
 FROM dbo.CW_Contacts
 WHERE funel_state = 0 AND custom_attributes_es_prospecto = 1
 ORDER BY id -- Es importante definir un criterio de ordenación
-OFFSET 0 ROWS
+OFFSET 100 ROWS
 FETCH NEXT 100 ROWS ONLY""" 
 
 #El query lleva, contacto, telefono y parametros

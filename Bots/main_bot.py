@@ -107,4 +107,4 @@ if __name__ == '__main__':
     except Exception as e:
         logging.warning(f"No se puede enlazar a 74.208.33.184, se usará localhost: {e}")
     
-    app.run(host=host_ip, port=5000)
+    app.run(host=host_ip, port=5001)
