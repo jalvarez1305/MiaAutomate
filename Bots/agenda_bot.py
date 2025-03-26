@@ -5,7 +5,7 @@ import logging
 # Añadir la ruta a libs al path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../libs')))
 from CW_Conversations import send_conversation_message, ChatwootSenders, envia_mensaje_plantilla, remove_bot_attribute
-from SQL_Helpers import GetParametersFromQuery
+from SQL_Helpers import GetParametersFromQuery,ExecuteScalar
 from datetime import datetime
 
 # Configurar logging
@@ -18,7 +18,6 @@ def AgendaBot(Detalles):
         last_message_content = last_message.get('Content')
         conversation_id = Detalles.get('conversation_id')
         contact_id = Detalles.get('contact_id')
-
         # Obtener la hora actual
         current_hour = datetime.now().hour
         dia = "Hoy" if current_hour < 16 else "Mañana"
@@ -30,8 +29,6 @@ Saludos!"""
 
         query = f"""
                 SELECT 
-                    [MedicoNickName],
-                    '{dia}' as Dia,
                     STRING_AGG(Citas,'\n') as Agenda
                 FROM 
                     (
@@ -59,7 +56,7 @@ Saludos!"""
                 GROUP BY 
                     [MedicoNickName]
                 """
-
+        agenda=ExecuteScalar(query)
 
         # Validar que las claves necesarias estén presentes
         if conversation_id is None:
@@ -68,8 +65,8 @@ Saludos!"""
         
         if last_message_content == 'Si':
             logging.info(f"Enviando respuesta afirmativa para la conversación {conversation_id}.")
-            parametros = GetParametersFromQuery(query)
-            envia_mensaje_plantilla(contact_id, plantilla_body, parametros=parametros, buzon=ChatwootSenders.Medicos)
+            send_conversation_message(conversation_id, agenda, is_private=False, buzon=ChatwootSenders.Medicos)
+            remove_bot_attribute(conversation_id)
         else:
             logging.info(f"Enviando respuesta negativa para la conversación {conversation_id}.")
             send_conversation_message(conversation_id, '@Pablo, no puedo responder esto', is_private=True, buzon=ChatwootSenders.Medicos)
