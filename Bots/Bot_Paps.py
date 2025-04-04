@@ -34,18 +34,18 @@ def BotPaps(Detalles):
             return
         if last_message_content =='1.- Papanicolaou Negativo':
             logging.info("1.- Papanicolaou Negativo")
-            NotificarPaciente('HX280bd888d556d826d10129f4d731625d',contact_id)#Pap negativo con receta
+            NotificarPaciente('HX280bd888d556d826d10129f4d731625d',contact_id,last_message_content)#Pap negativo con receta
         elif last_message_content =='2.- PAP Negativo (receta)':
             logging.info("2.- PAP Negativo (receta)")
             send_conversation_message(conversation_id, "Me puede compartir la receta, por favor", is_private=False, buzon=ChatwootSenders.Pacientes)
-            NotificarPaciente('HXeb3ba5c4af5c76775adea115755ab53e',contact_id,True)#Pap negativo con receta
+            NotificarPaciente('HXeb3ba5c4af5c76775adea115755ab53e',contact_id,last_message_content,True)#Pap negativo con receta
         elif last_message_content =='3.- PAP Positivo VPH':
             logging.info("3.- PAP Positivo VPH")
-            NotificarPaciente('HXbd5c3544d719abab4110d92e3c85e47c',contact_id)#Pap negativo con receta
+            NotificarPaciente('HXbd5c3544d719abab4110d92e3c85e47c',contact_id,last_message_content)#Pap negativo con receta
     except Exception as e:
         logging.error(f"Error en AgendaBot: {str(e)}")  # Manejo de errores con logging
 
-def NotificarPaciente(template_sid, Medico_FK,has_receta=False):
+def NotificarPaciente(template_sid, Medico_FK,last_message_content,has_receta=False):
     logging.info("Notificar al paciente")
     template_id = template_sid
     bot_name = None  # Si no deseas usar un bot, puedes pasar None
@@ -61,6 +61,7 @@ def NotificarPaciente(template_sid, Medico_FK,has_receta=False):
     update_query =f"""UPDATE [dbo].[Papanicolaous]
                     SET [Estatus] = 'Enviada al paciente'
                         ,[Fecha Paciente] = getdate()
+                        ,Resultado='{last_message_content}'
                     WHERE [Medico_FK] = {Medico_FK}
                             AND Estatus = N'Enviada al Medico'
                    """
