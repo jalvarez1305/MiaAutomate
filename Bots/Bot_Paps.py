@@ -56,5 +56,13 @@ def NotificarPaciente(template_sid, Medico_FK):
                                         dbo.CW_Contacts AS Cont WITH (nolock) ON Paps.Paciente_FK = Cont.id
                 WHERE        (Paps.Medico_FK = {Medico_FK}) AND (Paps.Estatus = N'Enviada al Medico')""" 
 
-    #El query lleva, contacto, telefono y parametros
+    #Se manda el mensaje apropiado a la paciente
     SendBlast(template_id, bot_name=None, query=query)
+    #Se actualiza el estatus del papanicolaou
+    update_query =f"""UPDATE [dbo].[Papanicolaous]
+                    SET [Estatus] = 'Enviada al paciente'
+                        ,[Fecha Paciente] = getdate()
+                    WHERE [Medico_FK] = {Medico_FK}
+                            AND Estatus = N'Enviada al Medico'
+                   """
+    ejecutar_update(update_query)

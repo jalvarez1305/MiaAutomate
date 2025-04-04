@@ -130,22 +130,39 @@ def ExecuteScalar(query):
         conn.close()
 
 def ejecutar_update(query):
+    """
+    Ejecuta una consulta de actualización en SQL Server.
+
+    :param query: La consulta SQL de tipo UPDATE, INSERT o DELETE.
+    """
+    conn = None
+    cursor = None
     try:
-        # Establece la conexión
+        print("Conectando a la base de datos...")
         conn = pymssql.connect(server=server, user=username, password=password, database=database)
         cursor = conn.cursor()
-        
-        # Ejecuta el query
+        print("Conexión establecida.")
+
+        print(f"Ejecutando query: {query}")
         cursor.execute(query)
-        
-        # Confirma los cambios
         conn.commit()
+        
         print("Actualización realizada exitosamente.")
         
+    except pymssql.DatabaseError as db_err:
+        print(f"❌ Error de base de datos: {db_err}")
+        if conn:
+            conn.rollback()  # Revertir cambios en caso de error
+
+    except pymssql.InterfaceError as conn_err:
+        print(f"❌ Error de conexión: {conn_err}")
+
     except Exception as e:
-        print("Error al ejecutar el query:", e)
-        
+        print(f"❌ Error inesperado: {e}")
+
     finally:
-        # Cierra la conexión
-        cursor.close()
-        conn.close()
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+        print("Conexión cerrada.")
