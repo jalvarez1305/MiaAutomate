@@ -88,6 +88,16 @@ def send_content_builder(to, content_sid, media_url=None, params=None):
         }
         
         if media_url:
+            # Reemplazar los parámetros de Twilio en la URL media_url
+            if params:
+                # Asegurarnos de que los parámetros están en el formato adecuado
+                if isinstance(params, list) and len(params) > 0:
+                    # Reemplazar las instancias de {{n}} en media_url
+                    for i, param in enumerate(params):
+                        # Reemplazar el marcador {{i+1}} con el valor correspondiente en params
+                        media_url = media_url.replace(f"{{{{{i+1}}}}}", str(param))
+            
+            # Asignar la URL media_url procesada a los argumentos del mensaje
             message_args["media_url"] = media_url
         
         if params:
