@@ -26,7 +26,7 @@ query = """
                 FROM dbo.Papanicolaous WITH (NOLOCK) 
                 WHERE Estatus = N'Enviada al Medico'
             )
-            AND Paps.Estatus = N'Enviada al Patologo'
+            AND Paps.Estatus = N'Resultado Recibido'
     )
     SELECT MedicoID, 
             phone_number, 
@@ -52,7 +52,7 @@ def UpdateEstatus():
                             FROM dbo.Papanicolaous WITH (NOLOCK) 
                             WHERE Estatus = N'Enviada al Medico'
                         )
-                        AND Paps.Estatus = N'Enviada al Patologo'
+                        AND Paps.Estatus = N'Resultado Recibido'
                 )
                 UPDATE Paps
                 SET 

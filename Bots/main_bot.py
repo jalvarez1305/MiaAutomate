@@ -38,7 +38,11 @@ def chatwoot_webhook():
         return jsonify({"error": "Unexpected payload format"}), 400
 
     last_message = split_data.get("last_message", {})
-    
+    new_msg = last_message.get('Content')
+    #evaluemos primero pipelines basados en mensajes
+    if new_msg in paps_messages:
+        logging.info(f"Se ejecuta BOT Paps")
+        BotPaps(split_data)
     if 'bot_attribute' in split_data and 'Sender' in last_message:
         if split_data['bot_attribute'] != "" and last_message.get('Sender') == "contact":
             match split_data["bot_attribute"]:
@@ -57,9 +61,6 @@ def chatwoot_webhook():
                         if new_msg == saludo_facebook:
                             logging.info(f"Se ejecuta BOT {split_data.get('bot_attribute', 'GyneGeneralBot')}")
                             GyneGeneralBot(split_data)
-                        if new_msg in paps_messages:
-                            logging.info(f"Se ejecuta BOT Paps")
-                            BotPaps(split_data)
                         else:
                             logging.warning("Mensaje no reconocido.")
         else:
