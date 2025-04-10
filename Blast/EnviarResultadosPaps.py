@@ -13,7 +13,7 @@ query = """
             Docs.id AS MedicoID, 
             Docs.phone_number, 
             Docs.custom_attributes_nickname AS Medico, 
-            COALESCE(Docs.custom_attributes_nickname, Pacs.name) AS Paciente, 
+            COALESCE(Pacs.custom_attributes_nickname, Pacs.name) AS Paciente, 
             CONVERT(VARCHAR(10), Paps.[Fecha Consulta], 23) AS Fecha, 
             REPLACE(Paps.[presigned url], 'https://papanicolaous.s3.us-east-2.amazonaws.com/', '') AS Url,
             ROW_NUMBER() OVER (PARTITION BY Docs.id ORDER BY Paps.[Fecha Consulta] ASC) AS RowNum
