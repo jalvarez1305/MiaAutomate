@@ -375,6 +375,26 @@ def get_open_conversation(contact_id):
         print(f"Excepción: {str(ex)}")
     
     return conv_id
+def get_conversation_by_id(conv_id):
+    url = f"{base_url}/conversations/{conv_id}"
+    headers = {
+        "api_access_token": cw_token
+    }
+    
+    conversacion = None
+    try:
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code == 200:
+            print("Conversación extraída con éxito.")
+            conversacion = response.json()  # <--- Aquí cambiamos a .json()
+        else:
+            print(f"Error al extraer conversación: {response.text}")
+    
+    except Exception as ex:
+        print(f"Excepción: {str(ex)}")
+    
+    return conversacion
 
 def get_conv_from_contact(response_data, contact_id):
     # Deserializar el contenido de la respuesta y buscar la conversación correspondiente
