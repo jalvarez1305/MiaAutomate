@@ -536,7 +536,7 @@ def get_all_conversation_messages(conversation_id):
 
         all_messages.extend([
             {
-                "role": "assistant" if msg["sender"]["type"] == "user" else msg["sender"]["type"],
+                "role": "assistant" if msg["sender"]["type"] == "user" else "user",
                 "content": msg.get("content", ""),
                 "created_at": msg.get("created_at", 0)
             }
@@ -552,3 +552,45 @@ def get_all_conversation_messages(conversation_id):
     all_messages.sort(key=lambda msg: msg["created_at"])
     
     return all_messages
+
+def get_AI_conversation_messages(conversation_id):
+    all_messages_raw = []
+    headers = {"api_access_token": cw_token}
+    before = None
+    first_iteration = True
+
+    while True:
+        url = f"{base_url}/conversations/{conversation_id}/messages"
+        params = {} if first_iteration else {"before": before}
+
+        response = requests.get(url, headers=headers, params=params)
+        if response.status_code != 200:
+            break
+
+        data = response.json()
+        messages = data.get("payload", [])
+        if not messages:
+            break
+
+        # Guardamos mensajes con created_at solo para ordenarlos después
+        all_messages_raw.extend([
+            {
+                "role": "user" if msg["sender"]["type"] == "user" else "assistant",
+                "content": msg.get("content", ""),
+                "created_at": msg.get("created_at", 0)
+            }
+            for msg in messages
+            if not msg.get("private", False) and "type" in msg.get("sender", {})
+        ])
+
+        before = min(msg["id"] for msg in messages)
+        first_iteration = False
+
+    # Ordenamos por created_at
+    all_messages_raw.sort(key=lambda msg: msg["created_at"])
+
+    # Eliminamos el campo created_at antes de retornar
+    all_messages = [{"role": msg["role"], "content": msg["content"]} for msg in all_messages_raw]
+
+    return all_messages
+

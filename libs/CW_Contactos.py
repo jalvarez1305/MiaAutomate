@@ -63,6 +63,31 @@ def actualizar_etiqueta(conv_id, label):
         print(f"Error al actualizar la etiqueta: {response.status_code}")
         print(conv_id)
 
+def asignar_a_agente(conv_id, agente_id=15):
+    # Configuración de la URL y encabezados de autenticación
+    #15 Yaneth
+    url = f"{base_url}/conversations/{conv_id}/assignments"
+    headers = {
+        "Content-Type": "application/json",
+        "api_access_token": cw_token
+    }
+
+    # Datos para asignar la conversación al agente por ID
+    data = {
+        "assignee_id": agente_id
+    }
+
+    # Envío de la solicitud POST para asignar la conversación
+    response = requests.post(url, json=data, headers=headers)
+
+    # Verificación de la respuesta
+    if response.status_code == 200:
+        print(f"Conversación {conv_id} asignada al agente con ID {agente_id}.")
+    else:
+        print(f"Error al asignar la conversación: {response.status_code}")
+        print(f"ID de la conversación: {conv_id}")
+
+
 def actualizar_funel_state(contact_id, state):
     # Configuración de la URL y encabezados de autenticación
     url = f"{base_url}/contacts/{contact_id}"

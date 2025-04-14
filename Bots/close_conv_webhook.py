@@ -11,7 +11,7 @@ from confirmar_cita_bot import ConfirmarCitaBot
 from encuesta_paciente_bot import EncuestaPacienteBot
 from agenda_bot import AgendaBot
 from helper import parse_conversation_payload
-from Bots_Config import audio_gyne,paps_messages,facebook_messages
+from Bots_Config import saludo_facebook, audio_gyne,paps_messages
 # Obtener el directorio padre (donde está ubicado 'libs')
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(parent_dir)
@@ -40,15 +40,9 @@ def chatwoot_webhook():
     last_message = split_data.get("last_message", {})
     new_msg = last_message.get('Content')
     #evaluemos primero pipelines basados en mensajes
-    if last_message.get('Sender') == "contact":
-        if new_msg in paps_messages:
-            logging.info(f"Se ejecuta BOT Paps")
-            BotPaps(split_data)
-        elif new_msg in facebook_messages:
-            logging.info(f"Se ejecuta BOT {split_data.get('bot_attribute', 'GyneGeneralBot')}")
-            GyneGeneralBot(split_data)
-
-
+    if new_msg in paps_messages:
+        logging.info(f"Se ejecuta BOT Paps")
+        BotPaps(split_data)
     if 'bot_attribute' in split_data and 'Sender' in last_message:
         if split_data['bot_attribute'] != "" and last_message.get('Sender') == "contact":
             match split_data["bot_attribute"]:
@@ -62,19 +56,22 @@ def chatwoot_webhook():
                     logging.info(f"Se ejecuta BOT {split_data['bot_attribute']}")
                     ConfirmarCitaBot(split_data)
                 case _:                    
-                    logging.warning("Mensaje no reconocido.")
+                    if last_message.get('Sender') == "contact":
+                        new_msg = last_message.get('Content')                        
+                        if new_msg == saludo_facebook:
+                            logging.info(f"Se ejecuta BOT {split_data.get('bot_attribute', 'GyneGeneralBot')}")
+                            GyneGeneralBot(split_data)
+                        else:
+                            logging.warning("Mensaje no reconocido.")
+        else:
+            new_msg = last_message.get('Content')                        
+            if new_msg == audio_gyne:
+                logging.info(f"Se ejecuta BOT Gyne")
+                GyneGeneralBot(split_data)
+            else:
+                logging.warning("Bot no reconocido.")
     else:
         logging.error("Faltan datos necesarios en el payload.")    
-
-    #Revisamos despues los bots de ventas
-    if last_message.get('Sender') == "contact":
-        print(f"Las sender contact")
-        labels = data['conversation']['labels']
-        print(f"Etiquetas: {labels} ")
-        if "citagyne" in labels:
-            print("Esta es una conversacion de ventas de ginecologia")
-            GyneGeneralBot(split_data)
-        
 
     return jsonify({"message": "Webhook received!"}), 200
 
@@ -82,34 +79,26 @@ def chatwoot_webhook():
 def save_conversation():
     """Webhook que guarda la conversación cuando se cierra en Chatwoot."""
     data = request.get_json()
-
+    print(f"Recibi conversacion: {data['id']} con estatus: {data['status']}")
+    
     if not data:
         return jsonify({"error": "Invalid JSON payload"}), 400
-
-    conversation_id = data.get('id')
-    status = data.get('status')
-
-    print(f"🔔 Recibí conversación: {conversation_id} con estatus: {status}")
-
+    
+    conversation_id = data['id']
+    
     if not conversation_id:
-        print("❌ Falta el ID de la conversación")
+        print("Missing conversation ID")
         return jsonify({"error": "Missing conversation ID"}), 400
 
-    # Solo continuar si el estatus es 'closed'
-    if status != 'resolved':
-        print(f"ℹ️ Conversación {conversation_id} ignorada porque su estatus no es 'closed'.")
-        return jsonify({"message": "Conversación no cerrada, no se almacena"}), 200
-
-    # Almacenar conversación si está cerrada
+    #Almacenar conversacion
     try:
-        conversacion.almacenar_conv_pinecone(data)
-        print("✅ Conversación guardada correctamente")
+        conversacion.almacenar(data)
+        print("Conversación guardada correctamente")
         return jsonify({"message": "Conversación guardada correctamente"}), 200
     except Exception as e:
-        logging.error(f"🚨 Error al guardar la conversación {conversation_id}: {e}")
-        print(f"🚨 Error al guardar la conversación {conversation_id}: {e}")
+        logging.error(f"Error al guardar la conversación {conversation_id}: {e}")
+        print(f"Error al guardar la conversación {conversation_id}: {e}")
         return jsonify({"error": "Error al guardar la conversación"}), 500
-
 
 if __name__ == '__main__':
     host_ip = 'localhost'  # Default to localhost
