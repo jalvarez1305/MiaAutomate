@@ -25,7 +25,10 @@ def ConversationAnswer(ConvMessages):
                                             No ofrezcas la cita a menos que estes seguro que el usuario ya resolvio todas sus dudas
                                             Si puedes proporcionar posibles causas, pero no puedes ofrecer tratamientos
                                             No le pidas agendar la cita a menos que el usuario lo solicite y ya haya resuelto las dudas de su padecimiento
-                                            No finalices preguntando dudas, espera que el usuario presente las dudas"""}
+                                            No finalices preguntando dudas, espera que el usuario presente las dudas
+                                            No digas consulta a tu medico, habla siempre en primera primersona
+                                            Se amable, le hablas a mujeres e incluye 1 o dos emojis
+                                            Estas hablando por whatsapp, se brebre y usa el formato apropiado"""}
         ]+ConvMessages
   response = client.responses.create(
       model="gpt-4o-mini",
