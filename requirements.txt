@@ -5,4 +5,5 @@ numpy
 pymssql
 twilio
 openai
-pinecone-client
+pinecone
+langchain-community
