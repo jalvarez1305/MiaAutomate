@@ -9,7 +9,7 @@ from CW_Conversations import send_conversation_message, ChatwootSenders,send_aud
 from CW_Contactos import actualizar_interes_en,actualizar_etiqueta
 from SQL_Helpers import execute_query,ExecuteScalar,ejecutar_update
 from CW_Automations import send_content
-from Bots_Config import saludo_facebook,audio_gyne
+from Bots_Config import audio_gyne,facebook_messages
 from datetime import datetime
 
 # Configurar logging
@@ -35,7 +35,7 @@ def GyneGeneralBot(Detalles):
         if conversation_id is None:
             logging.error("conversation_id no está presente en Detalles.")
             return
-        if last_message_content == saludo_facebook or last_message_content == audio_gyne:
+        if last_message_content in facebook_messages or last_message_content == audio_gyne:
             MandarMensajeSaludo(conversation_id,contact_phone,contact_id)
         elif last_message_content == 'Domicilio':
             send_conversation_message(conversation_id, respuesta_ubicacion, is_private=False, buzon=ChatwootSenders.Pacientes)

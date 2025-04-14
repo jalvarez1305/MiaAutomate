@@ -12,7 +12,6 @@ from CW_Conversations import send_conversation_message, ChatwootSenders,send_aud
 from CW_Contactos import actualizar_interes_en,actualizar_etiqueta
 from SQL_Helpers import execute_query,ExecuteScalar,ejecutar_update
 from CW_Automations import send_content
-from Bots_Config import saludo_facebook,audio_gyne
 from datetime import datetime
 
 # Configurar logging
