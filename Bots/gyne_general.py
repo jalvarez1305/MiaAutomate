@@ -9,8 +9,8 @@ import time
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../libs')))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../AI')))
 
-from GinecologiaAI import ConversationAnswer
-from OpenIAHelper import is_user_ready
+
+from OpenIAHelper import conv_clasification
 from CW_Conversations import send_conversation_message, ChatwootSenders,send_audio_mp3_via_twilio, envia_mensaje_plantilla, remove_bot_attribute,get_AI_conversation_messages
 from CW_Contactos import actualizar_interes_en,actualizar_etiqueta,asignar_a_agente
 from SQL_Helpers import execute_query,ExecuteScalar,ejecutar_update
@@ -42,16 +42,10 @@ def GyneGeneralBot(Detalles):
             return
         if last_message_content in facebook_messages or last_message_content == audio_gyne:
             MandarMensajeSaludo(conversation_id,contact_phone,contact_id)
-        elif is_user_ready(texto):
-            respuesta=ConversationAnswer(msg_arr)
+        else:
+            respuesta=conv_clasification(msg_arr)
             time.sleep(20)
             send_conversation_message(conversation_id,respuesta,True)
-            if is_user_ready(texto):
-                print("Asignar y etiquetar")
-                AsignaConversacion(conversation_id)
-        else:
-            print("Asignar y etiquetar")
-            AsignaConversacion(conversation_id)
     except Exception as e:
         logging.error(f"Error en gyne_general: {str(e)}")  # Manejo de errores con logging
 
