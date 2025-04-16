@@ -6,7 +6,7 @@ from Pinecone_Helper import get_context
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def ConversationAnswer(ConvMessages):
+def ConversationAnswer_tmp(ConvMessages):
   # Obtener el contexto adicional de Pinecone (o cualquier otra fuente que uses)
   texto = json.dumps(ConvMessages)
   context = get_context(texto)

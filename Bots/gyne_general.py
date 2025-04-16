@@ -44,6 +44,7 @@ def GyneGeneralBot(Detalles):
             MandarMensajeSaludo(conversation_id,contact_phone,contact_id)
         else:
             respuesta=conv_clasification(msg_arr)
+            respuesta=f"Categoría: {respuesta}"
             time.sleep(20)
             send_conversation_message(conversation_id,respuesta,True)
     except Exception as e:

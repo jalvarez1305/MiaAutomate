@@ -13,31 +13,82 @@ def get_embedding(data):
     return embedding
 
 def conv_clasification(ConvMessages):
+    """
+    :param conversacion: Lista de mensajes en orden cronológico. 
+                         Cada mensaje es un dict: {'rol': 'usuario'|'agente', 'contenido': str}
+    :return: Una string con la categoría
+    """
+    reglas = """
+                Clasifica la conversación en una (y solo una) de las siguientes categorías:
+
+                1. Acepto cita
+                - Ya se ofreció un horario
+                - El usuario lo aceptó
+                - Se le pidió su nombre y lo proporcionó
+                - El último mensaje del usuario es el nombre o una confirmación
+
+                2. Acepto horario
+                - Ya se ofreció un horario
+                - El usuario lo aceptó
+                - Aún no proporciona su nombre
+                - El último mensaje es aceptación
+
+                3. Rechazo horario
+                - Ya se ofreció un horario
+                - El usuario no puede tomarlo
+                - El último mensaje es un rechazo claro
+
+                4. Solicita horario
+                - El usuario ya resolvió dudas médicas
+                - Ya preguntó precio y aceptó
+                - El último mensaje es una pregunta por disponibilidad
+                - No se ha dado un horario aún
+
+                5. Dudas padecimiento
+                - El último mensaje es sobre síntomas o malestar
+                - No habla de procedimiento ni precios
+
+                6. Dudas procedimiento
+                - El último mensaje es sobre lo que se hará en consulta o lo que incluye
+                - Aún no se ha dado el precio
+
+                7. Precio consulta
+                - El último mensaje es duda sobre precio de: consulta, papanicolaou o trastornos menstruales
+                - Aún no se dio ese precio
+
+                8. Precio verrugas
+                - El último mensaje es duda sobre precio para verrugas
+                - Aún no se dio ese precio
+
+                9. Precio prenatal
+                - El último mensaje es duda sobre precio de consulta prenatal
+                - Aún no se dio ese precio
+
+                10. Ghosted 1
+                    - Ya respondimos todas sus dudas
+                    - El usuario dejó de responder
+                    - No se envió el mensaje "Sigo a tus órdenes si tienes alguna otra duda o deseas agendar tu cita ☺️"
+
+                11. Otro
+                    - No entra en ninguna de las anteriores
+                    - O se repitió el precio ya dado
+                    - O el mensaje es ambiguo o irrelevante
+
+                Clasifica exclusivamente en una de estas categorías, basándote en el último mensaje y el contexto anterior.
+                Responde únicamente con el nombre de la categoría.
+                """
+    mensajes_sistema = [
+        {"role": "system", "content": "Eres un médico que clasifica conversaciones médicas según reglas estrictas."},
+        {"role": "user", "content": reglas}
+    ]
     response = client.responses.create(
-        model="gpt-4o-mini",
+        model="gpt-4.1",
         input=[
-            {"role": "system", "content": """En una clinica medica tu eres un Medico que se dedica a clasificar conversaciones en una de las siguientes categorias
-                                                Dudas padecimiento: Para entrar en esta clasificacion el ultimo texto del usuario debe hacer referencia a dudas sobre su padecimiento medico
-                                                Solicita horario: Para entrar en esta clasificacion el usuario ya resolvio sus dudas de padecimiento.
-                                                                  Para entrar en esta clasificacion el usuario ya pregunto por el precio y estuvo de acuerdo
-                                                                  Especificamente pregunta por un espacio disponible; Pero, ya resolvio dudas medicas
-                                                                  Si ya le proporcionamos un horario, no puede tener esta clasificacion
-                                                Dudas procedimiento: Para entrar en esta clasificacion el usuario Tiene dudas sobre el precio
-                                                                     Tiene dudas sobre lo que se hara en consulta
-                                                                     Tiene dudas sobre lo que incluye la consulta
-                                                                     No se le ha pasaso precio anteriormente
-                                                Acepto Horario: Para entrar en esta clasificacion ya se le ofrecio un horario al paciente y este acepto uno
-                                                                La aceptacion debe ser el ultimo mensaje del usuario
-                                                Rechazo Horario: Para entrar en esta clasificacion ya se le ofrecio un horario al paciente y no puede tomar el horario ofrecido
-                                                                 El rechazo debe ser el ultimo mensaje del usuario
-                                                Acepto Cita: Para entrar en esta clasificacion ya se le ofrecio un horario, lo acepto, se le pidio su nombre y lo proporciono
-                                                Ghosted 1: Para entrar en esta clasificacion ya hemos respondido todas las preguntas del usuario y este dejo de responder
-                                                            no debe tener el mensaje "Sigo a tus órdenes si tienes alguna otra duda o deseas agendar tu cita ☺️"
-                                                Otro: Cuando no entra en ninguna de estas clasificaciones se clasifica como Otro
-                                                                  """},
-            {"role": "system", "content": """Dada la siguiente conversación, regresa la clasificacion"""}
-        ]+ConvMessages,
-        temperature=0.1  # Ajustar la temperatura a 0.1
+            {"role": "system", "content": "Eres un médico que clasifica conversaciones médicas según reglas estrictas."},
+            {"role": "user", "content": reglas},
+            {"role": "user", "content": f"""Ahora clasifica esta conversacion: {ConvMessages}"""}
+        ],
+        temperature=0  # Ajustar la temperatura a 0.1
     )
     
     return response.output_text
