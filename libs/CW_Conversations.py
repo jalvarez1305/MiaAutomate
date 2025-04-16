@@ -594,3 +594,16 @@ def get_AI_conversation_messages(conversation_id):
 
     return all_messages
 
+def segundos_entre_ultimos_mensajes(conversation_id):
+    mensajes = get_all_conversation_messages(conversation_id)
+
+    # Filtrar solo los mensajes del rol "user"
+    mensajes_user = [msg for msg in mensajes if msg["role"] == "user"]
+
+    if len(mensajes_user) < 2:
+        return 0  # No hay suficientes mensajes para calcular la diferencia
+
+    ultimo = mensajes_user[-1]["created_at"]
+    penultimo = mensajes_user[-2]["created_at"]
+
+    return int(ultimo - penultimo)

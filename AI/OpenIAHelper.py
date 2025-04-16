@@ -18,14 +18,14 @@ def conv_clasification(ConvMessages):
                          Cada mensaje es un dict: {'rol': 'usuario'|'agente', 'contenido': str}
     :return: Una string con la categoría
     """
-    reglas = """
-                Clasifica la conversación en una (y solo una) de las siguientes categorías:
+    reglas =  """
+                Clasifica la conversación en una (y solo una) de las siguientes categorías. Evalúa las reglas en este orden:
 
                 1. Acepto cita
                 - Ya se ofreció un horario
                 - El usuario lo aceptó
                 - Se le pidió su nombre y lo proporcionó
-                - El último mensaje del usuario es el nombre o una confirmación
+                - El último mensaje es su nombre o una confirmación
 
                 2. Acepto horario
                 - Ya se ofreció un horario
@@ -40,42 +40,53 @@ def conv_clasification(ConvMessages):
 
                 4. Solicita horario
                 - El usuario ya resolvió dudas médicas
-                - Ya preguntó precio y aceptó
-                - El último mensaje es una pregunta por disponibilidad
-                - No se ha dado un horario aún
+                - Ya preguntó y aceptó el precio
+                - El último mensaje es una pregunta por el siguiente espacio disponible o lo más cercano
+                - Si pregunta por una fecha específica (ej. "¿tienen el lunes?"), clasifica como Otro
+                - Aún no se ha ofrecido un horario
 
                 5. Dudas padecimiento
-                - El último mensaje es sobre síntomas o malestar
-                - No habla de procedimiento ni precios
+                - El último mensaje del usuario es una duda sobre sus síntomas o malestar
+                - No está preguntando sobre procedimiento, ubicación ni precios
 
                 6. Dudas procedimiento
-                - El último mensaje es sobre lo que se hará en consulta o lo que incluye
-                - Aún no se ha dado el precio
+                - El último mensaje del usuario es sobre lo que se hará en consulta o lo que incluye
+                - Aún no se ha dado precio
+                - Ejemplos: “¿qué me van a hacer?”, “¿incluye el papanicolaou?”
 
                 7. Precio consulta
-                - El último mensaje es duda sobre precio de: consulta, papanicolaou o trastornos menstruales
-                - Aún no se dio ese precio
+                - El último mensaje es una duda sobre el precio de: consulta, papanicolaou o trastornos menstruales
+                - Aún no se ha dado ese precio
 
                 8. Precio verrugas
-                - El último mensaje es duda sobre precio para verrugas
-                - Aún no se dio ese precio
+                - El último mensaje es una duda sobre precio para verrugas
+                - Aún no se ha dado ese precio
 
                 9. Precio prenatal
-                - El último mensaje es duda sobre precio de consulta prenatal
-                - Aún no se dio ese precio
+                - El último mensaje es una duda sobre precio de consulta prenatal o seguimiento de embarazo
+                - Aún no se ha dado ese precio
 
-                10. Ghosted 1
+                10. Ubicación
+                    - El último mensaje es una pregunta sobre la ubicación de la clínica
+                    - Ej: “¿Dónde están ubicados?”, “¿En qué calle es?”
+
+                11. Agradecimiento
+                    - Ya se resolvieron las dudas
+                    - El último mensaje es solo un agradecimiento o despedida
+                    - Ej: “Gracias”, “Perfecto, gracias”, “Nos vemos”
+
+                12. Ghosted 1
                     - Ya respondimos todas sus dudas
                     - El usuario dejó de responder
-                    - No se envió el mensaje "Sigo a tus órdenes si tienes alguna otra duda o deseas agendar tu cita ☺️"
+                    - No se ha enviado el mensaje: "Sigo a tus órdenes si tienes alguna otra duda o deseas agendar tu cita ☺️"
 
-                11. Otro
-                    - No entra en ninguna de las anteriores
-                    - O se repitió el precio ya dado
-                    - O el mensaje es ambiguo o irrelevante
-
-                Clasifica exclusivamente en una de estas categorías, basándote en el último mensaje y el contexto anterior.
-                Responde únicamente con el nombre de la categoría.
+                13. Otro
+                    - No entra en ninguna de las categorías anteriores
+                    - Pregunta por una fecha específica (aunque quiera horario)
+                    - Ya se dio el precio y el usuario lo vuelve a pedir
+                    - El mensaje es ambiguo, irrelevante o trata temas no considerados (ej. trámites, quejas, otros precios)
+                    
+                Solo responde con el nombre exacto de la categoría.
                 """
     mensajes_sistema = [
         {"role": "system", "content": "Eres un médico que clasifica conversaciones médicas según reglas estrictas."},
