@@ -5,4 +5,6 @@ facebook_messages = ["¡Hola! Podrías darme más información de…",
                      "¡Hola! Podrías darme más información de...",
                      "¡Hola! Quiero agendar una cita de ginecología",
                      "¡Hola! Quiero agendar una cita para un check-up",
+                     "Hola vi tu sitio en Google y quiero una consulta Ginecológica.",
                      "MandaAudio"]
+google_messages= ["Hola vi tu sitio en Google y quiero una consulta Ginecológica."]

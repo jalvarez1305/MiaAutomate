@@ -37,6 +37,31 @@ def actualizar_interes_en(contact_id, interes_en):
         print(f"Error al actualizar el atributo: {response.status_code}")
         print(response.json())
 
+def actualizar_lead_source(contact_id, lead_source):
+    # Configuración de la URL y encabezados de autenticación
+    url = f"{base_url}/contacts/{contact_id}"
+    headers = {
+        "Content-Type": "application/json",
+        "api_access_token": cw_token
+    }
+    
+    # Datos para actualizar el atributo personalizado
+    data = {
+        "custom_attributes": {
+            "lead_source": lead_source
+        }
+    }
+    
+    # Envío de la solicitud PATCH para actualizar el contacto
+    response = requests.put(url, json=data, headers=headers)
+    
+    # Verificación de la respuesta
+    if response.status_code == 200:
+        print("Atributo 'lead_source' actualizado correctamente.")
+    else:
+        print(f"Error al actualizar el atributo lead_source: {response.status_code}")
+        print(response.json())
+
 def actualizar_etiqueta(conv_id, label):
     # Configuración de la URL y encabezados de autenticación
     url = f"{base_url}/conversations/{conv_id}/labels"

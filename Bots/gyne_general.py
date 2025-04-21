@@ -12,10 +12,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../A
 
 from OpenIAHelper import conv_clasification
 from CW_Conversations import send_conversation_message, ChatwootSenders,send_audio_mp3_via_twilio, envia_mensaje_plantilla, remove_bot_attribute,get_AI_conversation_messages,segundos_entre_ultimos_mensajes
-from CW_Contactos import actualizar_interes_en,actualizar_etiqueta,asignar_a_agente
+from CW_Contactos import actualizar_interes_en,actualizar_etiqueta,asignar_a_agente,actualizar_lead_source
 from SQL_Helpers import execute_query,ExecuteScalar,ejecutar_update
 from CW_Automations import send_content
-from Bots_Config import audio_gyne,facebook_messages
+from Bots_Config import audio_gyne,facebook_messages,google_messages
 from datetime import datetime
 
 # Configurar logging
@@ -41,6 +41,14 @@ def GyneGeneralBot(Detalles):
             return
         if last_message_content in facebook_messages or last_message_content == audio_gyne:
             MandarMensajeSaludo(conversation_id,contact_phone,contact_id)
+            print(f"debug: {last_message_content}")
+            if last_message_content in google_messages:
+                logging.info(f"Actualizando el lead source a Google")
+                actualizar_lead_source(contact_id,"Google")
+            else:
+                logging.info(f"Actualizando el lead source a Facebook")
+                actualizar_lead_source(contact_id,"Facebook")
+
         else:
             if tiempo > 6:
                 time.sleep(20)                
