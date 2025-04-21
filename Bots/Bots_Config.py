@@ -4,4 +4,5 @@ paps_messages=["1.- Papanicolaou Negativo","2.- PAP Negativo (receta)","3.- PAP 
 facebook_messages = ["¡Hola! Podrías darme más información de…",
                      "¡Hola! Podrías darme más información de...",
                      "¡Hola! Quiero agendar una cita de ginecología",
+                     "¡Hola! Quiero agendar una cita para un check-up",
                      "MandaAudio"]

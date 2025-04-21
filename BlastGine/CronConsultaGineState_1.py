@@ -44,5 +44,5 @@ def UpdateEstatus():
 #El query lleva, contacto, telefono y parametros
 SendBlast(template_id, bot_name=bot_name, query=query)
 UpdateEstatus()
-# Iterar por cada contacto para acutlizar el funnel state a 1
-actualizar_funel_states(query,1)
+# Iterar por cada contacto para acutlizar el funnel state a 2
+actualizar_funel_states(query,2)

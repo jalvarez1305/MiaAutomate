@@ -33,8 +33,8 @@ def GyneGeneralBot(Detalles):
         conversation_id = Detalles.get('conversation_id')
         contact_id = Detalles.get('contact_id')
         contact_phone = Detalles.get('contact_phone')
-        
-        texto = json.dumps(msg_arr)
+        tiempo = segundos_entre_ultimos_mensajes(conversation_id)
+        print(f"Tiempo entre mensajes: {tiempo}")
         # Validar que las claves necesarias estén presentes
         if conversation_id is None:
             logging.error("conversation_id no está presente en Detalles.")
@@ -42,7 +42,7 @@ def GyneGeneralBot(Detalles):
         if last_message_content in facebook_messages or last_message_content == audio_gyne:
             MandarMensajeSaludo(conversation_id,contact_phone,contact_id)
         else:
-            if segundos_entre_ultimos_mensajes(conversation_id) > 3:
+            if tiempo > 6:
                 time.sleep(20)                
                 msg_arr=get_AI_conversation_messages(conversation_id)
                 respuesta=conv_clasification(msg_arr)
