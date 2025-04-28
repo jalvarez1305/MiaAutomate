@@ -1,3 +1,4 @@
+import sys
 import requests
 import os
 from dotenv import load_dotenv
@@ -7,6 +8,9 @@ from datetime import datetime, timedelta
 
 from CW_Contactos import actualizar_etiqueta, actualizar_interes_en
 from SQL_Helpers import GetTemplateDetails
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../AI')))
+from GinecologiaAI import ghosted_clasification
 
 # Cargar las variables de entorno desde el archivo .env
 load_dotenv()
@@ -459,11 +463,14 @@ def get_conversation_messages(conversation_id):
 
 # Constante para la duración de inactividad permitida
 DURACION_INACTIVIDAD = timedelta(hours=23)
+GHOSTED_INACTIVIDAD = timedelta(hours=1)
 
 def cerrar_conversaciones_inactivas(page=0):
     """
     Cierra todas las conversaciones abiertas que han estado inactivas por más de 16 horas.
     """
+    saludo="""Cuéntame un poquito más ✨ ¿Tienes algún tema en especial que te gustaría revisar en la consulta 🩺💖 o ya te toca tu revisión ginecológica anual? 📅🌸"""
+    remate ="""Sigo a tus órdenes si tienes alguna otra duda o deseas agendar tu cita ☺️"""
     try:
         url = f"{base_url}/conversations?status=open&page={page}"
         headers = {
@@ -481,18 +488,18 @@ def cerrar_conversaciones_inactivas(page=0):
 
                 for conversation in conversations['payload']:  # Cambiado a conversations directamente
                     last_activity_at = conversation.get('last_activity_at')
-                    
+                    conv_id_break=conversation.get('id')
                     if last_activity_at:
                         # Asegúrate de que last_activity_at esté en segundos
-                        last_activity_time = datetime.fromtimestamp(last_activity_at)
+                        last_activity_time = datetime.utcfromtimestamp(last_activity_at)
                         inactivity_duration = now - last_activity_time
-                        
+                        labels = conversation.get("labels", [None])                        
+                        bot_attribute = labels[0] if labels else None
                         # Verificar si la conversación está abierta y ha estado inactiva por más de 16 horas
                         if inactivity_duration > DURACION_INACTIVIDAD:
                             try:
                                 # Obtener el primer atributo de la lista de etiquetas en 'labels'
-                                labels = conversation.get("labels", [None])
-                                bot_attribute = labels[0] if labels else None
+                                
 
                                 # Verificar que el atributo y el ID del contacto existen antes de proceder
                                 if bot_attribute:
@@ -504,6 +511,16 @@ def cerrar_conversaciones_inactivas(page=0):
                                 cerrar_conversacion(conversation.get('id'))
                             except Exception as cerr_error:
                                 print(f"Error al cerrar la conversación {conversation.get('id')}: {str(cerr_error)}")
+                        elif "citagyne" in labels and inactivity_duration > GHOSTED_INACTIVIDAD:
+                            conv_id=conversation.get('id')
+                            conv_msg=get_all_conversation_messages(conv_id,include_private=True)
+                            g_clasification=ghosted_clasification(conv_msg)
+                            if g_clasification=="Ghosted A":
+                                send_conversation_message(conv_id,saludo,False)
+                                print(f"Claficacion: {g_clasification}")
+                            elif g_clasification=="Ghosted B":
+                                send_conversation_message(conv_id,remate,False)
+                                print(f"Claficacion: {g_clasification}")
             except ValueError as json_error:
                 print(f"Error al procesar el JSON de la respuesta: {str(json_error)}")
                 print("Respuesta de la API:", response.text)  # Muestra la respuesta completa para depuración
@@ -513,7 +530,7 @@ def cerrar_conversaciones_inactivas(page=0):
     except Exception as ex:
         print(f"Error al cerrar conversaciones inactivas: {str(ex)}")
 
-def get_all_conversation_messages(conversation_id):
+def get_all_conversation_messages(conversation_id, include_private=False):
     all_messages = []
     headers = {"api_access_token": cw_token}
     before = None  # Iniciamos sin un ID específico
@@ -534,15 +551,18 @@ def get_all_conversation_messages(conversation_id):
         if not messages:
             break  # Si no hay más mensajes, terminamos
 
-        all_messages.extend([
-            {
+        for msg in messages:
+            if "type" not in msg.get("sender", {}):
+                continue  # Saltar mensajes sin tipo de sender
+
+            if not include_private and msg.get("private", False):
+                continue  # Saltar mensajes privados si no queremos incluirlos
+
+            all_messages.append({
                 "role": "assistant" if msg["sender"]["type"] == "user" else "user",
                 "content": msg.get("content", ""),
                 "created_at": msg.get("created_at", 0)
-            }
-            for msg in messages 
-            if not msg.get("private", False) and "type" in msg.get("sender", {})
-        ])
+            })
 
         # Obtener el ID más bajo del lote actual para la siguiente petición
         before = min(msg["id"] for msg in messages)
@@ -550,7 +570,7 @@ def get_all_conversation_messages(conversation_id):
 
     # Ordenar los mensajes por created_at antes de retornarlos
     all_messages.sort(key=lambda msg: msg["created_at"])
-    
+
     return all_messages
 
 def get_AI_conversation_messages(conversation_id):
