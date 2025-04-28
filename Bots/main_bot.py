@@ -16,7 +16,9 @@ from Bots_Config import paps_messages,facebook_messages,custom_commands
 # Obtener el directorio padre (donde está ubicado 'libs')
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(parent_dir)
+from AI.OpenIAHelper import conv_close_sale
 from libs.SaveConversations import Conversacion
+from libs.CW_Conversations import get_AI_conversation_messages
 
 app = Flask(__name__)
 
@@ -105,9 +107,17 @@ def save_conversation():
 
     # Almacenar conversación si está cerrada
     try:
-        conversacion.almacenar_conv_pinecone(data)
-        print("✅ Conversación guardada correctamente")
-        return jsonify({"message": "Conversación guardada correctamente"}), 200
+        split_data = parse_conversation_payload(data)
+        msg_arr=get_AI_conversation_messages(conversation_id)
+        labels = data.get("labels", [None])   
+        print(f"Etiquetas: {labels}")
+        vendio= conv_close_sale(msg_arr)
+        print(f"Vendio: {vendio}")
+        # Solamente aqueyas conversaciones de ventas que terminaron en venta
+        if "citagyne" in labels and vendio:
+            conversacion.almacenar_conv_pinecone(data)
+            print("✅ Conversación guardada correctamente")
+            return jsonify({"message": "Conversación guardada correctamente"}), 200
     except Exception as e:
         logging.error(f"🚨 Error al guardar la conversación {conversation_id}: {e}")
         print(f"🚨 Error al guardar la conversación {conversation_id}: {e}")

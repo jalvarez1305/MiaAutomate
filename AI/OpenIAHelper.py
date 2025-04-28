@@ -148,3 +148,33 @@ Revisa el historial completo de la conversación para verificar si alguna catego
     )
     
     return response.output_text
+
+
+def conv_close_sale(ConvMessages):
+    """
+    :param conversacion: Lista de mensajes en orden cronológico. 
+                         Cada mensaje es un dict: {'rol': 'usuario'|'agente', 'contenido': str}
+    :return: Una Bool que indica si se cerro la venta o no
+    """
+    reglas =   """
+                Clasifica la conversación en True o False dependiendo si se cerro la venta o no
+                Para que una venta este cerrada debe cumplir estos criterios
+                - Se le ofrecio un horario
+                - El usuario acepto el horario
+                - Se le pidio su nombre
+                - EL usuario nos dio su nombre
+                Solo responde True o False.
+                """
+    
+
+    response = client.responses.create(
+        model="gpt-4.1",
+        input=[
+            {"role": "system", "content": "Eres un médico que clasifica conversaciones médicas según reglas estrictas."},
+            {"role": "user", "content": reglas},
+            {"role": "user", "content": f"""Ahora clasifica esta conversacion: {ConvMessages}"""}
+        ],
+        temperature=0  # Ajustar la temperatura a 0.1
+    )
+    
+    return response.output_text
