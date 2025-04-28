@@ -6,12 +6,13 @@ import sys
 import json
 from datetime import datetime
 from Bot_Paps import BotPaps
+from bot_commands import BotCommands
 from gyne_general import GyneGeneralBot
 from confirmar_cita_bot import ConfirmarCitaBot
 from encuesta_paciente_bot import EncuestaPacienteBot
 from agenda_bot import AgendaBot
 from helper import parse_conversation_payload
-from Bots_Config import audio_gyne,paps_messages,facebook_messages
+from Bots_Config import paps_messages,facebook_messages,custom_commands
 # Obtener el directorio padre (donde está ubicado 'libs')
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(parent_dir)
@@ -46,6 +47,9 @@ def chatwoot_webhook():
     elif new_msg in facebook_messages:
         logging.info(f"Se ejecuta BOT {split_data.get('bot_attribute', 'GyneGeneralBot')}")
         GyneGeneralBot(split_data)
+    elif new_msg in custom_commands:
+        logging.info(f"Se ejecuta BOT BotCommands")
+        BotCommands(split_data)
 
 
     if 'bot_attribute' in split_data and 'Sender' in last_message:

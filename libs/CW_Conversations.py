@@ -580,7 +580,7 @@ def get_AI_conversation_messages(conversation_id):
                 "created_at": msg.get("created_at", 0)
             }
             for msg in messages
-            if not msg.get("private", False) and "type" in msg.get("sender", {})
+            if "type" in msg.get("sender", {})
         ])
 
         before = min(msg["id"] for msg in messages)

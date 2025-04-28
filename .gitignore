@@ -25,3 +25,4 @@ PyLibrary/.env
 /libs
 /Bots/__pycache__
 *.pyc
+*.pyc

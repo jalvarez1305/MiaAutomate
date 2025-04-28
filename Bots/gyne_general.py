@@ -20,10 +20,42 @@ from datetime import datetime
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
-respuesta_ubicacion="""La ubicación es en tonala
-Av. Tonaltecas 180, Tonalá, Centro
+horario_aceptada="""Listo, ya reserve tu espacio. Me regalas tu nombre completo para ponerlo en la cita por favor"""
+respuesta_ubicacion="""Estamos en el Centro de Tonala 
 
-https://goo.su/qyWUmj"""
+📍 Vista en Google Maps: https://maps.app.goo.gl/H8zN3RD23J3j1Yyk8 
+
+Domicilio: Av. Tonaltecas #180. 
+
+( Entre la Comisaria de policia 👮🏻y la prepa UNE 🎒,  por la banqueta de enfrente ) 
+
+Te queda cerca?"""
+detalles="""dame un segundito para pasarte los detalles del proceso y los precios por favor 🙂"""
+precio_consulta="""La consulta ginecológica 🌺 consiste en:
+
+1-Historial médico completo para conocerte💻
+
+2-Identificar factores de riesgo para cancer de mama y cervicouterino , menstruaciones anormales etc!
+
+3-Especuloscopia y vaginoscopia para identificar infecciones 🔬
+
+4-Revision e interpretación de exámenes de laboratorio que tengas
+
+5-Receta para  tratamiento a las enfermedades diagnosticadas 📝
+
+Y en caso de requerir Haremos un
+
+-Eco digital de ovarios
+
+-Eco digital de matriz
+
+😃 Y no te preocupes lo haremos sin ningún costo extra! 🙌🏻😃Siempre y cuando se realice el mismo día de la consulta!!☺
+
+El Precio de la consulta ginecológica es de $650 pesos !!
+
+Y puedes pagar en efectivo, transferencia o tarjeta*!! 💳
+
+***en caso de requerir Papanicolaou sería un costo adicional de $200 pesos !"""
 
 def GyneGeneralBot(Detalles):
     try:
@@ -42,7 +74,10 @@ def GyneGeneralBot(Detalles):
         if last_message_content in facebook_messages or last_message_content == audio_gyne:
             MandarMensajeSaludo(conversation_id,contact_phone,contact_id)
             print(f"debug: {last_message_content}")
-            if last_message_content in google_messages:
+            if last_message_content in audio_gyne:
+                logging.info(f"Actualizando el lead source a Otro")
+                actualizar_lead_source(contact_id,"Otro")
+            elif last_message_content in google_messages:
                 logging.info(f"Actualizando el lead source a Google")
                 actualizar_lead_source(contact_id,"Google")
             else:
@@ -54,8 +89,19 @@ def GyneGeneralBot(Detalles):
                 time.sleep(20)                
                 msg_arr=get_AI_conversation_messages(conversation_id)
                 respuesta=conv_clasification(msg_arr)
-                respuesta=f"Categoría: {respuesta}"
-                send_conversation_message(conversation_id,respuesta,True)
+                if respuesta =="Precio consulta":
+                    send_conversation_message(conversation_id,detalles,False)
+                    time.sleep(20)   
+                    send_conversation_message(conversation_id,precio_consulta,False)
+                elif respuesta =="Ubicación":
+                    send_conversation_message(conversation_id,respuesta_ubicacion,False)
+                elif respuesta =="Acepto cita":
+                    send_conversation_message(conversation_id,"cita",True)
+                elif respuesta =="Acepto horario":
+                    send_conversation_message(conversation_id,horario_aceptada,True)
+                else:
+                    respuesta=f"Categoría: {respuesta}"
+                    send_conversation_message(conversation_id,respuesta,True)
     except Exception as e:
         logging.error(f"Error en gyne_general: {str(e)}")  # Manejo de errores con logging
 
