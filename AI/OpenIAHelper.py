@@ -24,39 +24,38 @@ def conv_clasification(ConvMessages):
 IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apareció previamente en la conversación: "Acepto cita", "Acepto horario", "Solicita horario con precio", "Precio consulta", "Ubicación aceptada con horario ofrecido", "Solicita horario sin precio", "Ubicación aceptada sin horario ofrecido", "Ubicación". Si la categoría que estás por asignar ya apareció antes, debes elegir la categoría "Otro" en su lugar.
 
 1. Acepto cita
-   - Ya se ofreció un horario específico
-   - El usuario lo aceptó explícitamente
-   - Se le pidió su nombre y lo proporcionó
-   - El ultimo mensaje es del usuario y no del agente de ventas
+   - Se le pidio su nombre a el usuario
+   - El usuario proporciono su nombre
+   - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Acepto cita" y no consideres otras categorías
 
 2. Acepto horario
-   - Ya se ofreció un horario específico
-   - El usuario lo aceptó explícitamente
+   - Ya se ofreció un horario o dos horarios
+   - El usuario lo aceptó explícitamente alguno de los horarios propuestos
    - Aún NO ha proporcionado su nombre (o no se le ha pedido)
-   - El ultimo mensaje es del usuario y no del agente de ventas
+   - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Acepto horario" y no consideres otras categorías
 
 3. Rechazo horario
-   - Ya se ofreció un horario específico
-   - El usuario indica explícitamente que NO puede asistir en ese horario
-   - El ultimo mensaje es del usuario y no del agente de ventas
+   - Ya se ofreció un horario específico o dos
+   - El usuario indica explícitamente que NO puede asistir en ninguno de esos horarios
+   - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Rechazo horario" y no consideres otras categorías
 
 4. Solicita horario con precio
    - El usuario ya ha resuelto todas sus dudas médicas previas
    - Ya preguntó por el precio Y lo aceptó o reconoció explícitamente
-   - NO se ha ofrecido todavía un horario específico
+   - NO se ha ofrecido todavía un horario o dos
    - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?")
    - NO incluye una fecha específica en su solicitud
-   - El ultimo mensaje es del usuario y no del agente de ventas
+   - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario con precio" y no consideres otras categorías
 
 5. Solicita horario sin precio
    - NO se ha proporcionado o discutido el precio aún
    - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?")
    - NO incluye una fecha específica en su solicitud
-   - El ultimo mensaje es del usuario y no del agente de ventas
+   - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario sin precio" y no consideres otras categorías
 
 6. Dudas padecimiento
@@ -75,7 +74,7 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
    - NO se ha proporcionado ese precio específico antes
    - NO está preguntando por precios de verrugas o consulta prenatal
    - Aun no se le proporciona un precio
-   - El ultimo mensaje es del usuario y no del agente de ventas
+   - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio consulta" y no consideres otras categorías
 
 9. Precio verrugas
@@ -93,7 +92,7 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
     - El usuario responde que le queda cerca o que conoce el lugar
     - Ya se ofreció un horario específico previamente
     - El usuario expresa esta confirmación de conocimiento/aceptación de ubicación
-    - El ultimo mensaje es del usuario y no del agente de ventas
+    - El ultimo mensaje es de user y no de assistant
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Ubicación aceptada con horario ofrecido" y no consideres las categorías "Ubicación" ni "Ubicación aceptada sin horario ofrecido"
 
 12. Ubicación aceptada sin horario ofrecido
@@ -101,14 +100,14 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
     - El usuario responde que le queda cerca o que conoce el lugar
     - NO se ha ofrecido ningún horario específico aún
     - El usuario expresa esta confirmación de conocimiento/aceptación de ubicación
-    - El ultimo mensaje es del usuario y no del agente de ventas
+    - El ultimo mensaje es de user y no de assistant
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Ubicación aceptada sin horario ofrecido" y no consideres la categoría "Ubicación"
 
 13. Ubicación
     - El último mensaje contiene una pregunta explícita sobre la ubicación física de la clínica
     - Ejemplos: "¿Dónde están ubicados?", "¿En qué calle es?", "¿Cuál es la dirección?"
     - NO se ha proporcionado el domicilio previamente
-    - El ultimo mensaje es del usuario y no del agente de ventas
+    - El ultimo mensaje es de user y no de assistant
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Ubicación" y no consideres otras categorías
 
 14. Agradecimiento

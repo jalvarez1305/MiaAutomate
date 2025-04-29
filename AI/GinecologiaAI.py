@@ -65,6 +65,8 @@ def ghosted_clasification(ConvMessages):
 
               Se envió el mensaje '{saludo}'.
 
+              No se ha enviado el mensaje '{remate}'
+
               El usuario respondió al menos dos mensajes.
 
               Después de esas respuestas, el agente hizo una pregunta directa (ej: "¿Te queda bien?", "¿Deseas agendar?") o un ofrecimiento significativo (ej: mandó precios, ofreció horarios, describió un servicio).
