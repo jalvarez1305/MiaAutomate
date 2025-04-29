@@ -7,3 +7,4 @@ twilio
 openai
 pinecone
 langchain-community
+boto3
