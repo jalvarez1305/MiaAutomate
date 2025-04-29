@@ -12,7 +12,7 @@ from confirmar_cita_bot import ConfirmarCitaBot
 from encuesta_paciente_bot import EncuestaPacienteBot
 from agenda_bot import AgendaBot
 from helper import parse_conversation_payload
-from Bots_Config import paps_messages,facebook_messages,custom_commands
+from Bots_Config import paps_messages,facebook_messages,custom_commands,agenda_medico
 # Obtener el directorio padre (donde está ubicado 'libs')
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(parent_dir)
@@ -49,6 +49,9 @@ def chatwoot_webhook():
     elif new_msg in facebook_messages:
         logging.info(f"Se ejecuta BOT {split_data.get('bot_attribute', 'GyneGeneralBot')}")
         GyneGeneralBot(split_data)
+    elif new_msg == agenda_medico:
+        logging.info(f"Se ejecuta BOT Agenda Medico")
+        AgendaBot(split_data)
     elif new_msg in custom_commands:
         logging.info(f"Se ejecuta BOT BotCommands")
         BotCommands(split_data)
@@ -57,9 +60,6 @@ def chatwoot_webhook():
     if 'bot_attribute' in split_data and 'Sender' in last_message:
         if split_data['bot_attribute'] != "" and last_message.get('Sender') == "contact":
             match split_data["bot_attribute"]:
-                case "AgendaMedico":
-                    logging.info(f"Se ejecuta BOT {split_data['bot_attribute']}")
-                    AgendaBot(split_data)
                 case "EncuestaPacienteBot":
                     logging.info(f"Se ejecuta BOT {split_data['bot_attribute']}")
                     EncuestaPacienteBot(split_data)
