@@ -30,7 +30,7 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Acepto cita" y no consideres otras categorías
 
 2. Acepto horario
-   - Ya se ofreció un horario o dos horarios
+   - Ya se ofrecieron horarios especificos
    - El usuario lo aceptó explícitamente alguno de los horarios propuestos
    - Aún NO ha proporcionado su nombre (o no se le ha pedido)
    - El ultimo mensaje es de user y no de assistant
@@ -116,13 +116,7 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
     - Ejemplos: "Gracias", "Perfecto, gracias", "Nos vemos", "Gracias, igualmente"
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Agradecimiento" y no consideres otras categorías
 
-15. Ghosted 1
-    - Ya respondimos a todas las dudas del usuario
-    - El usuario ha dejado de responder por un tiempo significativo
-    - NO se ha enviado el mensaje: "Sigo a tus órdenes si tienes alguna otra duda o deseas agendar tu cita ☺️"
-    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Ghosted 1" y no consideres otras categorías
-
-16. Otro
+15. Otro
     - La conversación NO encaja en ninguna de las categorías anteriores, incluyendo:
     - Pregunta por una fecha específica (aunque quiera horario)
     - Ya se proporcionó el precio y el usuario lo vuelve a solicitar

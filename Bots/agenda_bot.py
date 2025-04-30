@@ -63,13 +63,9 @@ Saludos!"""
             logging.error("conversation_id no está presente en Detalles.")
             return
         
-        if last_message_content == 'Si':
+        else:
             logging.info(f"Enviando respuesta afirmativa para la conversación {conversation_id}.")
             send_conversation_message(conversation_id, agenda, is_private=False, buzon=ChatwootSenders.Medicos)
-            remove_bot_attribute(conversation_id)
-        else:
-            logging.info(f"Enviando respuesta negativa para la conversación {conversation_id}.")
-            send_conversation_message(conversation_id, '@Pablo, no puedo responder esto', is_private=True, buzon=ChatwootSenders.Medicos)
             remove_bot_attribute(conversation_id)
 
     except Exception as e:
