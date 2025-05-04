@@ -114,7 +114,7 @@ def save_conversation():
         vendio= conv_close_sale(msg_arr)
         print(f"Vendio: {vendio}")
         # Solamente aqueyas conversaciones de ventas que terminaron en venta
-        if "citagyne" in labels and vendio:
+        if "citagyne" in labels and vendio==True:
             conversacion.almacenar_conv_pinecone(data)
             print("✅ Conversación guardada correctamente")
             return jsonify({"message": "Conversación guardada correctamente"}), 200

@@ -98,7 +98,7 @@ def GyneGeneralBot(Detalles):
                 elif respuesta =="Acepto cita":
                     send_conversation_message(conversation_id,"cita",True)
                 elif respuesta =="Acepto horario":
-                    send_conversation_message(conversation_id,horario_aceptada,True)
+                    send_conversation_message(conversation_id,horario_aceptada,False)
                 else:
                     respuesta=f"Categoría: {respuesta}"
                     send_conversation_message(conversation_id,respuesta,True)
