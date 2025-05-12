@@ -95,7 +95,52 @@ def execute_query(query):
     finally:
         # Cerrar la conexión
         conn.close()
+def GetFreeTime(Consultorio=6):
+    """
+    Obtiene el tiempo libre de un consultorio específico desde la base de datos.
 
+    :param Consultorio: El ID del consultorio a consultar (por defecto es 6).
+    :return: Un texto completo con loshorarios disponibles o None si no hay resultados.
+    """
+    #Consulta para saber el siguiente día habil
+    query = f"""select Top 1 Fecha, 
+                        case when 
+                                DATEDIFF(dd,GETDATE(),Fecha) <=1 then 'Mañana'
+                                else Name
+                            End as Dia
+            from [cfg].[Calendario]
+            where is_habil=1 and Fecha > GETDATE()
+            """
+    # Ejecutar la consulta y obtener el resultado
+    result_siguiente_dia = execute_query(query)
+    #consulta para obtener sicuiente cita matutina
+    query_matutina = f"""EXEC sp_BuscarPrimerEspacioDisponible '{result_siguiente_dia.iloc[0]['Fecha']}'"""
+    #Obtener la siguiente libre de turno matutino
+    matutino=execute_query(query_matutina)
+
+    #consulta para obtener sicuiente cita vespertino
+    query_vespertino = f"""EXEC sp_BuscarPrimerEspacioVespertino '{result_siguiente_dia.iloc[0]['Fecha']}'"""
+    #Obtener la siguiente libre de turno matutino
+    vespertino=execute_query(query_vespertino)
+
+    #Construye el texto    
+    
+    # Verificar si el resultado existe y tiene datos
+    if (matutino is not None and not matutino.empty) or (vespertino is not None and not vespertino.empty):
+        result = f"{result_siguiente_dia.iloc[0]['Dia']} tengo varios espacios, como por ejemplo "
+        if (matutino is not None and not matutino.empty):
+            result += f" {matutino.iloc[0]['libre']} "
+            if (vespertino is not None and not vespertino.empty):
+                result += f" y {vespertino.iloc[0]['libre']}."
+        else:
+            if (vespertino is not None and not vespertino.empty):
+                result += f" {vespertino.iloc[0]['libre']}."
+        result += f"\nQue horario tenias en mente?"
+        return result
+    else:
+        return None
+    
+    
 def ExecuteScalar(query):
     """
     Ejecuta una consulta SQL que retorna un solo valor y devuelve ese valor como string,
