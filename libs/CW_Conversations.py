@@ -6,7 +6,7 @@ import json
 from twilio.rest import Client
 from datetime import datetime, timedelta
 
-from CW_Contactos import actualizar_etiqueta, actualizar_interes_en
+from CW_Contactos import actualizar_etiqueta, actualizar_interes_en,asignar_a_agente
 from SQL_Helpers import GetTemplateDetails
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../AI')))
@@ -487,8 +487,9 @@ def cerrar_conversaciones_inactivas(page=0):
                 now = datetime.utcnow()
 
                 for conversation in conversations['payload']:  # Cambiado a conversations directamente
-                    last_activity_at = conversation.get('last_activity_at')
                     conv_id_break=conversation.get('id')
+                    last_activity_at = get_last_message_date(conv_id_break)
+                    
                     if last_activity_at:
                         # Asegúrate de que last_activity_at esté en segundos
                         last_activity_time = datetime.utcfromtimestamp(last_activity_at)
@@ -529,7 +530,49 @@ def cerrar_conversaciones_inactivas(page=0):
     
     except Exception as ex:
         print(f"Error al cerrar conversaciones inactivas: {str(ex)}")
+        
+def reasigna_conversaciones(old,new,page=0):
+    """
+    Verifica todas las conversaciones y si están asignadas al agente ID old,
+    imprime un mensaje indicando que debe cambiarse al agente ID new.
+    """
+    try:
+        url = f"{base_url}/conversations?status=open&page={page}"
+        headers = {
+            "api_access_token": cw_token
+        }
+        
+        response = requests.get(url, headers=headers)
+        
+        # Comprobar si la respuesta fue exitosa
+        if response.status_code == 200:
+            try:
+                # Intenta deserializar la respuesta JSON
+                conversations = response.json().get('data', [])
 
+                for conversation in conversations['payload']:
+                    conv_id = conversation.get('id')
+                    
+                    # Verificar si la conversación está asignada al agente ID 29
+                    assignee_id = None
+                    meta = conversation.get("meta", {})
+                    if meta and "assignee" in meta and meta["assignee"] is not None:
+                        assignee_id = meta["assignee"].get("id")
+                    
+                    # Si está asignada al agente ID 29, imprimir mensaje de cambio
+                    if assignee_id == old:
+                        print(f"🔄 Cambiar asignación de conversación {conv_id} del agente ID 29 al agente ID {new}")
+                        asignar_a_agente(conv_id,new)
+                
+            except ValueError as json_error:
+                print(f"Error al procesar el JSON de la respuesta: {str(json_error)}")
+                print("Respuesta de la API:", response.text)
+        else:
+            print(f"Error al obtener las conversaciones: {response.status_code} - {response.text}")
+    
+    except Exception as ex:
+        print(f"Error al verificar asignaciones: {str(ex)}")
+        
 def get_all_conversation_messages(conversation_id, include_private=False):
     all_messages = []
     headers = {"api_access_token": cw_token}
@@ -627,3 +670,16 @@ def segundos_entre_ultimos_mensajes(conversation_id):
     penultimo = mensajes_user[-2]["created_at"]
 
     return int(ultimo - penultimo)
+
+def get_last_message_date(conversation_id):
+    mensajes = get_all_conversation_messages(conversation_id)
+
+    # Filtrar solo los mensajes del rol "user"
+    mensajes_user = [msg for msg in mensajes if msg["role"] == "user"]
+
+    if len(mensajes_user) < 1:
+        return 0  # No hay suficientes mensajes para calcular la diferencia
+
+    ultimo = mensajes_user[-1]["created_at"]
+
+    return ultimo

@@ -1,38 +1,41 @@
 import json
 import os
 from openai import OpenAI
+from Pinecone_Helper import get_context
 
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def ConversationAnswer_tmp(ConvMessages):
+def ResolverPadecimiento(ConvMessages):
   # Obtener el contexto adicional de Pinecone (o cualquier otra fuente que uses)
-  texto = json.dumps(ConvMessages)
+  user_question= obtener_ultimos_mensajes_usuario(ConvMessages)
+  texto = json.dumps(user_question)
   context = get_context(texto)
   all_mesg=[
             {"role": "system", "content": f"Contexto adicional: {context}"},
-            {"role": "system", "content": """Eres un medico vendedor de servicios de ginecología"""},
-
+            {"role": "system", "content": """Eres un medico que porporciona una breve atencion a padecimientos medicos, no proporcionas tratamiento
+                                            unicamente le haces saber que conoces su padecimiento y por que es importante que le de tratamiento"""},
+            {"role": "system", "content": """tus respuestas deben venir exclusivamente del contexto para que tus respuestas se parezcan a como assitant ha respondido a conversaciones anteriores"""},
             {"role": "system", "content": """El flujo debe ser el siguiente:
                                             El usuario contacta.
                                             Le preguntamos si es una revisión general o si tiene un padecimiento específico.
                                             Nos proporciona el padecimiento.
                                             Buscamos en el contexto de conversaciones anteriores cómo se puede atender el padecimiento.
                                             Le respondemos del padecimiento.
-                                            Si tiene más dudas del padecimiento o procesos, le respondemos con el contexto.
-                                            Si pide precio, lo obtenemos del contexto.
-                                            No ofrezcas la cita a menos que estes seguro que el usuario ya resolvio todas sus dudas
+                                            Si tiene más dudas del padecimiento, le respondemos con el contexto.                        
                                             Si puedes proporcionar posibles causas, pero no puedes ofrecer tratamientos
-                                            No le pidas agendar la cita a menos que el usuario lo solicite y ya haya resuelto las dudas de su padecimiento
-                                            No finalices preguntando dudas, espera que el usuario presente las dudas
+                                            No finalices preguntando dudas
                                             No digas consulta a tu medico, habla siempre en primera primersona
                                             Se amable, le hablas a mujeres e incluye 1 o dos emojis
-                                            Estas hablando por whatsapp, se brebre y usa el formato apropiado"""}
+                                            Estas hablando por whatsapp, se brebre y usa el formato apropiado
+                                            Se breve
+                                            Si la pregunta es sobre 'Menopausia','Premenopausia','Perimenopausia' responde este texto extacto 'Dame un segundito para platicarte de las opciones que manejamos, por favor 🙌'
+                                            Si el contexto no tiene la informacion ue necesitas, responde este texto exacto 'Dame un segundito para darte la informacion precisa, por favor'"""}
         ]+ConvMessages
   response = client.responses.create(
-      model="gpt-4o-mini",
+      model="gpt-4.1",
       input=all_mesg,
-      temperature=0.1  # Ajustar la temperatura a 0.1
+      temperature=0  # Ajustar la temperatura a 0.1
   )
   return response.output_text
 
@@ -99,3 +102,30 @@ def ghosted_clasification(ConvMessages):
     )
     
     return response.output_text
+
+def obtener_ultimos_mensajes_usuario(mensajes):
+    """
+    Obtiene todos los mensajes del usuario desde la última vez que el asistente escribió.
+    
+    Args:
+        mensajes: Una lista de diccionarios con la estructura especificada
+        
+    Returns:
+        Una lista con los últimos mensajes del usuario
+    """
+    ultimos_mensajes = []
+    
+    # Recorremos la lista de mensajes en orden inverso (del más reciente al más antiguo)
+    for i in range(len(mensajes) - 1, -1, -1):
+        mensaje = mensajes[i]
+        
+        # Si encontramos un mensaje del asistente, terminamos la búsqueda
+        if mensaje["role"] == "assistant":
+            break
+        
+        # Si el mensaje es del usuario, lo agregamos a nuestra lista
+        if mensaje["role"] == "user":
+            ultimos_mensajes.append(mensaje)
+    
+    # Invertimos la lista para mantener el orden cronológico original
+    return ultimos_mensajes[::-1]

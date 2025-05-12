@@ -19,6 +19,7 @@ sys.path.append(parent_dir)
 from AI.OpenIAHelper import conv_close_sale
 from libs.SaveConversations import Conversacion
 from libs.CW_Conversations import get_AI_conversation_messages
+from libs.CW_Contactos import asignar_a_agente
 
 app = Flask(__name__)
 
@@ -31,7 +32,6 @@ conversacion = Conversacion()
 @app.route('/webhook/chatwoot', methods=['POST'])
 def chatwoot_webhook():
     data = request.get_json()
-
     if not data:
         return jsonify({"error": "Invalid JSON payload"}), 400
 
@@ -122,6 +122,58 @@ def save_conversation():
         logging.error(f"🚨 Error al guardar la conversación {conversation_id}: {e}")
         print(f"🚨 Error al guardar la conversación {conversation_id}: {e}")
         return jsonify({"error": "Error al guardar la conversación"}), 500
+
+@app.route('/AsignarNuevasConversaciones', methods=['POST'])
+def asignar_nuevas_conversaciones():
+    """Webhook que asigna automáticamente las conversaciones nuevas según reglas establecidas."""
+    import datetime  # Importar el módulo datetime
+    
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"error": "Invalid JSON payload"}), 400
+
+    conversation_id = data.get('id')
+
+    if not conversation_id:
+        print("❌ Falta el ID de la conversación")
+        return jsonify({"error": "Missing conversation ID"}), 400
+
+    print(f"🔔 Recibí conversación nueva: {conversation_id}")
+
+    # Obtener el atributo cliente desde la ruta correcta en el payload
+    cliente = data.get('meta', {}).get('sender', {}).get('custom_attributes', {}).get('cliente')
+    
+    # Verificar si el atributo "cliente" está presente
+    es_cliente = cliente is not None
+    
+    # Obtener la hora actual - CORREGIDO
+    hora_actual = datetime.datetime.now().hour
+    
+    # Aplicar reglas de asignación
+    try:
+        if es_cliente:
+            if hora_actual < 15:  # Antes de las 3:00 PM
+                print(f"Asigna Orlando - Conversación: {conversation_id}")
+                asignado = 29
+            else:  # 3:00 PM o posterior
+                print(f"Asigna Mayra - Conversación: {conversation_id}")
+                asignado = 32
+        else:
+            print(f"Asigna Yanet - Conversación: {conversation_id}")
+            asignado = 15
+        
+        # Aquí podrías agregar código para hacer la asignación real en Chatwoot
+        # Por ejemplo, llamar a la API de Chatwoot para asignar el agente correspondiente
+        asignar_a_agente(conversation_id,asignado)
+        return jsonify({
+            "message": f"Conversación {conversation_id} asignada a {asignado}",
+            "assigned_to": asignado
+        }), 200
+    except Exception as e:
+        logging.error(f"🚨 Error al asignar la conversación {conversation_id}: {e}")
+        print(f"🚨 Error al asignar la conversación {conversation_id}: {e}")
+        return jsonify({"error": "Error al asignar la conversación"}), 500
 
 
 if __name__ == '__main__':

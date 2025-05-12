@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../l
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../AI')))
 
 
+from GinecologiaAI import ResolverPadecimiento
 from OpenIAHelper import conv_clasification
 from CW_Conversations import send_conversation_message, ChatwootSenders,send_audio_mp3_via_twilio, envia_mensaje_plantilla, remove_bot_attribute,get_AI_conversation_messages,segundos_entre_ultimos_mensajes
 from CW_Contactos import actualizar_interes_en,actualizar_etiqueta,asignar_a_agente,actualizar_lead_source
@@ -57,6 +58,8 @@ Y puedes pagar en efectivo, transferencia o tarjeta*!! 💳
 
 ***en caso de requerir Papanicolaou sería un costo adicional de $200 pesos !"""
 
+segundos_buffer = 30
+
 def GyneGeneralBot(Detalles):
     try:
         # Verifica que las claves existan en Detalles        
@@ -85,8 +88,8 @@ def GyneGeneralBot(Detalles):
                 actualizar_lead_source(contact_id,"Facebook")
 
         else:
-            if tiempo > 6:
-                time.sleep(20)                
+            if tiempo > segundos_buffer:
+                time.sleep(segundos_buffer)                
                 msg_arr=get_AI_conversation_messages(conversation_id)
                 respuesta=conv_clasification(msg_arr)
                 if respuesta =="Precio consulta":
@@ -99,6 +102,9 @@ def GyneGeneralBot(Detalles):
                     send_conversation_message(conversation_id,"cita",True)
                 elif respuesta =="Acepto horario":
                     send_conversation_message(conversation_id,horario_aceptada,False)
+                elif respuesta =="Dudas padecimiento":
+                    respuesta_padecimiento=ResolverPadecimiento(msg_arr)
+                    send_conversation_message(conversation_id,respuesta_padecimiento,False)
                 else:
                     respuesta=f"Categoría: {respuesta}"
                     send_conversation_message(conversation_id,respuesta,True)

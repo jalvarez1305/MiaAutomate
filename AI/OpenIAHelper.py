@@ -46,14 +46,14 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
    - El usuario ya ha resuelto todas sus dudas médicas previas
    - Ya preguntó por el precio Y lo aceptó o reconoció explícitamente
    - NO se ha ofrecido todavía un horario o dos
-   - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?")
+   - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?","cuando tienen citas","Que dia tienen cita","Me parece bien","esta bien")
    - NO incluye una fecha específica en su solicitud
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario con precio" y no consideres otras categorías
 
 5. Solicita horario sin precio
    - NO se ha proporcionado o discutido el precio aún
-   - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?")
+   - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?","cuando tienen citas","Que dia tienen cita","Me parece bien","esta bien")
    - NO incluye una fecha específica en su solicitud
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario sin precio" y no consideres otras categorías
@@ -74,6 +74,7 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
    - NO se ha proporcionado ese precio específico antes
    - NO está preguntando por precios de verrugas o consulta prenatal
    - Aun no se le proporciona un precio
+   - Puede contener frases como ("revisión ginecólogica anual","Revision anual","Cheque anual","Que incluye","Que paquetes tienen")
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio consulta" y no consideres otras categorías
 
@@ -106,8 +107,9 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
 13. Ubicación
     - El último mensaje contiene una pregunta explícita sobre la ubicación física de la clínica
     - Ejemplos: "¿Dónde están ubicados?", "¿En qué calle es?", "¿Cuál es la dirección?"
-    - NO se ha proporcionado el domicilio previamente
+    - en la conversacion NO le hemos mandado el domicilio, que es en avenida Tonaltecas
     - El ultimo mensaje es de user y no de assistant
+    - No debe tener frases como ("Me queda lejos", "Estoy lejos", "Esta lejos")
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Ubicación" y no consideres otras categorías
 
 14. Agradecimiento
