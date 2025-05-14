@@ -106,7 +106,7 @@ def GetFreeTime(Consultorio=6):
     query = f"""select Top 1 Fecha, 
                         case when 
                                 DATEDIFF(dd,GETDATE(),Fecha) <=1 then 'Mañana'
-                                else Name
+                                else 'El ' + Name
                             End as Dia
             from [cfg].[Calendario]
             where is_habil=1 and Fecha > GETDATE()
