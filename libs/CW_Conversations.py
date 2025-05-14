@@ -462,7 +462,7 @@ def get_conversation_messages(conversation_id):
 
 
 # Constante para la duración de inactividad permitida
-DURACION_INACTIVIDAD = timedelta(hours=23)
+DURACION_INACTIVIDAD = timedelta(hours=15)
 GHOSTED_INACTIVIDAD = timedelta(hours=1)
 
 def cerrar_conversaciones_inactivas(page=0):
