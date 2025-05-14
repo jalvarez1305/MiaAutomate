@@ -42,6 +42,7 @@ def chatwoot_webhook():
 
     last_message = split_data.get("last_message", {})
     new_msg = last_message.get('Content')
+    print(f"Last message is: {new_msg} custom commands:{custom_commands} is in:{new_msg in custom_commands}")
     #evaluemos primero pipelines basados en mensajes
     if new_msg in paps_messages:
         logging.info(f"Se ejecuta BOT Paps")
@@ -53,7 +54,7 @@ def chatwoot_webhook():
         logging.info(f"Se ejecuta BOT Agenda Medico")
         AgendaBot(split_data)
     elif new_msg in custom_commands:
-        logging.info(f"Se ejecuta BOT BotCommands")
+        logging.info(f"Se ejecuta BOT BotCommands: {new_msg}")
         BotCommands(split_data)
 
 

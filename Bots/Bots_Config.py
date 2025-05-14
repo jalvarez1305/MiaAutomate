@@ -17,6 +17,9 @@ facebook_messages = ["¡Hola! Podrías darme más información de…",
 google_messages= ["Hola vi tu sitio en Google y quiero una consulta Ginecológica.",
                   "Hola! vi tu sitio en Google, quiero informes de la consulta",
                   "Hola vi tu sitio en Google y quiero información"]
-custom_commands = ["cita",
-                   "Dame un segundito para platicarte de las opciones que manejamos, por favor 🙌"]
+custom_commands = ["Cita",
+                   "cita",
+                   "Dame un segundito para platicarte de las opciones que manejamos, por favor 🙌",
+                   "Horarios",
+                   "Agendar cita"]
 agenda_medico="1.- Ver detalles"

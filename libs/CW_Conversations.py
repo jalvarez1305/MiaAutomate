@@ -497,7 +497,7 @@ def cerrar_conversaciones_inactivas(page=0):
                         labels = conversation.get("labels", [None])                        
                         bot_attribute = labels[0] if labels else None
                         # Verificar si la conversación está abierta y ha estado inactiva por más de 16 horas
-                        if inactivity_duration > DURACION_INACTIVIDAD:
+                        if (inactivity_duration.seconds > DURACION_INACTIVIDAD.seconds or inactivity_duration.days > 0) and not "agendar_cita" in labels:
                             try:
                                 # Obtener el primer atributo de la lista de etiquetas en 'labels'
                                 
@@ -672,14 +672,11 @@ def segundos_entre_ultimos_mensajes(conversation_id):
     return int(ultimo - penultimo)
 
 def get_last_message_date(conversation_id):
-    mensajes = get_all_conversation_messages(conversation_id)
+    mensajes = get_all_conversation_messages(conversation_id,include_private=True)
 
-    # Filtrar solo los mensajes del rol "user"
-    mensajes_user = [msg for msg in mensajes if msg["role"] == "user"]
-
-    if len(mensajes_user) < 1:
+    if len(mensajes) < 1:
         return 0  # No hay suficientes mensajes para calcular la diferencia
 
-    ultimo = mensajes_user[-1]["created_at"]
+    ultimo = mensajes[-1]["created_at"]
 
     return ultimo

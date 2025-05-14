@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../A
 
 from CW_Conversations import send_conversation_message,send_audio_mp3_via_twilio
 from CW_Contactos import actualizar_etiqueta,asignar_a_agente
+from SQL_Helpers import GetFreeTime
 
 
 # Configurar logging
@@ -28,10 +29,20 @@ def BotCommands(Detalles):
         contact_phone = Detalles.get('contact_phone')
 
         #Aqui se evaluan todos los comandos internos a un bot
-        if last_message_content == "cita":
+        if last_message_content == "Cita" or last_message_content == "cita" :
+            print(f"AsignaConversacion")
             AsignaConversacion(conversation_id,contact_id)
-        elif last_message_content == "Dame un segundito para platicarte de las opciones que manejamos, por favor 🙌":
+        elif last_message_content == "Dame un segundito para platicarte de las opciones que manejamos, por favor 🙌":            
+            print(f"MandarAudioMenopausia")
             MandarAudioMenopausia(conversation_id,contact_phone,contact_id)
+        elif last_message_content == "Horarios"or last_message_content == "Agendar cita":            
+            print(f"Mandar horarios")
+            horarios = GetFreeTime(Consultorio=6)
+            if horarios == None:
+                send_conversation_message(conversation_id,"@Yaneth Consultorio 6 esta lleno, favor de ofrecer otro dia u otro consultorio",True)
+            else:
+                time.sleep(20)
+                send_conversation_message(conversation_id,horarios,False)
     except Exception as e:
         logging.error(f"Error en bot_commands: {str(e)}")  # Manejo de errores con logging
 

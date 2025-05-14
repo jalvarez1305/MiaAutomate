@@ -46,14 +46,14 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
    - El usuario ya ha resuelto todas sus dudas médicas previas
    - Ya preguntó por el precio Y lo aceptó o reconoció explícitamente
    - NO se ha ofrecido todavía un horario o dos
-   - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?","cuando tienen citas","Que dia tienen cita","Me parece bien","esta bien")
+   - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?","cuando tienen citas","Que dia tienen cita","Me parece bien","esta bien","ok","excelente")
    - NO incluye una fecha específica en su solicitud
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario con precio" y no consideres otras categorías
 
 5. Solicita horario sin precio
    - NO se ha proporcionado o discutido el precio aún
-   - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?","cuando tienen citas","Que dia tienen cita","Me parece bien","esta bien")
+   - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?","cuando tienen citas","Que dia tienen cita","Me parece bien","esta bien","ok","excelente")
    - NO incluye una fecha específica en su solicitud
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario sin precio" y no consideres otras categorías
