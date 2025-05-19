@@ -11,10 +11,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../A
 
 
 from GinecologiaAI import ResolverPadecimiento
-from OpenIAHelper import conv_clasification
+from OpenIAHelper import conv_clasification,get_requested_date
 from CW_Conversations import send_conversation_message, ChatwootSenders,send_audio_mp3_via_twilio, envia_mensaje_plantilla, remove_bot_attribute,get_AI_conversation_messages,segundos_entre_ultimos_mensajes
 from CW_Contactos import actualizar_interes_en,actualizar_etiqueta,asignar_a_agente,actualizar_lead_source
-from SQL_Helpers import GetFreeTime
+from SQL_Helpers import GetFreeTime,GetFreeTimeForDate
 from CW_Automations import send_content
 from Bots_Config import audio_gyne,facebook_messages,google_messages
 from datetime import datetime
@@ -100,13 +100,22 @@ def GyneGeneralBot(Detalles):
                     send_conversation_message(conversation_id,respuesta_ubicacion,False)
                 elif respuesta =="Acepto cita":
                     send_conversation_message(conversation_id,"cita",True)
-                elif respuesta =="Acepto horario":
+                elif respuesta =="Acepto horario" or respuesta =="Ubicación aceptada con horario ofrecido":
                     send_conversation_message(conversation_id,horario_aceptada,False)
                 elif respuesta =="Dudas padecimiento":
-                    respuesta_padecimiento=ResolverPadecimiento(msg_arr)
+                    respuesta_padecimiento=ResolverPadecimiento(msg_arr)                    
                     send_conversation_message(conversation_id,respuesta_padecimiento,False)
+                    if respuesta_padecimiento == "Dame un segundito para darte la informacion precisa, por favor":
+                        send_conversation_message(conversation_id,"Ayuda",True)
                 elif respuesta =="Solicita horario con precio" or respuesta =="Solicita horario sin precio" or respuesta =="Ubicación aceptada sin horario ofrecido":
                     horarios = GetFreeTime(Consultorio=6)
+                    if horarios == None:
+                        send_conversation_message(conversation_id,"@Yaneth Consultorio 6 esta lleno, favor de ofrecer otro dia u otro consultorio",True)
+                    else:
+                        send_conversation_message(conversation_id,horarios,False)
+                elif respuesta =="Solicita horario especifico":
+                    fecha_solicitada=get_requested_date(msg_arr)
+                    horarios = GetFreeTimeForDate(fecha_solicitada,Consultorio=6)
                     if horarios == None:
                         send_conversation_message(conversation_id,"@Yaneth Consultorio 6 esta lleno, favor de ofrecer otro dia u otro consultorio",True)
                     else:

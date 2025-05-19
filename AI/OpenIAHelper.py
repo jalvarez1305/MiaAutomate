@@ -2,7 +2,6 @@ import os
 import openai
 from openai import OpenAI
 
-
 MODEL = os.getenv("EMBEDDED_MODEL")
 openai.api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -58,19 +57,25 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario sin precio" y no consideres otras categorías
 
-6. Dudas padecimiento
+6. Solicita horario especifico
+    - El mensaje contiene una solicitud específica para agendar (ej: "¿Tienen cita el lunes?", "¿A qué hora tienen cita el martes?", "¿Tienen disponibilidad el viernes?", "¿Tienen citas hoy?")
+    - incluye una fecha específica en su solicitud, o un dia especifico como "hoy", "mañana", "lunes", "martes", etc.
+    - El ultimo mensaje es de user y no de assistant
+    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario especifico" y no consideres otras categorías
+
+7. Dudas padecimiento
    - El último mensaje del usuario contiene preguntas específicas sobre sus síntomas o malestar
    - NO está preguntando sobre procedimiento, ubicación ni precios
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Dudas padecimiento" y no consideres otras categorías
 
-7. Dudas procedimiento
+8. Dudas procedimiento
    - El último mensaje del usuario es específicamente sobre lo que se hará en consulta o lo que incluye
    - NO se ha proporcionado el precio aún
    - Ejemplos: "¿qué me van a hacer?", "¿incluye el papanicolaou?"
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Dudas procedimiento" y no consideres otras categorías
 
-8. Precio consulta
-   - El último mensaje es una pregunta explícita sobre el precio de: consulta general, papanicolaou o trastornos menstruales
+9. Precio consulta
+   - El último mensaje es una pregunta explícita sobre el precio o costo de: consulta general, papanicolaou o trastornos menstruales
    - NO se ha proporcionado ese precio específico antes
    - NO está preguntando por precios de verrugas o consulta prenatal
    - Aun no se le proporciona un precio
@@ -78,17 +83,25 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio consulta" y no consideres otras categorías
 
-9. Precio verrugas
-   - El último mensaje es específicamente sobre el precio para tratamiento de verrugas
+10. Precio verrugas
+   - La conversación trata sobre verrugas
+   - El último mensaje es una pregunta explícita sobre el precio o costo de: consulta, tratamiento o eliminación de verrugas
    - NO se ha proporcionado ese precio específico antes
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio verrugas" y no consideres otras categorías
 
-10. Precio prenatal
-    - El último mensaje es específicamente sobre el precio de consulta prenatal o seguimiento de embarazo
+11. Precio prenatal
+    - La conversación trata sobre embarazo o consulta prenatal
+    - El último mensaje es una pregunta explícita sobre el precio o costo de: consulta prenatal, seguimiento de embarazo o papanicolaou
     - NO se ha proporcionado ese precio específico antes
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio prenatal" y no consideres otras categorías
 
-11. Ubicación aceptada con horario ofrecido
+12. Precio menopausia
+    - La conversacion trato sobre menopausia
+    - El último mensaje es una pregunta explícita sobre el precio o costo de: consulta general, papanicolaou o trastornos menstruales
+    - NO se ha proporcionado ese precio específico antes
+    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio prenatal" y no consideres otras categorías
+
+13. Ubicación aceptada con horario ofrecido
     - Ya se proporcionó el domicilio completo
     - El usuario responde que le queda cerca o que conoce el lugar
     - Ya se ofreció un horario específico previamente
@@ -96,7 +109,7 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
     - El ultimo mensaje es de user y no de assistant
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Ubicación aceptada con horario ofrecido" y no consideres las categorías "Ubicación" ni "Ubicación aceptada sin horario ofrecido"
 
-12. Ubicación aceptada sin horario ofrecido
+14. Ubicación aceptada sin horario ofrecido
     - Ya se proporcionó el domicilio completo
     - El usuario responde que le queda cerca o que conoce el lugar
     - NO se ha ofrecido ningún horario específico aún
@@ -104,7 +117,7 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
     - El ultimo mensaje es de user y no de assistant
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Ubicación aceptada sin horario ofrecido" y no consideres la categoría "Ubicación"
 
-13. Ubicación
+15. Ubicación
     - El último mensaje contiene una pregunta explícita sobre la ubicación física de la clínica
     - Ejemplos: "¿Dónde están ubicados?", "¿En qué calle es?", "¿Cuál es la dirección?"
     - en la conversacion NO le hemos mandado el domicilio, que es en avenida Tonaltecas
@@ -112,15 +125,14 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
     - No debe tener frases como ("Me queda lejos", "Estoy lejos", "Esta lejos")
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Ubicación" y no consideres otras categorías
 
-14. Agradecimiento
+16. Agradecimiento
     - Ya se resolvieron todas las dudas del usuario o ya se confirmó completamente la cita
     - El último mensaje contiene exclusivamente un agradecimiento o despedida
     - Ejemplos: "Gracias", "Perfecto, gracias", "Nos vemos", "Gracias, igualmente"
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Agradecimiento" y no consideres otras categorías
 
-15. Otro
+17. Otro
     - La conversación NO encaja en ninguna de las categorías anteriores, incluyendo:
-    - Pregunta por una fecha específica (aunque quiera horario)
     - Ya se proporcionó el precio y el usuario lo vuelve a solicitar
     - El mensaje es ambiguo, irrelevante o trata temas no considerados (ej. trámites, quejas, otros servicios)
     - Se intenta clasificar en una categoría que ya apareció previamente en la conversación (de la lista mencionada al principio)
@@ -173,3 +185,67 @@ def conv_close_sale(ConvMessages):
     )
     
     return response.output_text
+
+def get_requested_date(ConvMessages):
+    """
+    Extrae la fecha solicitada por el usuario desde una lista de mensajes de conversación.
+
+    :param ConvMessages: Lista de mensajes en orden cronológico.
+                         Cada mensaje es un dict con las llaves: {'rol': 'usuario'|'agente', 'contenido': str}
+    :return: Una fecha exacta en formato 'YYYY-MM-DD' que representa el día solicitado por el usuario.
+    """
+
+    user_question = obtener_ultimos_mensajes_usuario(ConvMessages)
+
+    reglas = """
+    Reglas para identificar la fecha solicitada por el usuario:
+
+    1. Si el usuario pide una cita para "hoy", devuelve la fecha actual en formato YYYY-MM-DD.
+    2. Si menciona "la siguiente semana", devuelve el martes de la próxima semana en formato YYYY-MM-DD.
+    3. Si menciona un día de la semana (por ejemplo: martes, miércoles, jueves, viernes, sábado o domingo),
+       devuelve la próxima fecha que corresponde a ese día, en formato YYYY-MM-DD.
+    4. Si menciona una fecha exacta en formato tipo "2023-10-10", simplemente devuelve esa fecha.
+    5. Si menciona solo un número de día (por ejemplo: el 15, 21, o 28),
+       devuelve la próxima fecha futura que coincide con ese número de día en el mes actual o siguiente,
+       en formato YYYY-MM-DD.
+    
+    Importante: Siempre devuelve únicamente la fecha solicitada por el usuario, sin explicaciones adicionales.
+    """
+
+    response = client.responses.create(
+        model="gpt-4.1",
+        input=[
+            {"role": "system", "content": "Eres un asistente que interpreta fechas solicitadas por el usuario y devuelve solo una fecha en formato YYYY-MM-DD."},
+            {"role": "user", "content": reglas},
+            {"role": "user", "content": f"Aquí están los últimos mensajes del usuario solicitando la fecha:\n{user_question}"}
+        ],
+        temperature=0  # Respuesta más determinística
+    )
+
+    return response.output_text
+def obtener_ultimos_mensajes_usuario(mensajes):
+    """
+    Obtiene todos los mensajes del usuario desde la última vez que el asistente escribió.
+    
+    Args:
+        mensajes: Una lista de diccionarios con la estructura especificada
+        
+    Returns:
+        Una lista con los últimos mensajes del usuario
+    """
+    ultimos_mensajes = []
+    
+    # Recorremos la lista de mensajes en orden inverso (del más reciente al más antiguo)
+    for i in range(len(mensajes) - 1, -1, -1):
+        mensaje = mensajes[i]
+        
+        # Si encontramos un mensaje del asistente, terminamos la búsqueda
+        if mensaje["role"] == "assistant":
+            break
+        
+        # Si el mensaje es del usuario, lo agregamos a nuestra lista
+        if mensaje["role"] == "user":
+            ultimos_mensajes.append(mensaje)
+    
+    # Invertimos la lista para mantener el orden cronológico original
+    return ultimos_mensajes[::-1]

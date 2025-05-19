@@ -1,6 +1,7 @@
 import json
 import os
 from openai import OpenAI
+from OpenIAHelper import obtener_ultimos_mensajes_usuario
 from Pinecone_Helper import get_context
 
 
@@ -103,29 +104,3 @@ def ghosted_clasification(ConvMessages):
     
     return response.output_text
 
-def obtener_ultimos_mensajes_usuario(mensajes):
-    """
-    Obtiene todos los mensajes del usuario desde la última vez que el asistente escribió.
-    
-    Args:
-        mensajes: Una lista de diccionarios con la estructura especificada
-        
-    Returns:
-        Una lista con los últimos mensajes del usuario
-    """
-    ultimos_mensajes = []
-    
-    # Recorremos la lista de mensajes en orden inverso (del más reciente al más antiguo)
-    for i in range(len(mensajes) - 1, -1, -1):
-        mensaje = mensajes[i]
-        
-        # Si encontramos un mensaje del asistente, terminamos la búsqueda
-        if mensaje["role"] == "assistant":
-            break
-        
-        # Si el mensaje es del usuario, lo agregamos a nuestra lista
-        if mensaje["role"] == "user":
-            ultimos_mensajes.append(mensaje)
-    
-    # Invertimos la lista para mantener el orden cronológico original
-    return ultimos_mensajes[::-1]
