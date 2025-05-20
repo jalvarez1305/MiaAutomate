@@ -258,3 +258,14 @@ def ejecutar_update(query):
         if conn:
             conn.close()
         print("Conexión cerrada.")
+        
+def update_sql_funnel_state(identifier, new_state):
+    try:
+        cursor.execute(
+            "UPDATE [dbo].[CW_Contacts] SET funel_state = %s WHERE id = %s",
+            (new_state, identifier)
+        )
+        conn.commit()
+        print(f"[{identifier}] Actualizado funnel_state en SQL a: {new_state}")
+    except Exception as e:
+        print(f"[{identifier}] Error al actualizar SQL: {e}")

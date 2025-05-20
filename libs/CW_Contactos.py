@@ -2,7 +2,7 @@ import requests
 import os
 from dotenv import load_dotenv
 
-from SQL_Helpers import execute_query
+from SQL_Helpers import execute_query,update_sql_funnel_state
 
 # Cargar las variables de entorno desde el archivo .env
 load_dotenv()
@@ -133,6 +133,7 @@ def actualizar_funel_state(contact_id, state):
     
     # Verificación de la respuesta
     if response.status_code == 200:
+        update_sql_funnel_state(contact_id, state)
         print("Atributo 'funnel_state' actualizado correctamente.")
     else:
         print(f"Error al actualizar el atributo: {response.status_code}")

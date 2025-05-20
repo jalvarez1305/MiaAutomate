@@ -1,6 +1,8 @@
 import os
 import openai
 from openai import OpenAI
+from datetime import date
+from datetime import datetime
 
 MODEL = os.getenv("EMBEDDED_MODEL")
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -45,22 +47,28 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
    - El usuario ya ha resuelto todas sus dudas médicas previas
    - Ya preguntó por el precio Y lo aceptó o reconoció explícitamente
    - NO se ha ofrecido todavía un horario o dos
-   - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?","cuando tienen citas","Que dia tienen cita","Me parece bien","esta bien","ok","excelente")
+   - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?","cuando tienen citas","Que dia tienen cita","Me parece bien","esta bien","ok","excelente","Es con cita")
    - NO incluye una fecha específica en su solicitud
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario con precio" y no consideres otras categorías
 
 5. Solicita horario sin precio
    - NO se ha proporcionado o discutido el precio aún
-   - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?","cuando tienen citas","Que dia tienen cita","Me parece bien","esta bien","ok","excelente")
+   - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?","cuando tienen citas","Que dia tienen cita","Me parece bien","esta bien","ok","excelente","Es con cita")
    - NO incluye una fecha específica en su solicitud
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario sin precio" y no consideres otras categorías
 
 6. Solicita horario especifico
-    - El mensaje contiene una solicitud específica para agendar (ej: "¿Tienen cita el lunes?", "¿A qué hora tienen cita el martes?", "¿Tienen disponibilidad el viernes?", "¿Tienen citas hoy?")
+    - El mensaje contiene una solicitud específica para agendar (ej: "¿Tienen cita el lunes?", "¿A qué hora tienen cita el martes?", "¿Tienen disponibilidad el viernes?", "¿Tienen citas hoy?","Tienen citas disponibles para el lunes?","¿A qué hora tienen cita el martes?","¿Tienen disponibilidad el viernes?","¿Tienen citas hoy?")
+    - El mensaje contiene una solicitud específica para agendar (ej: "Tienen citas disponibles para el miércoles?")
+    - El usuario menciona un día específico (ej: "lunes", "martes", "hoy", "mañana")
+    - El usuario menciona una fecha específica (ej: "2023-10-10", "15 de octubre")
+    - El usuario menciona un rango de fechas (ej: "del 10 al 15 de octubre")
+    - El usuario mensiona una semana, como la (ej: "la siguiente semana", "la proxima pasada", "la semana que viene")
     - incluye una fecha específica en su solicitud, o un dia especifico como "hoy", "mañana", "lunes", "martes", etc.
     - El ultimo mensaje es de user y no de assistant
+    - Importante: No debe contener una hora, solo la fecha.
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario especifico" y no consideres otras categorías
 
 7. Dudas padecimiento
@@ -196,20 +204,22 @@ def get_requested_date(ConvMessages):
     """
 
     user_question = obtener_ultimos_mensajes_usuario(ConvMessages)
+    hoy = datetime.today().strftime('%Y-%m-%d')
 
-    reglas = """
-    Reglas para identificar la fecha solicitada por el usuario:
+    reglas = f"""
+Reglas para identificar la fecha solicitada por el usuario:
 
-    1. Si el usuario pide una cita para "hoy", devuelve la fecha actual en formato YYYY-MM-DD.
-    2. Si menciona "la siguiente semana", devuelve el martes de la próxima semana en formato YYYY-MM-DD.
-    3. Si menciona un día de la semana (por ejemplo: martes, miércoles, jueves, viernes, sábado o domingo),
-       devuelve la próxima fecha que corresponde a ese día, en formato YYYY-MM-DD.
-    4. Si menciona una fecha exacta en formato tipo "2023-10-10", simplemente devuelve esa fecha.
-    5. Si menciona solo un número de día (por ejemplo: el 15, 21, o 28),
-       devuelve la próxima fecha futura que coincide con ese número de día en el mes actual o siguiente,
-       en formato YYYY-MM-DD.
-    
-    Importante: Siempre devuelve únicamente la fecha solicitada por el usuario, sin explicaciones adicionales.
+Fecha actual: {hoy}
+
+1. Si el usuario pide una cita para "hoy", devuelve la fecha actual en formato YYYY-MM-DD.
+2. Si menciona "la siguiente semana", devuelve el martes de la próxima semana en formato YYYY-MM-DD.
+3. Si menciona un día de la semana (por ejemplo: martes, miércoles, jueves, viernes, sábado o domingo),
+   devuelve la próxima fecha que corresponde a ese día, en formato YYYY-MM-DD.
+4. Si menciona una fecha exacta en formato tipo "2023-10-10", simplemente devuelve esa fecha.
+5. Si menciona solo un número de día (por ejemplo: el 15, 21, o 28),
+   devuelve la próxima fecha futura que coincide con ese número de día en el mes actual o siguiente,
+   en formato YYYY-MM-DD.
+"""nte: Siempre devuelve únicamente la fecha solicitada por el usuario, sin explicaciones adicionales.
     """
 
     response = client.responses.create(
