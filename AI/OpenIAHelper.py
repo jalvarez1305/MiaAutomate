@@ -207,19 +207,18 @@ def get_requested_date(ConvMessages):
     hoy = datetime.today().strftime('%Y-%m-%d')
 
     reglas = f"""
-Reglas para identificar la fecha solicitada por el usuario:
+    Reglas para identificar la fecha solicitada por el usuario:
 
-Fecha actual: {hoy}
+    Fecha actual: {hoy}
 
-1. Si el usuario pide una cita para "hoy", devuelve la fecha actual en formato YYYY-MM-DD.
-2. Si menciona "la siguiente semana", devuelve el martes de la próxima semana en formato YYYY-MM-DD.
-3. Si menciona un día de la semana (por ejemplo: martes, miércoles, jueves, viernes, sábado o domingo),
-   devuelve la próxima fecha que corresponde a ese día, en formato YYYY-MM-DD.
-4. Si menciona una fecha exacta en formato tipo "2023-10-10", simplemente devuelve esa fecha.
-5. Si menciona solo un número de día (por ejemplo: el 15, 21, o 28),
-   devuelve la próxima fecha futura que coincide con ese número de día en el mes actual o siguiente,
-   en formato YYYY-MM-DD.
-"""nte: Siempre devuelve únicamente la fecha solicitada por el usuario, sin explicaciones adicionales.
+    1. Si el usuario pide una cita para "hoy", devuelve la fecha actual en formato YYYY-MM-DD.
+    2. Si menciona "la siguiente semana", devuelve el martes de la próxima semana en formato YYYY-MM-DD.
+    3. Si menciona un día de la semana (por ejemplo: martes, miércoles, jueves, viernes, sábado o domingo),
+    devuelve la próxima fecha que corresponde a ese día, en formato YYYY-MM-DD.
+    4. Si menciona una fecha exacta en formato tipo "2023-10-10", simplemente devuelve esa fecha.
+    5. Si menciona solo un número de día (por ejemplo: el 15, 21, o 28),
+    devuelve la próxima fecha futura que coincide con ese número de día en el mes actual o siguiente,
+    en formato YYYY-MM-DD.
     """
 
     response = client.responses.create(
@@ -233,6 +232,7 @@ Fecha actual: {hoy}
     )
 
     return response.output_text
+
 def obtener_ultimos_mensajes_usuario(mensajes):
     """
     Obtiene todos los mensajes del usuario desde la última vez que el asistente escribió.

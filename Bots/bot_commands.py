@@ -8,9 +8,11 @@ import time
 # Añadir la ruta a libs al path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../libs')))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../AI')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../Blast')))
 
 
 
+from BlastHelper import SendBlast
 from CW_Conversations import send_conversation_message,send_audio_mp3_via_twilio
 from CW_Contactos import actualizar_etiqueta,asignar_a_agente
 from SQL_Helpers import GetFreeTime
@@ -35,6 +37,20 @@ def BotCommands(Detalles):
         elif last_message_content == "Dame un segundito para platicarte de las opciones que manejamos, por favor 🙌":            
             print(f"MandarAudioMenopausia")
             MandarAudioMenopausia(conversation_id,contact_phone,contact_id)
+        elif last_message_content == "Reagendar":            
+            time.sleep(20)
+            send_conversation_message(conversation_id,"con todo gusto hermosa, cuentame que dia te gustaria para tu cita?",False)
+        elif last_message_content == "★" or last_message_content == "★★★":     
+            print("Tuvimos una mala experiencia")
+            # Se asigna la etiqueta de mala experiencia       
+            time.sleep(20)            
+            send_conversation_message(conversation_id,"Que mal :( que tu experiencia no haya sido fantastica. Me puedes compartir un poco de como podemos hacerla mejor?",False)
+            query=f"""SELECT [id]
+                        ,[phone_number]
+                        ,'{conversation_id}' ConvId
+                    FROM [dbo].[CW_Contacts]
+                    where id=165"""
+            SendBlast("HX7458e441e3c397750e3f147b9b463904",None,query)
         elif last_message_content == "Horarios"or last_message_content == "Agendar cita":            
             print(f"Mandar horarios")
             horarios = GetFreeTime(Consultorio=6)

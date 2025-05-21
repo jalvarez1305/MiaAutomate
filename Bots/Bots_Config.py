@@ -21,5 +21,8 @@ custom_commands = ["Cita",
                    "cita",
                    "Dame un segundito para platicarte de las opciones que manejamos, por favor 🙌",
                    "Horarios",
-                   "Agendar cita"]
+                   "Agendar cita",
+                   "Reagendar",
+                   "★",
+                   "★★★"]
 agenda_medico="1.- Ver detalles"

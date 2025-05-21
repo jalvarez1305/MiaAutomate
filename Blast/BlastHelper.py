@@ -16,7 +16,7 @@ def SendBlast(template_id, bot_name, query):
 
     :param template_id: Nombre de la plantilla a utilizar.
     :param bot_name: Nombre del bot (puede ser None).
-    :param query: Consulta SQL que debe retornar un DataFrame con los contactos y sus parámetros.
+    :param query: Consulta SQL que debe retornar un DataFrame con los contactos y sus parámetros, contacto ->0 telefono ->1, parametros.
     """
     # 1. Ejecutar get_template_body para obtener el body de la plantilla
     template_details = GetTemplateDetails(template_id)
