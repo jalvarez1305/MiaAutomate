@@ -9,7 +9,8 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def ResolverPadecimiento(ConvMessages):
   # Obtener el contexto adicional de Pinecone (o cualquier otra fuente que uses)
-  user_question= obtener_ultimos_mensajes_usuario(ConvMessages)
+  mensajes_usuario = obtener_ultimos_mensajes_usuario(ConvMessages)
+  user_question = "\n".join([msg["contenido"] for msg in mensajes_usuario])
   texto = json.dumps(user_question)
   context = get_context(texto)
   all_mesg=[

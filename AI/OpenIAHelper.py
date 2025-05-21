@@ -203,7 +203,8 @@ def get_requested_date(ConvMessages):
     :return: Una fecha exacta en formato 'YYYY-MM-DD' que representa el día solicitado por el usuario.
     """
 
-    user_question = obtener_ultimos_mensajes_usuario(ConvMessages)
+    mensajes_usuario = obtener_ultimos_mensajes_usuario(ConvMessages)
+    user_question = "\n".join([msg["contenido"] for msg in mensajes_usuario])
     hoy = datetime.today().strftime('%Y-%m-%d')
 
     reglas = f"""
