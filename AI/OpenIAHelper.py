@@ -23,7 +23,7 @@ def conv_clasification(ConvMessages):
     reglas =   """
                 Clasifica la conversación en una (y solo una) de las siguientes categorías. Evalúa las reglas en este orden estricto de prioridad:
 
-IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apareció previamente en la conversación: "Acepto cita", "Acepto horario", "Solicita horario con precio", "Precio consulta", "Ubicación aceptada con horario ofrecido", "Solicita horario sin precio", "Ubicación aceptada sin horario ofrecido", "Ubicación". Si la categoría que estás por asignar ya apareció antes, debes elegir la categoría "Otro" en su lugar.
+IMPORTANTE: Si la conversacion puede ser clasifica en mas de una categoria, clasifica solo en la primera que cumpla las condiciones.
 
 1. Acepto cita
    - Se le pidio su nombre a el usuario
@@ -36,6 +36,7 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
    - El usuario lo aceptó explícitamente alguno de los horarios propuestos
    - Aún NO ha proporcionado su nombre (o no se le ha pedido)
    - El ultimo mensaje es de user y no de assistant
+   - El usuario NO ha proporcionado su nombre en ningún mensaje anterior de la conversación.
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Acepto horario" y no consideres otras categorías
 
 3. Rechazo horario
@@ -51,12 +52,13 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
    - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?","cuando tienen citas","Que dia tienen cita","Me parece bien","esta bien","ok","excelente","Es con cita")
    - NO incluye una fecha específica en su solicitud
    - El ultimo mensaje es de user y no de assistant
+   - NO debe mencionar ninguna fecha, día, semana ni rango de fechas (ej. “lunes”, “mañana”, “15 de octubre”, “semana que viene”, etc.).
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario con precio" y no consideres otras categorías
 
 5. Solicita horario sin precio
    - NO se ha proporcionado o discutido el precio aún
    - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?","cuando tienen citas","Que dia tienen cita","Me parece bien","esta bien","ok","excelente","Es con cita")
-   - NO incluye una fecha específica en su solicitud
+   - NO debe mencionar ninguna fecha, día, semana ni rango de fechas.
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario sin precio" y no consideres otras categorías
 
@@ -67,6 +69,7 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
     - El usuario menciona una fecha específica (ej: "2023-10-10", "15 de octubre")
     - El usuario menciona un rango de fechas (ej: "del 10 al 15 de octubre")
     - El usuario mensiona una semana, como la (ej: "la siguiente semana", "la proxima pasada", "la semana que viene")
+    - Si menciona día, fecha, semana o rango temporal (ej. “lunes”, “mañana”, “la semana que viene”, “15 de octubre”), clasifica como esta categoría sin importar si se preguntó precio o no.
     - incluye una fecha específica en su solicitud, o un dia especifico como "hoy", "mañana", "lunes", "martes", etc.
     - El ultimo mensaje es de user y no de assistant
     - Importante: No debe contener una hora, solo la fecha.
@@ -102,6 +105,8 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio prenatal" y no consideres otras categorías
 
 12. Precio consulta
+   - NO debe haber habido menciones previas a embarazo, verrugas, menopausia.
+   - NO debe ser una pregunta sobre qué incluye, sino sobre el costo explícito.
    - El último conjunto de mensajes es una pregunta explícita sobre el precio o costo 
    - NO se ha proporcionado ese precio específico antes
    - NO está preguntando por precios de verrugas o consulta prenatal
@@ -205,7 +210,7 @@ def get_requested_date(ConvMessages):
     """
 
     mensajes_usuario = obtener_ultimos_mensajes_usuario(ConvMessages)
-    user_question = "\n".join([msg["contenido"] for msg in mensajes_usuario])
+    user_question = "\n".join([msg["content"] for msg in mensajes_usuario])
     hoy = datetime.today().strftime('%Y-%m-%d')
 
     reglas = f"""
