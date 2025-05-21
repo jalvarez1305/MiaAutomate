@@ -7,6 +7,7 @@ from datetime import datetime
 MODEL = os.getenv("EMBEDDED_MODEL")
 openai.api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+gpt_model= "gpt-4o"
 
 def get_embedding(data):
     response = openai.embeddings.create(input=data, model=MODEL)
@@ -82,32 +83,32 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
    - Ejemplos: "¿qué me van a hacer?", "¿incluye el papanicolaou?"
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Dudas procedimiento" y no consideres otras categorías
 
-9. Precio consulta
-   - El último mensaje es una pregunta explícita sobre el precio o costo de: consulta general, papanicolaou o trastornos menstruales
+9. Precio verrugas
+   - Previamente se hablo sobre verrugas,condilomas
+   - El último conjunto de mensajes es una pregunta explícita sobre el precio o costo 
+   - NO se ha proporcionado ese precio específico antes
+   - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio verrugas" y no consideres otras categorías
+
+10. Precio prenatal
+    - Previamente se hablo sobre embarazo, prenatal
+    - El último conjunto de mensajes es una pregunta explícita sobre el precio o costo 
+    - NO se ha proporcionado ese precio específico antes
+    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio prenatal" y no consideres otras categorías
+
+11. Precio menopausia
+    - Previamente se hablo sobre menopausia, pre menopausia, climaterio o perimenopausia
+    - El último conjunto de mensajes es una pregunta explícita sobre el precio o costo 
+    - NO se ha proporcionado ese precio específico antes
+    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio prenatal" y no consideres otras categorías
+
+12. Precio consulta
+   - El último conjunto de mensajes es una pregunta explícita sobre el precio o costo 
    - NO se ha proporcionado ese precio específico antes
    - NO está preguntando por precios de verrugas o consulta prenatal
    - Aun no se le proporciona un precio
    - Puede contener frases como ("revisión ginecólogica anual","Revision anual","Cheque anual","Que incluye","Que paquetes tienen")
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio consulta" y no consideres otras categorías
-
-10. Precio verrugas
-   - La conversación trata sobre verrugas
-   - El último mensaje es una pregunta explícita sobre el precio o costo de: consulta, tratamiento o eliminación de verrugas
-   - NO se ha proporcionado ese precio específico antes
-   - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio verrugas" y no consideres otras categorías
-
-11. Precio prenatal
-    - La conversación trata sobre embarazo o consulta prenatal
-    - El último mensaje es una pregunta explícita sobre el precio o costo de: consulta prenatal, seguimiento de embarazo o papanicolaou
-    - NO se ha proporcionado ese precio específico antes
-    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio prenatal" y no consideres otras categorías
-
-12. Precio menopausia
-    - La conversacion trato sobre menopausia
-    - El último mensaje es una pregunta explícita sobre el precio o costo de: consulta general, papanicolaou o trastornos menstruales
-    - NO se ha proporcionado ese precio específico antes
-    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio prenatal" y no consideres otras categorías
 
 13. Ubicación aceptada con horario ofrecido
     - Ya se proporcionó el domicilio completo
@@ -153,7 +154,7 @@ Revisa el historial completo de la conversación para verificar si alguna catego
     
 
     response = client.responses.create(
-        model="gpt-4.1",
+        model=gpt_model,
         input=[
             {"role": "system", "content": "Eres un médico que clasifica conversaciones médicas según reglas estrictas."},
             {"role": "user", "content": reglas},
@@ -183,7 +184,7 @@ def conv_close_sale(ConvMessages):
     
 
     response = client.responses.create(
-        model="gpt-4.1",
+        model=gpt_model,
         input=[
             {"role": "system", "content": "Eres un médico que clasifica conversaciones médicas según reglas estrictas."},
             {"role": "user", "content": reglas},
@@ -208,24 +209,32 @@ def get_requested_date(ConvMessages):
     hoy = datetime.today().strftime('%Y-%m-%d')
 
     reglas = f"""
-    Reglas para identificar la fecha solicitada por el usuario:
+                Eres un asistente que interpreta mensajes en español y extrae la fecha solicitada por el usuario en formato YYYY-MM-DD.
 
-    Fecha actual: {hoy}
+                Fecha actual: {hoy}
 
-    1. Si el usuario pide una cita para "hoy", devuelve la fecha actual en formato YYYY-MM-DD.
-    2. Si menciona "la siguiente semana", devuelve el martes de la próxima semana en formato YYYY-MM-DD.
-    3. Si menciona un día de la semana (por ejemplo: martes, miércoles, jueves, viernes, sábado o domingo),
-    devuelve la próxima fecha que corresponde a ese día, en formato YYYY-MM-DD.
-    4. Si menciona una fecha exacta en formato tipo "2023-10-10", simplemente devuelve esa fecha.
-    5. Si menciona solo un número de día (por ejemplo: el 15, 21, o 28),
-    devuelve la próxima fecha futura que coincide con ese número de día en el mes actual o siguiente,
-    en formato YYYY-MM-DD.
-    """
+                Reglas para identificar la fecha solicitada:
+
+                1. Si el usuario dice palabras como "hoy", "para hoy", "el día de hoy" o similares, devuelve la fecha actual: {hoy}.
+
+                2. Si el usuario menciona "la siguiente semana", "la próxima semana" o expresiones similares, devuelve el **martes** de la próxima semana (no esta), en formato YYYY-MM-DD.
+
+                3. Si el usuario menciona un día de la semana (por ejemplo: "el sábado", "este viernes", "para el domingo"), devuelve la **fecha más cercana en el futuro** que caiga en ese día, en formato YYYY-MM-DD.
+
+                4. Si el usuario escribe una fecha explícita en formato YYYY-MM-DD (por ejemplo: "2023-10-10"), simplemente devuelve esa fecha.
+
+                5. Si el usuario menciona un número de día sin mes (por ejemplo: "el 15", "para el 28", "día 7"), devuelve la **próxima fecha futura** que coincida con ese número, ya sea del mes actual (si aún no ha pasado) o del siguiente mes.
+
+                6. Si no se puede determinar una fecha con claridad, devuelve exactamente: None
+
+                Formato de respuesta:
+                Devuelve únicamente la fecha en formato YYYY-MM-DD o None, sin agregar ningún otro texto o explicación.
+                """
 
     response = client.responses.create(
-        model="gpt-4.1",
+        model=gpt_model,
         input=[
-            {"role": "system", "content": "Eres un asistente que interpreta fechas solicitadas por el usuario y devuelve solo una fecha en formato YYYY-MM-DD."},
+            {"role": "system", "content": "Eres un asistente que interpreta solicitudes de fechas escritas en español y devuelve únicamente una fecha en formato YYYY-MM-DD."},
             {"role": "user", "content": reglas},
             {"role": "user", "content": f"Aquí están los últimos mensajes del usuario solicitando la fecha:\n{user_question}"}
         ],

@@ -6,6 +6,7 @@ from Pinecone_Helper import get_context
 
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+gpt_model= "gpt-4o"
 
 def ResolverPadecimiento(ConvMessages):
   # Obtener el contexto adicional de Pinecone (o cualquier otra fuente que uses)
@@ -35,7 +36,7 @@ def ResolverPadecimiento(ConvMessages):
                                             Si el contexto no tiene la informacion ue necesitas, responde este texto exacto 'Dame un segundito para darte la informacion precisa, por favor'"""}
         ]+ConvMessages
   response = client.responses.create(
-      model="gpt-4.1",
+      model=gpt_model,
       input=all_mesg,
       temperature=0  # Ajustar la temperatura a 0.1
   )
@@ -94,7 +95,7 @@ def ghosted_clasification(ConvMessages):
     
 
     response = client.responses.create(
-        model="gpt-4.1",
+        model=gpt_model,
         input=[
             {"role": "system", "content": "Eres un médico que clasifica conversaciones médicas según reglas estrictas."},
             {"role": "user", "content": reglas},
