@@ -32,6 +32,25 @@ Domicilio: Av. Tonaltecas #180.
 
 Te queda cerca?"""
 detalles="""dame un segundito para pasarte los detalles del proceso y los precios por favor 🙂"""
+precio_menopausia ="""En la consulta de transición a la menopausia (premenopausia)  y Menopausia  🌷evaluaremos el estado actual de tu Organismo a través de  :
+
+-Entrevista especializada completa 📋🩺
+
+-ultrasonido de ovarios para determinar su bienestar  y carga folicular
+
+-ultrasonido de utero o matriz para descartar alguna alteración🖥️
+
+-Exploración y palpación de mamas 🔎
+
+-Realzacion de solicitud 📝 de estudios dirigidos a tu caso en particular para estudio de la Menopáusia
+
+-👩🏻‍⚕️Explicación detallada de esta etapa y sus diversos tratamientos *Hormonales (sintéticos , bioidenticos, naturales ) y
+
+No hormonales , que existen actualmente
+
+Todo esto para ayudarte a vivir esta etapa sin síntomas molestos que deterioran tu salud y tus relaciones personales
+
+El precio de la consulta es de 650 pesos. Y puedes pagar en efectivo , tarjeta o transferencia 😃"""
 precio_consulta="""La consulta ginecológica 🌺 consiste en:
 
 1-Historial médico completo para conocerte💻
@@ -76,7 +95,6 @@ def GyneGeneralBot(Detalles):
             return
         if last_message_content in facebook_messages or last_message_content == audio_gyne:
             MandarMensajeSaludo(conversation_id,contact_phone,contact_id)
-            print(f"debug: {last_message_content}")
             if last_message_content in audio_gyne:
                 logging.info(f"Actualizando el lead source a Otro")
                 actualizar_lead_source(contact_id,"Otro")
@@ -92,10 +110,15 @@ def GyneGeneralBot(Detalles):
                 time.sleep(segundos_buffer)                
                 msg_arr=get_AI_conversation_messages(conversation_id)
                 respuesta=conv_clasification(msg_arr)
+                print(f"Respuesta clasificada: {respuesta}")
                 if respuesta =="Precio consulta":
                     send_conversation_message(conversation_id,detalles,False)
                     time.sleep(20)   
                     send_conversation_message(conversation_id,precio_consulta,False)
+                if respuesta =="Precio menopausia":
+                    send_conversation_message(conversation_id,detalles,False)
+                    time.sleep(20)   
+                    send_conversation_message(conversation_id,precio_menopausia,False)
                 elif respuesta =="Ubicación":
                     send_conversation_message(conversation_id,respuesta_ubicacion,False)
                 elif respuesta =="Acepto cita":
@@ -124,6 +147,8 @@ def GyneGeneralBot(Detalles):
                 else:
                     respuesta=f"Categoría: {respuesta}"
                     send_conversation_message(conversation_id,respuesta,True)
+            
+                #send_conversation_message(conversation_id,respuesta,True)
     except Exception as e:
         logging.error(f"Error en gyne_general: {str(e)}")  # Manejo de errores con logging
 

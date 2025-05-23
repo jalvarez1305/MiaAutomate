@@ -25,27 +25,36 @@ def conv_clasification(ConvMessages):
 
 IMPORTANTE: Si la conversacion puede ser clasifica en mas de una categoria, clasifica solo en la primera que cumpla las condiciones.
 
-1. Acepto cita
+
+1. Dudas padecimiento
+   - El último conjunto de mensajes del usuario contiene preguntas específicas sobre sus síntomas o malestar o sobre su ciclo menstrual
+   - El usuario está buscando información sobre su padecimiento o síntomas
+   - NO está preguntando sobre procedimiento, ubicación ni precios
+   - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Dudas padecimiento" y no consideres otras categorías
+2. Acepto cita
    - Se le pidio su nombre a el usuario
    - El usuario proporciono su nombre
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Acepto cita" y no consideres otras categorías
 
-2. Acepto horario
+3. Acepto horario
    - Ya se ofrecieron horarios especificos
    - El usuario lo aceptó explícitamente alguno de los horarios propuestos
+   - La aceptacion puede tener forma de "El de la mañana me parece bien", "El de la tarde me parece bien", "Me parece bien el horario de la mañana", "Me parece bien el horario de la tarde"
+   - El usuario menciona que le parece bien alguno de los horarios ofrecidos
+   - El usuario repite el horario ofrecido
    - Aún NO ha proporcionado su nombre (o no se le ha pedido)
    - El ultimo mensaje es de user y no de assistant
    - El usuario NO ha proporcionado su nombre en ningún mensaje anterior de la conversación.
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Acepto horario" y no consideres otras categorías
 
-3. Rechazo horario
+4. Rechazo horario
    - Ya se ofreció un horario específico o dos
    - El usuario indica explícitamente que NO puede asistir en ninguno de esos horarios
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Rechazo horario" y no consideres otras categorías
 
-4. Solicita horario con precio
+5. Solicita horario con precio
    - El usuario ya ha resuelto todas sus dudas médicas previas
    - Ya preguntó por el precio Y lo aceptó o reconoció explícitamente
    - NO se ha ofrecido todavía un horario o dos
@@ -55,14 +64,14 @@ IMPORTANTE: Si la conversacion puede ser clasifica en mas de una categoria, clas
    - NO debe mencionar ninguna fecha, día, semana ni rango de fechas (ej. “lunes”, “mañana”, “15 de octubre”, “semana que viene”, etc.).
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario con precio" y no consideres otras categorías
 
-5. Solicita horario sin precio
+6. Solicita horario sin precio
    - NO se ha proporcionado o discutido el precio aún
    - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?","cuando tienen citas","Que dia tienen cita","Me parece bien","esta bien","ok","excelente","Es con cita")
    - NO debe mencionar ninguna fecha, día, semana ni rango de fechas.
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario sin precio" y no consideres otras categorías
 
-6. Solicita horario especifico
+7. Solicita horario especifico
     - El mensaje contiene una solicitud específica para agendar (ej: "¿Tienen cita el lunes?", "¿A qué hora tienen cita el martes?", "¿Tienen disponibilidad el viernes?", "¿Tienen citas hoy?","Tienen citas disponibles para el lunes?","¿A qué hora tienen cita el martes?","¿Tienen disponibilidad el viernes?","¿Tienen citas hoy?")
     - El mensaje contiene una solicitud específica para agendar (ej: "Tienen citas disponibles para el miércoles?")
     - El usuario menciona un día específico (ej: "lunes", "martes", "hoy", "mañana")
@@ -74,11 +83,6 @@ IMPORTANTE: Si la conversacion puede ser clasifica en mas de una categoria, clas
     - El ultimo mensaje es de user y no de assistant
     - Importante: No debe contener una hora, solo la fecha.
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario especifico" y no consideres otras categorías
-
-7. Dudas padecimiento
-   - El último mensaje del usuario contiene preguntas específicas sobre sus síntomas o malestar
-   - NO está preguntando sobre procedimiento, ubicación ni precios
-   - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Dudas padecimiento" y no consideres otras categorías
 
 8. Dudas procedimiento
    - El último mensaje del usuario es específicamente sobre lo que se hará en consulta o lo que incluye
@@ -161,7 +165,7 @@ Revisa el historial completo de la conversación para verificar si alguna catego
     response = client.responses.create(
         model=gpt_model,
         input=[
-            {"role": "system", "content": "Eres un médico que clasifica conversaciones médicas según reglas estrictas."},
+            {"role": "system", "content": "Eres un médico ginecologo que clasifica conversaciones médicas según reglas estrictas."},
             {"role": "user", "content": reglas},
             {"role": "user", "content": f"""Ahora clasifica esta conversacion: {ConvMessages}"""}
         ],
@@ -208,10 +212,14 @@ def get_requested_date(ConvMessages):
                          Cada mensaje es un dict con las llaves: {'rol': 'usuario'|'agente', 'contenido': str}
     :return: Una fecha exacta en formato 'YYYY-MM-DD' que representa el día solicitado por el usuario.
     """
-
+    
+    print(f"ConvMessages: {ConvMessages}")
     mensajes_usuario = obtener_ultimos_mensajes_usuario(ConvMessages)
+    print(f"Mendajes usuario: {mensajes_usuario}")
     user_question = "\n".join([msg["content"] for msg in mensajes_usuario])
+    print(f"user_question: {user_question}")
     hoy = datetime.today().strftime('%Y-%m-%d')
+    print(f"Hoy es: {hoy}")
 
     reglas = f"""
                 Eres un asistente que interpreta mensajes en español y extrae la fecha solicitada por el usuario en formato YYYY-MM-DD.
@@ -224,7 +232,7 @@ def get_requested_date(ConvMessages):
 
                 2. Si el usuario menciona "la siguiente semana", "la próxima semana" o expresiones similares, devuelve el **martes** de la próxima semana (no esta), en formato YYYY-MM-DD.
 
-                3. Si el usuario menciona un día de la semana (por ejemplo: "el sábado", "este viernes", "para el domingo"), devuelve la **fecha más cercana en el futuro** que caiga en ese día, en formato YYYY-MM-DD.
+                3. Si el usuario menciona un día de la semana (por ejemplo: "sábado", "viernes", "domingo"), devuelve la **fecha más cercana en el futuro** que caiga en ese día, en formato YYYY-MM-DD.
 
                 4. Si el usuario escribe una fecha explícita en formato YYYY-MM-DD (por ejemplo: "2023-10-10"), simplemente devuelve esa fecha.
 
@@ -245,7 +253,6 @@ def get_requested_date(ConvMessages):
         ],
         temperature=0  # Respuesta más determinística
     )
-
     return response.output_text
 
 def obtener_ultimos_mensajes_usuario(mensajes):

@@ -222,7 +222,7 @@ def envia_mensaje_plantilla(contacto_id,phone_number, content_sid, parametros=No
             }
 
         response = requests.post(url, json=conversation_body, headers=headers)
-        print(f"La respuesta al enviar la plantilla fue: {response.json()}")
+        #print(f"La respuesta al enviar la plantilla fue: {response.json()}")
 
         if response.status_code == 200:
             conversation_response = response.json()
@@ -308,9 +308,9 @@ def send_conversation_message(conversation_id, message, is_private=False, buzon=
     response = requests.post(url, json=message_body, headers=headers)
     
     if response.status_code == 200:
-        print(f"Mensaje enviado con éxito: {response.content.decode()}")
+        print(f"Mensaje enviado con éxito: ")
     else:
-        print(f"Error al enviar mensaje: {response.text}")
+        print(f"Error al enviar mensaje: ")
 
 
 def send_conversation_file(conversation_id, file_url, is_private=False):
@@ -370,7 +370,7 @@ def get_open_conversation(contact_id):
         response = requests.get(url, headers=headers)
         
         if response.status_code == 200:
-            print("Mensajes extraidos con éxito.")
+            #print("Mensajes extraidos con éxito.")
             conv_id = get_conv_from_contact(response.json(), contact_id)
         else:
             print(f"Error al enviar mensaje: {response.text}")

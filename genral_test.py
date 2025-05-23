@@ -6,7 +6,7 @@ from libs.SQL_Helpers import GetFreeTimeForDate
 
 msg_arr=[{
                 "role": "user",
-                "content": "Me interesa me puedes agendar cita para el sábado",
+                "content": "Mañana no podría sería el sig viernes que descanso",
                 "created_at": "2023-10-01T12:00:00Z",
             }]
 fecha_solicitada=get_requested_date(msg_arr)

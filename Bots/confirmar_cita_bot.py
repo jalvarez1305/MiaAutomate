@@ -33,7 +33,7 @@ def ConfirmarCitaBot(Detalles):
             print(f"Ultima cita: {ultima_cita}")
             cmd=f"UPDATE [cal].[CalendarEvents] SET LocalUpdate=1,[summary]= REPLACE([summary], 'Agendada', 'Confirmada') WHERE ID='{ultima_cita}'"
             ejecutar_update(cmd)
-            print(f"update query: {cmd}")
+            #print(f"update query: {cmd}")
             send_conversation_message(conversation_id, respuesta, is_private=False, buzon=ChatwootSenders.Pacientes)
             RevisaFormularios(conversation_id,contact_id)
         else:

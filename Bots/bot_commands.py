@@ -37,7 +37,7 @@ def BotCommands(Detalles):
         elif last_message_content == "Dame un segundito para platicarte de las opciones que manejamos, por favor 🙌":            
             print(f"MandarAudioMenopausia")
             MandarAudioMenopausia(conversation_id,contact_phone,contact_id)
-        elif last_message_content == "Reagendar":            
+        elif last_message_content == "Reagendar" or last_message_content == "No, reagendar":            
             time.sleep(20)
             send_conversation_message(conversation_id,"con todo gusto hermosa, cuentame que dia te gustaria para tu cita?",False)
         elif last_message_content == "★" or last_message_content == "★★★":     

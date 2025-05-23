@@ -23,6 +23,7 @@ custom_commands = ["Cita",
                    "Horarios",
                    "Agendar cita",
                    "Reagendar",
+                   "No, reagendar",
                    "★",
                    "★★★"]
 agenda_medico="1.- Ver detalles"
