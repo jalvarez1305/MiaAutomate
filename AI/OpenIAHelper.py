@@ -20,7 +20,7 @@ def conv_clasification(ConvMessages):
                          Cada mensaje es un dict: {'rol': 'usuario'|'agente', 'contenido': str}
     :return: Una string con la categoría
     """
-    if not ConvMessages or ConvMessages[-1]["rol"] != "usuario":
+    if not ConvMessages or ConvMessages[-1]["role"] != "user":
         return "Ultimo Mensaje no es del usuario"
     
     reglas =   """
@@ -155,7 +155,6 @@ Toma en cuenta la hora de llegada de los mensajes para determinar el orden crono
 Revisa el historial completo de la conversación para verificar si alguna categoría ya fue asignada previamente, especialmente: "Acepto cita", "Acepto horario", "Solicita horario con precio", "Precio consulta", "Ubicación aceptada con horario ofrecido", "Solicita horario sin precio", "Ubicación aceptada sin horario ofrecido", "Ubicación".
                 """
     conversacion_formateada = "\n".join([f"{m['role'].capitalize()}: {m['content']}" for m in ConvMessages])
-    print(f"Conversacion formateada: {conversacion_formateada}")
 
     response = client.responses.create(
         model=gpt_model,
@@ -208,13 +207,11 @@ def get_requested_date(ConvMessages):
     :return: Una fecha exacta en formato 'YYYY-MM-DD' que representa el día solicitado por el usuario.
     """
     
-    print(f"ConvMessages: {ConvMessages}")
+    
     mensajes_usuario = obtener_ultimos_mensajes_usuario(ConvMessages)
-    print(f"Mendajes usuario: {mensajes_usuario}")
     user_question = "\n".join([msg["content"] for msg in mensajes_usuario])
     print(f"user_question: {user_question}")
     hoy = datetime.today().strftime('%Y-%m-%d')
-    print(f"Hoy es: {hoy}")
 
     reglas = f"""
                 Eres un asistente que interpreta mensajes en español y extrae la fecha solicitada por el usuario en formato YYYY-MM-DD.

@@ -107,7 +107,7 @@ def GyneGeneralBot(Detalles):
 
         else:
             if tiempo > segundos_buffer:
-                time.sleep(segundos_buffer)                
+                time.sleep(segundos_buffer)            
                 msg_arr=get_AI_conversation_messages(conversation_id)
                 respuesta=conv_clasification(msg_arr)
                 print(f"Respuesta clasificada: {respuesta}")
@@ -139,7 +139,7 @@ def GyneGeneralBot(Detalles):
                 elif respuesta =="Solicita horario especifico":
                     fecha_solicitada=get_requested_date(msg_arr)
                     horarios = GetFreeTimeForDate(fecha_solicitada,Consultorio=6)
-                    send_conversation_message(conversation_id,f"Revisando la fecha {fecha_solicitada}",True)
+                    #send_conversation_message(conversation_id,f"Revisando la fecha {fecha_solicitada}",True)
                     if horarios == None:
                         send_conversation_message(conversation_id,"@Yaneth Consultorio 6 esta lleno, favor de ofrecer otro dia u otro consultorio",True)
                     else:

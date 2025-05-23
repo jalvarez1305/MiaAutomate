@@ -634,11 +634,10 @@ def get_AI_conversation_messages(conversation_id):
         messages = data.get("payload", [])
         if not messages:
             break
-
         # Guardamos mensajes con created_at solo para ordenarlos después
         all_messages_raw.extend([
             {
-                "role": "user" if msg["sender"]["type"] == "user" else "assistant",
+                "role": "user" if msg["sender"]["type"] == "contact" else "assistant",
                 "content": msg.get("content", ""),
                 "created_at": msg.get("created_at", 0)
             }
