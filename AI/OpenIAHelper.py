@@ -23,48 +23,44 @@ def conv_clasification(ConvMessages):
     reglas =   """
                 Clasifica la conversación en una (y solo una) de las siguientes categorías. Evalúa las reglas en este orden estricto de prioridad:
 
-IMPORTANTE: Si la conversacion puede ser clasifica en mas de una categoria, clasifica solo en la primera que cumpla las condiciones.
+IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apareció previamente en la conversación: "Acepto cita", "Acepto horario", "Solicita horario con precio", "Precio consulta", "Ubicación aceptada con horario ofrecido", "Solicita horario sin precio", "Ubicación aceptada sin horario ofrecido", "Ubicación". Si la categoría que estás por asignar ya apareció antes, debes elegir la categoría "Otro" en su lugar.
 
-
-1. Dudas padecimiento
-   - El último conjunto de mensajes del usuario contiene preguntas específicas sobre sus síntomas o malestar o sobre su ciclo menstrual
-   - El usuario está buscando información sobre su padecimiento o síntomas
+6. Dudas padecimiento
+   - El último mensaje del usuario contiene preguntas específicas sobre sus síntomas o malestar
    - NO está preguntando sobre procedimiento, ubicación ni precios
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Dudas padecimiento" y no consideres otras categorías
-2. Acepto cita
+
+1. Acepto cita
    - Se le pidio su nombre a el usuario
    - El usuario proporciono su nombre
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Acepto cita" y no consideres otras categorías
 
-3. Acepto horario
+2. Acepto horario
    - Ya se ofrecieron horarios especificos
    - El usuario lo aceptó explícitamente alguno de los horarios propuestos
    - La aceptacion puede tener forma de "El de la mañana me parece bien", "El de la tarde me parece bien", "Me parece bien el horario de la mañana", "Me parece bien el horario de la tarde"
-   - El usuario menciona que le parece bien alguno de los horarios ofrecidos
-   - El usuario repite el horario ofrecido
    - Aún NO ha proporcionado su nombre (o no se le ha pedido)
    - El ultimo mensaje es de user y no de assistant
    - El usuario NO ha proporcionado su nombre en ningún mensaje anterior de la conversación.
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Acepto horario" y no consideres otras categorías
 
-4. Rechazo horario
+3. Rechazo horario
    - Ya se ofreció un horario específico o dos
    - El usuario indica explícitamente que NO puede asistir en ninguno de esos horarios
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Rechazo horario" y no consideres otras categorías
 
-5. Solicita horario con precio
+4. Solicita horario con precio
    - El usuario ya ha resuelto todas sus dudas médicas previas
    - Ya preguntó por el precio Y lo aceptó o reconoció explícitamente
    - NO se ha ofrecido todavía un horario o dos
    - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?","cuando tienen citas","Que dia tienen cita","Me parece bien","esta bien","ok","excelente","Es con cita")
    - NO incluye una fecha específica en su solicitud
    - El ultimo mensaje es de user y no de assistant
-   - NO debe mencionar ninguna fecha, día, semana ni rango de fechas (ej. “lunes”, “mañana”, “15 de octubre”, “semana que viene”, etc.).
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario con precio" y no consideres otras categorías
 
-6. Solicita horario sin precio
+5. Solicita horario sin precio
    - NO se ha proporcionado o discutido el precio aún
    - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?","cuando tienen citas","Que dia tienen cita","Me parece bien","esta bien","ok","excelente","Es con cita")
    - NO debe mencionar ninguna fecha, día, semana ni rango de fechas.
@@ -84,21 +80,19 @@ IMPORTANTE: Si la conversacion puede ser clasifica en mas de una categoria, clas
     - Importante: No debe contener una hora, solo la fecha.
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario especifico" y no consideres otras categorías
 
-8. Dudas procedimiento
+7. Dudas procedimiento
    - El último mensaje del usuario es específicamente sobre lo que se hará en consulta o lo que incluye
    - NO se ha proporcionado el precio aún
    - Ejemplos: "¿qué me van a hacer?", "¿incluye el papanicolaou?"
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Dudas procedimiento" y no consideres otras categorías
 
 9. Precio verrugas
-   - Previamente se hablo sobre verrugas,condilomas
-   - El último conjunto de mensajes es una pregunta explícita sobre el precio o costo 
+   - El último mensaje es específicamente sobre el precio para tratamiento de verrugas
    - NO se ha proporcionado ese precio específico antes
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio verrugas" y no consideres otras categorías
 
 10. Precio prenatal
-    - Previamente se hablo sobre embarazo, prenatal
-    - El último conjunto de mensajes es una pregunta explícita sobre el precio o costo 
+    - El último mensaje es específicamente sobre el precio de consulta prenatal o seguimiento de embarazo
     - NO se ha proporcionado ese precio específico antes
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio prenatal" y no consideres otras categorías
 
@@ -106,20 +100,17 @@ IMPORTANTE: Si la conversacion puede ser clasifica en mas de una categoria, clas
     - Previamente se hablo sobre menopausia, pre menopausia, climaterio o perimenopausia
     - El último conjunto de mensajes es una pregunta explícita sobre el precio o costo 
     - NO se ha proporcionado ese precio específico antes
-    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio prenatal" y no consideres otras categorías
+    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio menopausia" y no consideres otras categorías
 
-12. Precio consulta
-   - NO debe haber habido menciones previas a embarazo, verrugas, menopausia.
-   - NO debe ser una pregunta sobre qué incluye, sino sobre el costo explícito.
-   - El último conjunto de mensajes es una pregunta explícita sobre el precio o costo 
+8. Precio consulta
+   - El último mensaje es una pregunta explícita sobre el precio o costo
+   - Puede expresar que quiere saber costo con frases como ("revisión ginecólogica anual","Revision anual","Cheque anual","Que incluye","Que paquetes tienen")
    - NO se ha proporcionado ese precio específico antes
-   - NO está preguntando por precios de verrugas o consulta prenatal
    - Aun no se le proporciona un precio
-   - Puede contener frases como ("revisión ginecólogica anual","Revision anual","Cheque anual","Que incluye","Que paquetes tienen")
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio consulta" y no consideres otras categorías
 
-13. Ubicación aceptada con horario ofrecido
+11. Ubicación aceptada con horario ofrecido
     - Ya se proporcionó el domicilio completo
     - El usuario responde que le queda cerca o que conoce el lugar
     - Ya se ofreció un horario específico previamente
@@ -127,7 +118,7 @@ IMPORTANTE: Si la conversacion puede ser clasifica en mas de una categoria, clas
     - El ultimo mensaje es de user y no de assistant
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Ubicación aceptada con horario ofrecido" y no consideres las categorías "Ubicación" ni "Ubicación aceptada sin horario ofrecido"
 
-14. Ubicación aceptada sin horario ofrecido
+12. Ubicación aceptada sin horario ofrecido
     - Ya se proporcionó el domicilio completo
     - El usuario responde que le queda cerca o que conoce el lugar
     - NO se ha ofrecido ningún horario específico aún
@@ -135,21 +126,21 @@ IMPORTANTE: Si la conversacion puede ser clasifica en mas de una categoria, clas
     - El ultimo mensaje es de user y no de assistant
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Ubicación aceptada sin horario ofrecido" y no consideres la categoría "Ubicación"
 
-15. Ubicación
+13. Ubicación
     - El último mensaje contiene una pregunta explícita sobre la ubicación física de la clínica
     - Ejemplos: "¿Dónde están ubicados?", "¿En qué calle es?", "¿Cuál es la dirección?"
-    - en la conversacion NO le hemos mandado el domicilio, que es en avenida Tonaltecas
+    - NO se ha proporcionado el domicilio previamente
     - El ultimo mensaje es de user y no de assistant
-    - No debe tener frases como ("Me queda lejos", "Estoy lejos", "Esta lejos")
+
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Ubicación" y no consideres otras categorías
 
-16. Agradecimiento
+14. Agradecimiento
     - Ya se resolvieron todas las dudas del usuario o ya se confirmó completamente la cita
     - El último mensaje contiene exclusivamente un agradecimiento o despedida
     - Ejemplos: "Gracias", "Perfecto, gracias", "Nos vemos", "Gracias, igualmente"
     - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Agradecimiento" y no consideres otras categorías
 
-17. Otro
+15. Otro
     - La conversación NO encaja en ninguna de las categorías anteriores, incluyendo:
     - Ya se proporcionó el precio y el usuario lo vuelve a solicitar
     - El mensaje es ambiguo, irrelevante o trata temas no considerados (ej. trámites, quejas, otros servicios)
