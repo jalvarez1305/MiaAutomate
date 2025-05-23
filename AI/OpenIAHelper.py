@@ -20,23 +20,21 @@ def conv_clasification(ConvMessages):
                          Cada mensaje es un dict: {'rol': 'usuario'|'agente', 'contenido': str}
     :return: Una string con la categoría
     """
+    if not ConvMessages or ConvMessages[-1]["rol"] != "usuario":
+        return "Ultimo Mensaje no es del usuario"
+    
     reglas =   """
                 Clasifica la conversación en una (y solo una) de las siguientes categorías. Evalúa las reglas en este orden estricto de prioridad:
 
 IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apareció previamente en la conversación: "Acepto cita", "Acepto horario", "Solicita horario con precio", "Precio consulta", "Ubicación aceptada con horario ofrecido", "Solicita horario sin precio", "Ubicación aceptada sin horario ofrecido", "Ubicación". Si la categoría que estás por asignar ya apareció antes, debes elegir la categoría "Otro" en su lugar.
 
-1. Dudas padecimiento
-   - El último mensaje del usuario contiene preguntas específicas sobre sus síntomas o malestar
-   - NO está preguntando sobre procedimiento, ubicación ni precios
-   - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Dudas padecimiento" y no consideres otras categorías
-
-2. Acepto cita
+1. Acepto cita
    - Se le pidio su nombre a el usuario
    - El usuario proporciono su nombre
    - El ultimo mensaje es de user y no de assistant
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Acepto cita" y no consideres otras categorías
 
-3. Acepto horario
+2. Acepto horario
    - Ya se ofrecieron horarios especificos
    - El usuario lo aceptó explícitamente alguno de los horarios propuestos
    - La aceptacion puede tener forma de "El de la mañana me parece bien", "El de la tarde me parece bien", "Me parece bien el horario de la mañana", "Me parece bien el horario de la tarde"
@@ -44,6 +42,11 @@ IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apar
    - El ultimo mensaje es de user y no de assistant
    - El usuario NO ha proporcionado su nombre en ningún mensaje anterior de la conversación.
    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Acepto horario" y no consideres otras categorías
+
+3. Dudas padecimiento
+   - El último mensaje del usuario contiene preguntas específicas sobre sus síntomas o malestar
+   - NO está preguntando sobre procedimiento, ubicación ni precios
+   - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Dudas padecimiento" y no consideres otras categorías
 
 4. Rechazo horario
    - Ya se ofreció un horario específico o dos
@@ -151,14 +154,15 @@ Solo responde con el nombre exacto de la categoría.
 Toma en cuenta la hora de llegada de los mensajes para determinar el orden cronológico de la conversación.
 Revisa el historial completo de la conversación para verificar si alguna categoría ya fue asignada previamente, especialmente: "Acepto cita", "Acepto horario", "Solicita horario con precio", "Precio consulta", "Ubicación aceptada con horario ofrecido", "Solicita horario sin precio", "Ubicación aceptada sin horario ofrecido", "Ubicación".
                 """
-    
+    conversacion_formateada = "\n".join([f"{m['role'].capitalize()}: {m['content']}" for m in ConvMessages])
+    print(f"Conversacion formateada: {conversacion_formateada}")
 
     response = client.responses.create(
         model=gpt_model,
         input=[
-            {"role": "system", "content": "Eres un médico ginecologo que clasifica conversaciones médicas según reglas estrictas."},
+            {"role": "system", "content": "Eres un médico ginecologo que sabe mucho sobre el ciclo mentrual y clasifica conversaciones médicas según reglas estrictas."},
             {"role": "user", "content": reglas},
-            {"role": "user", "content": f"""Ahora clasifica esta conversacion: {ConvMessages}"""}
+            {"role": "user", "content": f"""Ahora clasifica esta conversacion:\n {conversacion_formateada}"""}
         ],
         temperature=0  # Ajustar la temperatura a 0.1
     )

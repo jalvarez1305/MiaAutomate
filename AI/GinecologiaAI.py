@@ -11,7 +11,7 @@ gpt_model= "gpt-4o"
 def ResolverPadecimiento(ConvMessages):
   # Obtener el contexto adicional de Pinecone (o cualquier otra fuente que uses)
   mensajes_usuario = obtener_ultimos_mensajes_usuario(ConvMessages)
-  user_question = "\n".join([msg["contenido"] for msg in mensajes_usuario])
+  user_question = "\n".join([msg["content"] for msg in mensajes_usuario])
   texto = json.dumps(user_question)
   context = get_context(texto)
   all_mesg=[
@@ -45,7 +45,7 @@ def ResolverPadecimiento(ConvMessages):
 def ghosted_clasification(ConvMessages):
     """
     :param conversacion: Lista de mensajes en orden cronológico. 
-                         Cada mensaje es un dict: {'rol': 'usuario'|'agente', 'contenido': str}
+                         Cada mensaje es un dict: {'rol': 'usuario'|'agente', 'content': str}
     :return: Una string con la categoría
     """
     saludo="""Cuéntame un poquito más ✨ ¿Tienes algún tema en especial que te gustaría revisar en la consulta 🩺💖 o ya te toca tu revisión ginecológica anual? 📅🌸"""
