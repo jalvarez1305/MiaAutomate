@@ -27,38 +27,41 @@ def conv_clasification(ConvMessages):
     bloque_reciente_usuario = "\n".join([msg["content"] for msg in mensajes_usuario])
     
     reglas =   """
-                Clasifica la conversación en una (y solo una) de las siguientes categorías. Evalúa las reglas en este orden estricto de prioridad:
+                Clasifica la conversación en una (y solo una) de las siguientes categorías.
+                Evalua cada regla considerando que se cumplan las condiciones de el historial y tambien las del ultimo mensaje del usuario 
+                Evalúa las reglas en este orden estricto de prioridad:
 
 1. Acepto cita
    # EVALUACIÓN: INCLUDE_HISTORY
-   ## Condiciones que deben haberse cumplido en el historial:
-   ### TODAS ESTAS:
-   - Se le pidió su nombre al usuario anteriormente
-   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
+   - Se le pidió su nombre al usuario
+   ## EVALUAR ESTAS REGLAS EN EL ULTIMO MENSAJE DEL USUARIO:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - El usuario proporciono su nombre
    ## NOTA IMPORTANTE: 
    - Si cumple estas condiciones, clasifica SOLO como "Acepto cita" y no consideres otras categorías
 
 2. Acepto horario
    # EVALUACIÓN: INCLUDE_HISTORY
-   ## Condiciones que deben haberse cumplido en el historial:
-   ### AL MENOS UNA DE ESTAS:
-   - El usuario NO ha proporcionado su nombre en ningún mensaje anterior de la conversación.
-   - El agente no ha solicitado su nombre en ningún mensaje anterior de la conversación.  
-   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE AL MENOS UNA DE ESTAS CONDICIONES:
+   - El usuario NO ha proporcionado su nombre.
+   - El agente no ha solicitado su nombre.  
+   ## EVALUAR ESTAS REGLAS EN EL ULTIMO MENSAJE DEL USUARIO:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - El usuario lo aceptó explícitamente alguno de los horarios propuestos
-   ### EJEMPLOS:
+   #### EJEMPLOS:
    - La aceptacion puede tener forma de "El de la mañana me parece bien", "El de la tarde me parece bien", "Me parece bien el horario de la mañana", "Me parece bien el horario de la tarde"
-   - La aceptacion puede ser repitiendo el horario ofrecido, como "Me parece bien el lunes a las 10:00 am", "Me parece bien el martes a las 4:00 pm"
+   - La aceptacion puede ser repitiendo el horario ofrecido, como "Me parece bien el lunes a las 10:00 am", "Me parece bien el martes a las 4:00 pm"   
    ## NOTA IMPORTANTE: 
    - Si cumple estas condiciones, clasifica SOLO como "Acepto horario" y no consideres otras categorías
 
 3. Dudas padecimiento
    # EVALUACIÓN: RECENT_ONLY
-   ### TODAS ESTAS:
-   - El último mensaje del usuario contiene preguntas específicas sobre sus síntomas o malestar
+   ## EVALUAR ESTAS REGLAS EN ULTIMO MENSAJE DEL USUARIO:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
+   - Contiene preguntas específicas sobre sus síntomas o malestar
    - NO está preguntando sobre procedimiento
    - NO esta preguntando sobre ubicacion
    - No esta preguntando sobre precios
@@ -67,12 +70,12 @@ def conv_clasification(ConvMessages):
 
 4. Rechazo horario
    # EVALUACIÓN: INCLUDE_HISTORY
-   ## Condiciones que deben haberse cumplido en el historial:
-   ### AL MENOS UNA DE ESTAS:
+   ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE AL MENOS UNA DE ESTAS CONDICIONES:
    - Ya se ofreció un horario específico
    - Se ofrecio mas de un horario
-   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
-   ### AL MENOS UNA DE ESTAS:
+   ## EVALUAR ESTAS REGLAS EN ULTIMO MENSAJE DEL USUARIO:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - El usuario indica explícitamente que NO puede asistir en ninguno de esos horarios
    - El usuario NO esta proponiendo un nuevo horario
    - El usuario NO esta proponiendo una nueva fecha
@@ -82,17 +85,17 @@ def conv_clasification(ConvMessages):
 
 5. Solicita horario con precio
    # EVALUACIÓN: INCLUDE_HISTORY
-   ## Condiciones que deben haberse cumplido en el historial:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - El usuario ya ha resuelto todas sus dudas médicas previas
    - Ya preguntó por el precio
    - El usuario ya acepto el precio o lo reconocio
    - NO se ha ofrecido todavía un horario o mas de uno
-   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:   
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN ULTIMO MENSAJE DEL USUARIO:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - Contiene una solicitud general para agendar
    - NO incluye una fecha específica en su solicitud
-   ### EJEMPLOS:
+   #### EJEMPLOS:
    - ¿Qué días atienden?
    - ¿Cuál es su disponibilidad?
    - cuando tienen citas
@@ -107,15 +110,15 @@ def conv_clasification(ConvMessages):
 
 6. Solicita horario sin precio
    # EVALUACIÓN: INCLUDE_HISTORY
-   ## Condiciones que deben haberse cumplido en el historial:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - NO se ha proporcionado o discutido el precio aún
    - NO incluye una fecha específica en su solicitud
-   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN ULTIMO MENSAJE DEL USUARIO:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - Contiene una solicitud general para agendar
    - NO debe mencionar ninguna fecha, día, semana ni rango de fechas.
-   ### EJEMPLOS:
+   #### EJEMPLOS:
    - ¿Qué días atienden?
    - ¿Cuál es su disponibilidad?
    - cuando tienen citas
@@ -130,20 +133,21 @@ def conv_clasification(ConvMessages):
 
 7. Solicita horario especifico
    #EVALUACIÓN: INCLUDE_HISTORY
-   ## Condiciones que deben haberse cumplido en el historial:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - El usuario no ha aceptado ya un horario propuesto
-   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN ULTIMO MENSAJE DEL USUARIO:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - No debe contener una hora.
-   ### AL MENOS UNA DE ESTAS:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE AL MENOS UNA ESTAS CONDICIONES:
    - El mensaje contiene una solicitud específica para agendar
    - El usuario menciona un día específico (ej: "lunes", "martes", "hoy", "mañana")
    - El usuario menciona una fecha específica (ej: "2023-10-10", "15 de octubre")
    - El usuario menciona un rango de fechas (ej: "del 10 al 15 de octubre")
-   - El usuario mensiona una semana, como la (ej: "la siguiente semana", "la proxima pasada", "la semana que viene")
+   - El usuario menciona una semana, como la (ej: "la siguiente semana", "la proxima semana", "la semana que viene")
    - El usuario menciona día, fecha, semana o rango temporal (ej. “lunes”, “mañana”, “la semana que viene”, “15 de octubre”)
-   - incluye una fecha específica en su solicitud, o un dia especifico como "hoy", "mañana", "lunes", "martes", etc.  ### EJEMPLOS:
+   - incluye una fecha específica en su solicitud, o un dia especifico como "hoy", "mañana", "lunes", "martes", etc.  
+   #### EJEMPLOS:
    - ¿Tienen cita el lunes?
    - ¿A qué hora tienen cita el martes?
    - ¿Tienen disponibilidad el viernes?
@@ -158,13 +162,13 @@ def conv_clasification(ConvMessages):
 
 8. Dudas procedimiento
    #EVALUACIÓN: INCLUDE_HISTORY
-   ## Condiciones que deben haberse cumplido en el historial:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - NO se ha proporcionado el precio aún
-   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
-   ### TODAS ESTAS:
-   - Es específicamente sobre lo que se hará en consulta o lo que incluye   
-   ### EJEMPLOS:
+   ## EVALUAR ESTAS REGLAS EN ULTIMO MENSAJE DEL USUARIO:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
+   - Habla específicamente sobre lo que se hará en consulta o lo que incluye   
+   #### EJEMPLOS:
    - ¿qué me van a hacer?
    - ¿incluye el papanicolaou?
    - ¿Que incluye?
@@ -173,26 +177,30 @@ def conv_clasification(ConvMessages):
 
 9. Precio verrugas
    #EVALUACIÓN: INCLUDE_HISTORY
-   ## Condiciones que deben haberse cumplido en el historial:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - Cuando se hablo de padecimiento, se mencionó específicamente verrugas
    - NO se ha proporcionado precio aún
-   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:   
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN ULTIMO MENSAJE DEL USUARIO:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - El usuario pregunta explícitamente sobre el precio o costo   
+   #### EJEMPLOS:
+   - Que incluye
+   - Que paquetes tienen
+   - ¿Cuánto cuesta?
    ## NOTA IMPORTANTE: 
     - Si cumple estas condiciones, clasifica SOLO como "Precio verrugas" y no consideres otras categorías
 
 10. Precio prenatal
    #EVALUACIÓN: INCLUDE_HISTORY
-   ## Condiciones que deben haberse cumplido en el historial:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - Cuando se hablo de padecimiento, se mencionó específicamente embarazo o prenatal
    - NO se ha proporcionado precio aún
-   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:   
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN ULTIMO MENSAJE DEL USUARIO:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - El usuario pregunta explícitamente sobre el precio o costo
-   ### EJEMPLOS:
+   #### EJEMPLOS:
    - Que incluye
    - Que paquetes tienen
    - ¿Cuánto cuesta?
@@ -201,10 +209,10 @@ def conv_clasification(ConvMessages):
 
 11. Precio menopausia
    #EVALUACIÓN: INCLUDE_HISTORY
-   ## Condiciones que deben haberse cumplido en el historial:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - NO se ha proporcionado precio aún
-   ### AL MENOS UNA DE ESTAS:
+   ### CLASIFICAR EN ESTA CATEGORIA SI AL MENOS UNA DE ESTAS CONDICIONES:
    - Cuando se hablo de padecimiento, se mencionó específicamente menopausia
    - Cuando se hablo de padecimiento, se mencionó específicamente climaterio
    - Cuando se hablo de padecimiento, se mencionó específicamente menopausia precoz
@@ -223,24 +231,25 @@ def conv_clasification(ConvMessages):
    - Cuando se hablo de padecimiento, se mencionó específicamente perimenopausia
    - Cuando se hablo de padecimiento, se mencionó específicamente premenopausia
    - Incluye el texto exacto "Dame un segundito para platicarte de las opciones que manejamos, por favor 🙌"
-   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
-   ### TODAS ESTAS:   
+   ## EVALUAR ESTAS REGLAS EN ULTIMO MENSAJE DEL USUARIO:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:  
    - El usuario pregunta explícitamente sobre el precio o costo
-   ### EJEMPLOS:
+   #### EJEMPLOS:
    - Que incluye
    - Cuanto cuesta
+   - Que precio tiene
    ## NOTA IMPORTANTE:    
     - Si cumple estas condiciones, clasifica SOLO como "Precio menopausia" y no consideres otras categorías
 
 12. Precio consulta
    #EVALUACIÓN: INCLUDE_HISTORY
-   ## Condiciones que deben haberse cumplido en el historial:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - Aun no se le proporciona un precio
-   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN ULTIMO MENSAJE DEL USUARIO:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:  
    - El último mensaje es una pregunta explícita sobre el precio o costo
-   ### EJEMPLOS:
+   #### EJEMPLOS:
    - revisión ginecólogica anual
    - Revision anual
    - Cheque anual
@@ -251,37 +260,43 @@ def conv_clasification(ConvMessages):
 
 13. Ubicación aceptada con horario ofrecido
    #EVALUACIÓN: INCLUDE_HISTORY
-   ## Condiciones que deben haberse cumplido en el historial:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - Ya se proporcionó el domicilio completo
    - Ya se ofreció un horario específico previamente
-   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
-   ### AL MENOS UNA DE ESTAS:
+   ## EVALUAR ESTAS REGLAS EN ULTIMO MENSAJE DEL USUARIO:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE AL MENOS UNA DE ESTAS CONDICIONES:  
    - El usuario responde que le queda cerca o que conoce el lugar
    - El usuario expresa esta confirmación de conocimiento/aceptación de ubicación
+   #### EJEMPLOS:
+   - El usuario dice que le queda cerca
+   - El usuario dice que conoce el lugar
    ## NOTA IMPORTANTE: 
     - Si cumple estas condiciones, clasifica SOLO como "Ubicación aceptada con horario ofrecido" y no consideres otras categorías
 
 14. Ubicación aceptada sin horario ofrecido
    #EVALUACIÓN: INCLUDE_HISTORY
-   ## Condiciones que deben haberse cumplido en el historial:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - Ya se proporcionó el domicilio completo
    - NO se ha ofrecido ningún horario específico aún
-   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
-   ### AL MENOS UNA DE ESTAS:
+   ## EVALUAR ESTAS REGLAS EN ULTIMO MENSAJE DEL USUARIO:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE AL MENOS UNA DE ESTAS CONDICIONES:  
    - El usuario responde que le queda cerca o que conoce el lugar
    - El usuario expresa esta confirmación de conocimiento/aceptación de ubicación
+   #### EJEMPLOS:
+   - El usuario dice que le queda cerca
+   - El usuario dice que conoce el lugar
    ## NOTA IMPORTANTE: 
     - Si cumple estas condiciones, clasifica SOLO como "Ubicación aceptada sin horario ofrecido" y no consideres otras categorías
 
 15. Ubicación
    #EVALUACIÓN: INCLUDE_HISTORY
-   ## Condiciones que deben haberse cumplido en el historial:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - No se ha proporcionado la ubicacion aún
-   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN ULTIMO MENSAJE DEL USUARIO:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE AL MENOS UNA DE ESTAS CONDICIONES:  
    - El usuario hace una pregunta explícita sobre la ubicación física de la clínica
    ### EJEMPLOS:
    - El usuario pregunta por la dirección, calle o ubicación de la clínica
@@ -293,13 +308,13 @@ def conv_clasification(ConvMessages):
 
 16. Agradecimiento
    #EVALUACIÓN: INCLUDE_HISTORY
-   ## Condiciones que deben haberse cumplido en el historial:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
    - Ya se resolvieron todas las dudas del usuario o ya se confirmó completamente la cita
-   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
-   ### TODAS ESTAS:
+   ## EVALUAR ESTAS REGLAS EN ULTIMO MENSAJE DEL USUARIO:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:  
    - El usuario esta agradeciendoo despidiendose
-   ### EJEMPLOS:
+   #### EJEMPLOS:
    - Gracias
    - Perfecto
    - gracias
@@ -311,7 +326,7 @@ def conv_clasification(ConvMessages):
 
 17. Otro
    ## Condiciones para clasificar como "Otro":
-   ### AL MENOS UNA DE ESTAS:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE AL MENOS UNA DE ESTAS CONDICIONES:
    - La conversación NO encaja en ninguna de las categorías anteriores.
    - Ya se proporcionó el precio y el usuario lo vuelve a solicitar.
    - El mensaje es ambiguo, irrelevante o trata temas no considerados (ej. trámites, quejas, otros servicios).
@@ -338,7 +353,17 @@ Revisa el historial completo de la conversación para verificar si alguna catego
             },
             {
                 "role": "user",
-                "content": f"""Clasifica esta conversación enfocándote principalmente en los mensajes recientes del usuario desde la última intervención del agente:\n\n{bloque_reciente_usuario}\n\nTambién considera el historial completo de la conversación por si alguna categoría requiere contexto previo:\n\n{conversacion_formateada}"""
+                "content": f"""Este es el hisotrial de la conversacion para su analisis:\n\n{conversacion_formateada}"""
+            },
+            {
+                "role": "user",
+                "content": f"""Este es el ultimo mensaje del usuario:\n\n{bloque_reciente_usuario}"""
+            },
+            {
+                "role": "user",
+                "content": f"""Internaliza primero el historial de la conversacion para que tengas contexto, 
+                                luego entiende el ultimo mensaje del usuario para que entiendas que esta preguntando en este momento 
+                                y por ultimo evalua las reglas"""
             }
         ],
         temperature=0  # Ajustar la temperatura a 0.1

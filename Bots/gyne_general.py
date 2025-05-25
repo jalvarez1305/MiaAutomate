@@ -137,6 +137,7 @@ def GyneGeneralBot(Detalles):
                         send_conversation_message(conversation_id,horarios,False)
                 elif respuesta =="Solicita horario especifico":
                     fecha_solicitada=get_requested_date(msg_arr)
+                    send_conversation_message(conversation_id,f"Evaluando: {fecha_solicitada}",True)
                     horarios = GetFreeTimeForDate(fecha_solicitada,Consultorio=6)
                     if horarios == None:
                         send_conversation_message(conversation_id,"@Yaneth Consultorio 6 esta lleno, favor de ofrecer otro dia u otro consultorio",True)
