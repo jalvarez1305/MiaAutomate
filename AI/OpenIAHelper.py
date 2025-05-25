@@ -23,132 +23,301 @@ def conv_clasification(ConvMessages):
     if not ConvMessages or ConvMessages[-1]["role"] != "user":
         return "Ultimo Mensaje no es del usuario"
     
+    mensajes_usuario = obtener_ultimos_mensajes_usuario(ConvMessages)
+    bloque_reciente_usuario = "\n".join([msg["content"] for msg in mensajes_usuario])
+    
     reglas =   """
                 Clasifica la conversación en una (y solo una) de las siguientes categorías. Evalúa las reglas en este orden estricto de prioridad:
 
-IMPORTANTE: Antes de clasificar, verifica si alguna de estas categorías ya apareció previamente en la conversación: "Acepto cita", "Acepto horario", "Solicita horario con precio", "Precio consulta", "Ubicación aceptada con horario ofrecido", "Solicita horario sin precio", "Ubicación aceptada sin horario ofrecido", "Ubicación". Si la categoría que estás por asignar ya apareció antes, debes elegir la categoría "Otro" en su lugar.
-
 1. Acepto cita
-   - Se le pidio su nombre a el usuario
+   # EVALUACIÓN: INCLUDE_HISTORY
+   ## Condiciones que deben haberse cumplido en el historial:
+   ### TODAS ESTAS:
+   - Se le pidió su nombre al usuario anteriormente
+   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
+   ### TODAS ESTAS:
    - El usuario proporciono su nombre
-   - El ultimo mensaje es de user y no de assistant
-   - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Acepto cita" y no consideres otras categorías
+   ## NOTA IMPORTANTE: 
+   - Si cumple estas condiciones, clasifica SOLO como "Acepto cita" y no consideres otras categorías
 
 2. Acepto horario
-   - Ya se ofrecieron horarios especificos
-   - El usuario lo aceptó explícitamente alguno de los horarios propuestos
-   - La aceptacion puede tener forma de "El de la mañana me parece bien", "El de la tarde me parece bien", "Me parece bien el horario de la mañana", "Me parece bien el horario de la tarde"
-   - Aún NO ha proporcionado su nombre (o no se le ha pedido)
-   - El ultimo mensaje es de user y no de assistant
+   # EVALUACIÓN: INCLUDE_HISTORY
+   ## Condiciones que deben haberse cumplido en el historial:
+   ### AL MENOS UNA DE ESTAS:
    - El usuario NO ha proporcionado su nombre en ningún mensaje anterior de la conversación.
-   - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Acepto horario" y no consideres otras categorías
+   - El agente no ha solicitado su nombre en ningún mensaje anterior de la conversación.  
+   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
+   ### TODAS ESTAS:
+   - El usuario lo aceptó explícitamente alguno de los horarios propuestos
+   ### EJEMPLOS:
+   - La aceptacion puede tener forma de "El de la mañana me parece bien", "El de la tarde me parece bien", "Me parece bien el horario de la mañana", "Me parece bien el horario de la tarde"
+   - La aceptacion puede ser repitiendo el horario ofrecido, como "Me parece bien el lunes a las 10:00 am", "Me parece bien el martes a las 4:00 pm"
+   ## NOTA IMPORTANTE: 
+   - Si cumple estas condiciones, clasifica SOLO como "Acepto horario" y no consideres otras categorías
 
 3. Dudas padecimiento
+   # EVALUACIÓN: RECENT_ONLY
+   ### TODAS ESTAS:
    - El último mensaje del usuario contiene preguntas específicas sobre sus síntomas o malestar
-   - NO está preguntando sobre procedimiento, ubicación ni precios
-   - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Dudas padecimiento" y no consideres otras categorías
+   - NO está preguntando sobre procedimiento
+   - NO esta preguntando sobre ubicacion
+   - No esta preguntando sobre precios
+   ## NOTA IMPORTANTE: 
+   - Si cumple estas condiciones, clasifica SOLO como "Dudas padecimiento" y no consideres otras categorías
 
 4. Rechazo horario
-   - Ya se ofreció un horario específico o dos
+   # EVALUACIÓN: INCLUDE_HISTORY
+   ## Condiciones que deben haberse cumplido en el historial:
+   ### AL MENOS UNA DE ESTAS:
+   - Ya se ofreció un horario específico
+   - Se ofrecio mas de un horario
+   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
+   ### AL MENOS UNA DE ESTAS:
    - El usuario indica explícitamente que NO puede asistir en ninguno de esos horarios
-   - El ultimo mensaje es de user y no de assistant
-   - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Rechazo horario" y no consideres otras categorías
+   - El usuario NO esta proponiendo un nuevo horario
+   - El usuario NO esta proponiendo una nueva fecha
+   - El usuario NO esta proponiendo una nueva semana
+   ## NOTA IMPORTANTE: 
+   - Si cumple estas condiciones, clasifica SOLO como "Rechazo horario" y no consideres otras categorías
 
 5. Solicita horario con precio
+   # EVALUACIÓN: INCLUDE_HISTORY
+   ## Condiciones que deben haberse cumplido en el historial:
+   ### TODAS ESTAS:
    - El usuario ya ha resuelto todas sus dudas médicas previas
-   - Ya preguntó por el precio Y lo aceptó o reconoció explícitamente
-   - NO se ha ofrecido todavía un horario o dos
-   - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?","cuando tienen citas","Que dia tienen cita","Me parece bien","esta bien","ok","excelente","Es con cita")
+   - Ya preguntó por el precio
+   - El usuario ya acepto el precio o lo reconocio
+   - NO se ha ofrecido todavía un horario o mas de uno
+   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:   
+   ### TODAS ESTAS:
+   - Contiene una solicitud general para agendar
    - NO incluye una fecha específica en su solicitud
-   - El ultimo mensaje es de user y no de assistant
-   - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario con precio" y no consideres otras categorías
+   ### EJEMPLOS:
+   - ¿Qué días atienden?
+   - ¿Cuál es su disponibilidad?
+   - cuando tienen citas
+   - Que dia tienen cita
+   - Me parece bien
+   - esta bien
+   - ok
+   - excelente
+   - Es con cita
+   ## NOTA IMPORTANTE: 
+   - Si cumple estas condiciones, clasifica SOLO como "Solicita horario con precio" y no consideres otras categorías
 
 6. Solicita horario sin precio
+   # EVALUACIÓN: INCLUDE_HISTORY
+   ## Condiciones que deben haberse cumplido en el historial:
+   ### TODAS ESTAS:
    - NO se ha proporcionado o discutido el precio aún
-   - El último mensaje contiene una solicitud general para agendar (ej: "¿Qué días atienden?", "¿Cuál es su disponibilidad?","cuando tienen citas","Que dia tienen cita","Me parece bien","esta bien","ok","excelente","Es con cita")
+   - NO incluye una fecha específica en su solicitud
+   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
+   ### TODAS ESTAS:
+   - Contiene una solicitud general para agendar
    - NO debe mencionar ninguna fecha, día, semana ni rango de fechas.
-   - El ultimo mensaje es de user y no de assistant
-   - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario sin precio" y no consideres otras categorías
+   ### EJEMPLOS:
+   - ¿Qué días atienden?
+   - ¿Cuál es su disponibilidad?
+   - cuando tienen citas
+   - Que dia tienen cita
+   - Me parece bien
+   - esta bien
+   - ok
+   - excelente
+   - Es con cita
+   ## NOTA IMPORTANTE: 
+   - Si cumple estas condiciones, clasifica SOLO como "Solicita horario sin precio" y no consideres otras categorías
 
 7. Solicita horario especifico
-    - El mensaje contiene una solicitud específica para agendar (ej: "¿Tienen cita el lunes?", "¿A qué hora tienen cita el martes?", "¿Tienen disponibilidad el viernes?", "¿Tienen citas hoy?","Tienen citas disponibles para el lunes?","¿A qué hora tienen cita el martes?","¿Tienen disponibilidad el viernes?","¿Tienen citas hoy?")
-    - El mensaje contiene una solicitud específica para agendar (ej: "Tienen citas disponibles para el miércoles?")
-    - El usuario menciona un día específico (ej: "lunes", "martes", "hoy", "mañana")
-    - El usuario menciona una fecha específica (ej: "2023-10-10", "15 de octubre")
-    - El usuario menciona un rango de fechas (ej: "del 10 al 15 de octubre")
-    - El usuario mensiona una semana, como la (ej: "la siguiente semana", "la proxima pasada", "la semana que viene")
-    - Si menciona día, fecha, semana o rango temporal (ej. “lunes”, “mañana”, “la semana que viene”, “15 de octubre”), clasifica como esta categoría sin importar si se preguntó precio o no.
-    - incluye una fecha específica en su solicitud, o un dia especifico como "hoy", "mañana", "lunes", "martes", etc.
-    - El ultimo mensaje es de user y no de assistant
-    - Importante: No debe contener una hora, solo la fecha.
-    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Solicita horario especifico" y no consideres otras categorías
+   #EVALUACIÓN: INCLUDE_HISTORY
+   ## Condiciones que deben haberse cumplido en el historial:
+   ### TODAS ESTAS:
+   - El usuario no ha aceptado ya un horario propuesto
+   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
+   ### TODAS ESTAS:
+   - No debe contener una hora.
+   ### AL MENOS UNA DE ESTAS:
+   - El mensaje contiene una solicitud específica para agendar
+   - El usuario menciona un día específico (ej: "lunes", "martes", "hoy", "mañana")
+   - El usuario menciona una fecha específica (ej: "2023-10-10", "15 de octubre")
+   - El usuario menciona un rango de fechas (ej: "del 10 al 15 de octubre")
+   - El usuario mensiona una semana, como la (ej: "la siguiente semana", "la proxima pasada", "la semana que viene")
+   - El usuario menciona día, fecha, semana o rango temporal (ej. “lunes”, “mañana”, “la semana que viene”, “15 de octubre”)
+   - incluye una fecha específica en su solicitud, o un dia especifico como "hoy", "mañana", "lunes", "martes", etc.  ### EJEMPLOS:
+   - ¿Tienen cita el lunes?
+   - ¿A qué hora tienen cita el martes?
+   - ¿Tienen disponibilidad el viernes?
+   - ¿Tienen citas hoy?
+   - Tienen citas disponibles para el lunes?
+   - ¿A qué hora tienen cita el martes?
+   - ¿Tienen disponibilidad el viernes?
+   - ¿Tienen citas hoy?
+   - Tienen citas disponibles para el miércoles?
+   ## NOTA IMPORTANTE: 
+   - Si cumple estas condiciones, clasifica SOLO como "Solicita horario especifico" y no consideres otras categorías
 
 8. Dudas procedimiento
-   - El último mensaje del usuario es específicamente sobre lo que se hará en consulta o lo que incluye
+   #EVALUACIÓN: INCLUDE_HISTORY
+   ## Condiciones que deben haberse cumplido en el historial:
+   ### TODAS ESTAS:
    - NO se ha proporcionado el precio aún
-   - Ejemplos: "¿qué me van a hacer?", "¿incluye el papanicolaou?"
-   - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Dudas procedimiento" y no consideres otras categorías
+   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
+   ### TODAS ESTAS:
+   - Es específicamente sobre lo que se hará en consulta o lo que incluye   
+   ### EJEMPLOS:
+   - ¿qué me van a hacer?
+   - ¿incluye el papanicolaou?
+   - ¿Que incluye?
+   ## NOTA IMPORTANTE: 
+    - Si cumple estas condiciones, clasifica SOLO como "Dudas procedimiento" y no consideres otras categorías
 
 9. Precio verrugas
-   - El último mensaje es específicamente sobre el precio para tratamiento de verrugas
-   - NO se ha proporcionado ese precio específico antes
-   - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio verrugas" y no consideres otras categorías
+   #EVALUACIÓN: INCLUDE_HISTORY
+   ## Condiciones que deben haberse cumplido en el historial:
+   ### TODAS ESTAS:
+   - Cuando se hablo de padecimiento, se mencionó específicamente verrugas
+   - NO se ha proporcionado precio aún
+   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:   
+   ### TODAS ESTAS:
+   - El usuario pregunta explícitamente sobre el precio o costo   
+   ## NOTA IMPORTANTE: 
+    - Si cumple estas condiciones, clasifica SOLO como "Precio verrugas" y no consideres otras categorías
 
 10. Precio prenatal
-    - El último mensaje es específicamente sobre el precio de consulta prenatal o seguimiento de embarazo
-    - NO se ha proporcionado ese precio específico antes
-    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio prenatal" y no consideres otras categorías
+   #EVALUACIÓN: INCLUDE_HISTORY
+   ## Condiciones que deben haberse cumplido en el historial:
+   ### TODAS ESTAS:
+   - Cuando se hablo de padecimiento, se mencionó específicamente embarazo o prenatal
+   - NO se ha proporcionado precio aún
+   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:   
+   ### TODAS ESTAS:
+   - El usuario pregunta explícitamente sobre el precio o costo
+   ### EJEMPLOS:
+   - Que incluye
+   - Que paquetes tienen
+   - ¿Cuánto cuesta?
+   ## NOTA IMPORTANTE: 
+    - Si cumple estas condiciones, clasifica SOLO como "Precio prenatal" y no consideres otras categorías
 
 11. Precio menopausia
-    - Previamente se hablo sobre menopausia, pre menopausia, climaterio o perimenopausia
-    - El último conjunto de mensajes es una pregunta explícita sobre el precio o costo 
-    - NO se ha proporcionado ese precio específico antes
-    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio menopausia" y no consideres otras categorías
+   #EVALUACIÓN: INCLUDE_HISTORY
+   ## Condiciones que deben haberse cumplido en el historial:
+   ### TODAS ESTAS:
+   - NO se ha proporcionado precio aún
+   ### AL MENOS UNA DE ESTAS:
+   - Cuando se hablo de padecimiento, se mencionó específicamente menopausia
+   - Cuando se hablo de padecimiento, se mencionó específicamente climaterio
+   - Cuando se hablo de padecimiento, se mencionó específicamente menopausia precoz
+   - Cuando se hablo de padecimiento, se mencionó específicamente menopausia temprana
+   - Cuando se hablo de padecimiento, se mencionó específicamente menopausia tardía
+   - Cuando se hablo de padecimiento, se mencionó específicamente menopausia prematura
+   - Cuando se hablo de padecimiento, se mencionó específicamente menopausia artificial
+   - Cuando se hablo de padecimiento, se mencionó específicamente menopausia quirúrgica
+   - Cuando se hablo de padecimiento, se mencionó específicamente menopausia inducida
+   - Cuando se hablo de padecimiento, se mencionó específicamente menopausia natural
+   - Cuando se hablo de padecimiento, se mencionó específicamente menopausia fisiológica
+   - Cuando se hablo de padecimiento, se mencionó específicamente menopausia biológica
+   - Cuando se hablo de padecimiento, se mencionó específicamente menopausia hormonal
+   - Cuando se hablo de padecimiento, se mencionó específicamente menopausia sintomática
+   - Cuando se hablo de padecimiento, se mencionó específicamente menopausia asintomática
+   - Cuando se hablo de padecimiento, se mencionó específicamente perimenopausia
+   - Cuando se hablo de padecimiento, se mencionó específicamente premenopausia
+   - Incluye el texto exacto "Dame un segundito para platicarte de las opciones que manejamos, por favor 🙌"
+   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
+   ### TODAS ESTAS:   
+   - El usuario pregunta explícitamente sobre el precio o costo
+   ### EJEMPLOS:
+   - Que incluye
+   - Cuanto cuesta
+   ## NOTA IMPORTANTE:    
+    - Si cumple estas condiciones, clasifica SOLO como "Precio menopausia" y no consideres otras categorías
 
 12. Precio consulta
-   - El último mensaje es una pregunta explícita sobre el precio o costo
-   - Puede expresar que quiere saber costo con frases como ("revisión ginecólogica anual","Revision anual","Cheque anual","Que incluye","Que paquetes tienen")
-   - NO se ha proporcionado ese precio específico antes
+   #EVALUACIÓN: INCLUDE_HISTORY
+   ## Condiciones que deben haberse cumplido en el historial:
+   ### TODAS ESTAS:
    - Aun no se le proporciona un precio
-   - El ultimo mensaje es de user y no de assistant
-   - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Precio consulta" y no consideres otras categorías
+   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
+   ### TODAS ESTAS:
+   - El último mensaje es una pregunta explícita sobre el precio o costo
+   ### EJEMPLOS:
+   - revisión ginecólogica anual
+   - Revision anual
+   - Cheque anual
+   - Que incluye
+   - Que paquetes tienen
+   ## NOTA IMPORTANTE: 
+    - Si cumple estas condiciones, clasifica SOLO como "Precio consulta" y no consideres otras categorías
 
 13. Ubicación aceptada con horario ofrecido
-    - Ya se proporcionó el domicilio completo
-    - El usuario responde que le queda cerca o que conoce el lugar
-    - Ya se ofreció un horario específico previamente
-    - El usuario expresa esta confirmación de conocimiento/aceptación de ubicación
-    - El ultimo mensaje es de user y no de assistant
-    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Ubicación aceptada con horario ofrecido" y no consideres las categorías "Ubicación" ni "Ubicación aceptada sin horario ofrecido"
+   #EVALUACIÓN: INCLUDE_HISTORY
+   ## Condiciones que deben haberse cumplido en el historial:
+   ### TODAS ESTAS:
+   - Ya se proporcionó el domicilio completo
+   - Ya se ofreció un horario específico previamente
+   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
+   ### AL MENOS UNA DE ESTAS:
+   - El usuario responde que le queda cerca o que conoce el lugar
+   - El usuario expresa esta confirmación de conocimiento/aceptación de ubicación
+   ## NOTA IMPORTANTE: 
+    - Si cumple estas condiciones, clasifica SOLO como "Ubicación aceptada con horario ofrecido" y no consideres otras categorías
 
 14. Ubicación aceptada sin horario ofrecido
-    - Ya se proporcionó el domicilio completo
-    - El usuario responde que le queda cerca o que conoce el lugar
-    - NO se ha ofrecido ningún horario específico aún
-    - El usuario expresa esta confirmación de conocimiento/aceptación de ubicación
-    - El ultimo mensaje es de user y no de assistant
-    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Ubicación aceptada sin horario ofrecido" y no consideres la categoría "Ubicación"
+   #EVALUACIÓN: INCLUDE_HISTORY
+   ## Condiciones que deben haberse cumplido en el historial:
+   ### TODAS ESTAS:
+   - Ya se proporcionó el domicilio completo
+   - NO se ha ofrecido ningún horario específico aún
+   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
+   ### AL MENOS UNA DE ESTAS:
+   - El usuario responde que le queda cerca o que conoce el lugar
+   - El usuario expresa esta confirmación de conocimiento/aceptación de ubicación
+   ## NOTA IMPORTANTE: 
+    - Si cumple estas condiciones, clasifica SOLO como "Ubicación aceptada sin horario ofrecido" y no consideres otras categorías
 
 15. Ubicación
-    - El último mensaje contiene una pregunta explícita sobre la ubicación física de la clínica
-    - Ejemplos: "¿Dónde están ubicados?", "¿En qué calle es?", "¿Cuál es la dirección?"
-    - NO se ha proporcionado el domicilio previamente
-    - El ultimo mensaje es de user y no de assistant
-
-    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Ubicación" y no consideres otras categorías
+   #EVALUACIÓN: INCLUDE_HISTORY
+   ## Condiciones que deben haberse cumplido en el historial:
+   ### TODAS ESTAS:
+   - No se ha proporcionado la ubicacion aún
+   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
+   ### TODAS ESTAS:
+   - El usuario hace una pregunta explícita sobre la ubicación física de la clínica
+   ### EJEMPLOS:
+   - El usuario pregunta por la dirección, calle o ubicación de la clínica
+   - ¿Dónde están ubicados?
+   - ¿En qué calle es?
+   - ¿Cuál es la dirección?
+   ## NOTA IMPORTANTE: 
+    - Si cumple estas condiciones, clasifica SOLO como "Ubicación" y no consideres otras categorías
 
 16. Agradecimiento
-    - Ya se resolvieron todas las dudas del usuario o ya se confirmó completamente la cita
-    - El último mensaje contiene exclusivamente un agradecimiento o despedida
-    - Ejemplos: "Gracias", "Perfecto, gracias", "Nos vemos", "Gracias, igualmente"
-    - IMPORTANTE: Si cumple estas condiciones, clasifica SOLO como "Agradecimiento" y no consideres otras categorías
+   #EVALUACIÓN: INCLUDE_HISTORY
+   ## Condiciones que deben haberse cumplido en el historial:
+   ### TODAS ESTAS:
+   - Ya se resolvieron todas las dudas del usuario o ya se confirmó completamente la cita
+   ## Condiciones que deben cumplirse SOLO en los mensajes recientes del usuario:
+   ### TODAS ESTAS:
+   - El usuario esta agradeciendoo despidiendose
+   ### EJEMPLOS:
+   - Gracias
+   - Perfecto
+   - gracias
+   - Nos vemos
+   - Gracias
+   - igualmente
+   ## NOTA IMPORTANTE: 
+   - Si cumple estas condiciones, clasifica SOLO como "Agradecimiento" y no consideres otras categorías
 
 17. Otro
-    - La conversación NO encaja en ninguna de las categorías anteriores, incluyendo:
-    - Ya se proporcionó el precio y el usuario lo vuelve a solicitar
-    - El mensaje es ambiguo, irrelevante o trata temas no considerados (ej. trámites, quejas, otros servicios)
-    - Se intenta clasificar en una categoría que ya apareció previamente en la conversación (de la lista mencionada al principio)
-    - IMPORTANTE: Utiliza esta categoría SOLO si ninguna de las anteriores aplica o si la categoría adecuada ya fue utilizada antes
+   ## Condiciones para clasificar como "Otro":
+   ### AL MENOS UNA DE ESTAS:
+   - La conversación NO encaja en ninguna de las categorías anteriores.
+   - Ya se proporcionó el precio y el usuario lo vuelve a solicitar.
+   - El mensaje es ambiguo, irrelevante o trata temas no considerados (ej. trámites, quejas, otros servicios).
+   - Se intenta clasificar en una categoría que ya apareció previamente en la conversación (de la lista mencionada al principio).
+   ### IMPORTANTE:
+   - Utiliza esta categoría SOLO si ninguna de las anteriores aplica o si la categoría adecuada ya fue utilizada antes.
 
 Solo responde con el nombre exacto de la categoría.
 Toma en cuenta la hora de llegada de los mensajes para determinar el orden cronológico de la conversación.
@@ -159,9 +328,18 @@ Revisa el historial completo de la conversación para verificar si alguna catego
     response = client.responses.create(
         model=gpt_model,
         input=[
-            {"role": "system", "content": "Eres un médico ginecologo que sabe mucho sobre el ciclo mentrual y clasifica conversaciones médicas según reglas estrictas."},
-            {"role": "user", "content": reglas},
-            {"role": "user", "content": f"""Ahora clasifica esta conversacion:\n {conversacion_formateada}"""}
+            {
+                "role": "system",
+                "content": "Eres un médico ginecólogo que sabe mucho sobre el ciclo menstrual y clasifica conversaciones médicas según reglas estrictas."
+            },
+            {
+                "role": "user",
+                "content": f"Estas son las reglas:\n\n{reglas}"
+            },
+            {
+                "role": "user",
+                "content": f"""Clasifica esta conversación enfocándote principalmente en los mensajes recientes del usuario desde la última intervención del agente:\n\n{bloque_reciente_usuario}\n\nTambién considera el historial completo de la conversación por si alguna categoría requiere contexto previo:\n\n{conversacion_formateada}"""
+            }
         ],
         temperature=0  # Ajustar la temperatura a 0.1
     )
