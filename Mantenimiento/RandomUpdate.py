@@ -56,7 +56,7 @@ def update_sql_funnel_state(identifier, new_state):
         print(f"[{identifier}] Error al actualizar SQL: {e}")
 
 # Iterar sobre contactos
-for contact_id in range(2066, 2600):
+for contact_id in range(1, 2810):
     contacto = get_chatwoot_contact(contact_id)
     if not contacto:
         continue
