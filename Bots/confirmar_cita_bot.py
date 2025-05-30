@@ -36,6 +36,12 @@ def ConfirmarCitaBot(Detalles):
             #print(f"update query: {cmd}")
             send_conversation_message(conversation_id, respuesta, is_private=False, buzon=ChatwootSenders.Pacientes)
             RevisaFormularios(conversation_id,contact_id)
+        elif last_message_content =="No, reagendar":
+            cmd=f"SELECT top 1 [ID] FROM [dbo].[vw_CalendarEventsExtracted] where [Paciente ID] = {contact_id} order by start_datetime desc"
+            ultima_cita=ExecuteScalar(cmd)
+            print(f"Ultima cita: {ultima_cita}")
+            cmd=f"UPDATE [cal].[CalendarEvents] SET LocalUpdate=1,[summary]= 'Cancelada' WHERE ID='{ultima_cita}'"
+            ejecutar_update(cmd)
         else:
             send_conversation_message(conversation_id, 'Hola soy Robot, me ayudan con esto?', is_private=True, buzon=ChatwootSenders.Pacientes)
     except Exception as e:
