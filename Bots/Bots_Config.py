@@ -27,3 +27,7 @@ custom_commands = ["Cita",
                    "★",
                    "★★★"]
 agenda_medico="1.- Ver detalles"
+
+constelaciones_messages = ["Hola vi tu sitio en Google y quiero una consulta de constelaciones familiares. ",
+                           "Hola vi tu sitio en Google y quiero una consulta de constelaciones familiares.",
+                           "Constelar"]
