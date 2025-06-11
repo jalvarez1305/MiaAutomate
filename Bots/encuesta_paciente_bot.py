@@ -51,7 +51,6 @@ def EncuestaPacienteBot(Detalles):
             update_query=f"EXEC CalificaConsulta {calificacion}, {contact_id}"
             ejecutar_update(update_query)
         else:
-            send_conversation_message(conversation_id, '@Pablo soy Robot, no puedo responder esto', is_private=True, buzon=ChatwootSenders.Pacientes)
             remove_bot_attribute(conversation_id)
 
     except Exception as e:
