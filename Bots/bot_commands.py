@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../B
 
 from BlastHelper import SendBlast
 from CW_Conversations import send_conversation_message,send_audio_mp3_via_twilio
-from CW_Contactos import actualizar_etiqueta,asignar_a_agente
+from CW_Contactos import actualizar_etiqueta,asignar_a_agente,actualizar_lead_source
 from SQL_Helpers import GetFreeTime
 
 
@@ -40,6 +40,10 @@ def BotCommands(Detalles):
         elif last_message_content == "Reagendar" or last_message_content == "No, reagendar":            
             time.sleep(20)
             send_conversation_message(conversation_id,"con todo gusto hermosa, cuentame que dia te gustaria para tu cita?",False)
+        elif last_message_content == "Hola!":  
+            actualizar_lead_source(contact_id,"Rosario")          
+            time.sleep(20)
+            send_conversation_message(conversation_id,"Hola Hermosa, soy Yaneth la asistente de la CLinica y de Rosario, a tus ordenes",False)
         elif last_message_content == "★" or last_message_content == "★★★":     
             print("Tuvimos una mala experiencia")
             # Se asigna la etiqueta de mala experiencia       

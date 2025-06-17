@@ -16,7 +16,7 @@ from CW_Conversations import send_conversation_message, ChatwootSenders,send_aud
 from CW_Contactos import actualizar_interes_en,actualizar_etiqueta,asignar_a_agente,actualizar_lead_source
 from SQL_Helpers import GetFreeTime,GetFreeTimeForDate
 from CW_Automations import send_content
-from Bots_Config import audio_gyne,facebook_messages,google_messages
+from Bots_Config import audio_gyne,facebook_messages,google_messages,rosario_messages
 from datetime import datetime
 
 # Configurar logging
@@ -101,6 +101,9 @@ def GyneGeneralBot(Detalles):
             elif last_message_content in google_messages:
                 logging.info(f"Actualizando el lead source a Google")
                 actualizar_lead_source(contact_id,"Google")
+            elif last_message_content in rosario_messages:
+                logging.info(f"Actualizando el lead source a Rosario")
+                actualizar_lead_source(contact_id,"Rosario")
             else:
                 logging.info(f"Actualizando el lead source a Facebook")
                 actualizar_lead_source(contact_id,"Facebook")
