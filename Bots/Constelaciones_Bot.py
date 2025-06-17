@@ -47,7 +47,6 @@ def Constelaciones_Bot(Detalles):
         logging.error(f"Error en Constelaciones_Bot: {str(e)}")  # Manejo de errores con logging
 
 def AsignaConversacion(conversation_id):
-    actualizar_etiqueta(conversation_id,"agendar_cita")
     asignar_a_agente(conversation_id)
 
 def MandarMensajeSaludo(conversation_id,contact_phone,contact_id):
