@@ -42,6 +42,40 @@ def ResolverPadecimiento(ConvMessages):
   )
   return response.output_text
 
+def ResolverProcedimiento(ConvMessages):
+  # Obtener el contexto adicional de Pinecone (o cualquier otra fuente que uses)
+  mensajes_usuario = obtener_ultimos_mensajes_usuario(ConvMessages)
+  user_question = "\n".join([msg["content"] for msg in mensajes_usuario])
+  texto = json.dumps(user_question)
+  context = get_context(texto)
+  all_mesg=[
+            {"role": "system", "content": f"Contexto adicional: {context}"},
+            {"role": "system", "content": """Eres un medico que resuelve dudas sobre los procedimientos que se realizan en una consulta ginecologica, no proporcionas tratamiento
+                                            unicamente le resuelves las dudas sobre procedimientos y por que es importante agendar una cita"""},
+            {"role": "system", "content": """tus respuestas deben venir exclusivamente del contexto para que tus respuestas se parezcan a como assitant ha respondido a conversaciones anteriores"""},
+            {"role": "system", "content": """No debes proporcionar precios ni horarios"""},
+            {"role": "system", "content": """El flujo debe ser el siguiente:
+                                            El usuario contacta.
+                                            Le preguntamos si es una revisión general o si tiene un padecimiento específico.
+                                            Nos proporciona sus dudas sobre los procedimientos.
+                                            Buscamos en el contexto de conversaciones anteriores sobre los procesos.
+                                            Le respondemos del procedimiento o procesos.
+                                            Si tiene más dudas del procedimitno, le respondemos con el contexto.                        
+                                            Si puedes proporcionar posibles causas, pero no puedes ofrecer tratamientos
+                                            No finalices preguntando dudas
+                                            No digas consulta a tu medico, habla siempre en primera primersona
+                                            Se amable, le hablas a mujeres e incluye 1 o dos emojis
+                                            Estas hablando por whatsapp, se brebre y usa el formato apropiado
+                                            Se breve
+                                            Si el contexto no tiene la informacion ue necesitas, responde este texto exacto 'Dame un segundito por favor,lo estoy consultando con la doctora'"""}
+        ]+ConvMessages
+  response = client.responses.create(
+      model=gpt_model,
+      input=all_mesg,
+      temperature=0  # Ajustar la temperatura a 0.1
+  )
+  return response.output_text
+
 def ghosted_clasification(ConvMessages):
     """
     :param conversacion: Lista de mensajes en orden cronológico. 

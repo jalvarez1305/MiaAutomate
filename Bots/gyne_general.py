@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../l
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../AI')))
 
 
-from GinecologiaAI import ResolverPadecimiento
+from GinecologiaAI import ResolverPadecimiento,ResolverProcedimiento
 from OpenIAHelper import conv_clasification,get_requested_date
 from CW_Conversations import send_conversation_message, ChatwootSenders,send_audio_mp3_via_twilio, envia_mensaje_plantilla, remove_bot_attribute,get_AI_conversation_messages,segundos_entre_ultimos_mensajes
 from CW_Contactos import actualizar_interes_en,actualizar_etiqueta,asignar_a_agente,actualizar_lead_source
@@ -131,6 +131,11 @@ def GyneGeneralBot(Detalles):
                     respuesta_padecimiento=ResolverPadecimiento(msg_arr)                    
                     send_conversation_message(conversation_id,respuesta_padecimiento,False)
                     if respuesta_padecimiento == "Dame un segundito para darte la informacion precisa, por favor":
+                        send_conversation_message(conversation_id,"Ayuda",True)
+                elif respuesta =="Dudas procedimiento":
+                    respuesta_procedimiento=ResolverProcedimiento(msg_arr)                    
+                    send_conversation_message(conversation_id,respuesta_procedimiento,False)
+                    if respuesta_padecimiento == "Dame un segundito por favor,lo estoy consultando con la doctora":
                         send_conversation_message(conversation_id,"Ayuda",True)
                 elif respuesta =="Solicita horario con precio" or respuesta =="Solicita horario sin precio" or respuesta =="Ubicación aceptada sin horario ofrecido":
                     horarios = GetFreeTime(Consultorio=6)
