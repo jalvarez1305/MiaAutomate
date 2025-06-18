@@ -10,7 +10,7 @@ facebook_messages = ["¡Hola! Podrías darme más información de…",
                      "¡Hola! Quiero agendar una cita de valoracion",
                      "Información",
                      "¡Hola! Quiero más información.",
-                     "¡Hola! Quiero agendar una cita de ginecología con la promo del descuento"
+                     "¡Hola! Quiero agendar una cita de ginecología con la promo del descuento",
                      "¡Hola! Quiero agendar una cita para un  Papanicolaou con 50%% de descuento",
                      "¡Hola! Quiero agendar una cita de ginecología con la promo del 10%%",
                      "Hola vi tu sitio en Google y quiero una consulta Ginecológica.",
