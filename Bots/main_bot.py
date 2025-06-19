@@ -9,11 +9,12 @@ from Bot_Paps import BotPaps
 from bot_commands import BotCommands
 from gyne_general import GyneGeneralBot
 from Constelaciones_Bot import Constelaciones_Bot
+from Labioplastia_Bot import Labioplastia_Bot
 from confirmar_cita_bot import ConfirmarCitaBot
 from encuesta_paciente_bot import EncuestaPacienteBot
 from agenda_bot import AgendaBot
 from helper import parse_conversation_payload
-from Bots_Config import paps_messages,facebook_messages,custom_commands,agenda_medico,constelaciones_messages
+from Bots_Config import paps_messages,facebook_messages,custom_commands,agenda_medico,constelaciones_messages,labioplastia_messages
 # Obtener el directorio padre (donde está ubicado 'libs')
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(parent_dir)
@@ -53,6 +54,9 @@ def chatwoot_webhook():
     elif new_msg in constelaciones_messages:
         logging.info(f"Se ejecuta BOT {split_data.get('bot_attribute', 'Constelaciones_Bot')}")
         Constelaciones_Bot(split_data)
+    elif new_msg in labioplastia_messages:
+        logging.info(f"Se ejecuta BOT {split_data.get('bot_attribute', 'Labioplastia_Bot')}")
+        Labioplastia_Bot(split_data)
     elif new_msg == agenda_medico:
         logging.info(f"Se ejecuta BOT Agenda Medico")
         AgendaBot(split_data)

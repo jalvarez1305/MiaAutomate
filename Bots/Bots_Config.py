@@ -37,3 +37,5 @@ agenda_medico="1.- Ver detalles"
 constelaciones_messages = ["Hola vi tu sitio en Google y quiero una consulta de constelaciones familiares. ",
                            "Hola vi tu sitio en Google y quiero una consulta de constelaciones familiares.",
                            "Constelar"]
+
+labioplastia_messages = ["Hola vi tu sitio en Google y quiero más información de Labioplastia."]
