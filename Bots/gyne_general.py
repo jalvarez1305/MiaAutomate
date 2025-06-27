@@ -135,7 +135,9 @@ def GyneGeneralBot(Detalles):
                 elif respuesta =="Dudas procedimiento":
                     respuesta_procedimiento=ResolverProcedimiento(msg_arr)                    
                     send_conversation_message(conversation_id,respuesta_procedimiento,False)
-                    if respuesta_padecimiento == "Dame un segundito por favor,lo estoy consultando con la doctora":
+                    if respuesta_padecimiento == "Dame un segundito por favor,lo estoy consultando con la doctora" \
+                        or respuesta_padecimiento == "Dame un segundito por favor,lo estoy consultando con la doctora." \
+                        or respuesta_padecimiento == "Dame un segundito para darte la información precisa, por favor.":
                         send_conversation_message(conversation_id,"Ayuda",True)
                 elif respuesta =="Solicita horario con precio" or respuesta =="Solicita horario sin precio" or respuesta =="Ubicación aceptada sin horario ofrecido":
                     horarios = GetFreeTime(Consultorio=6)
