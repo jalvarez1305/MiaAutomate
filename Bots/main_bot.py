@@ -22,6 +22,7 @@ from AI.OpenIAHelper import conv_close_sale
 from libs.SaveConversations import Conversacion
 from libs.CW_Conversations import get_AI_conversation_messages
 from libs.CW_Contactos import asignar_a_agente,devolver_llamada
+from libs.TwilioHandler import get_child_call_status
 
 app = Flask(__name__)
 
@@ -185,20 +186,25 @@ def asignar_nuevas_conversaciones():
 
 @app.route('/twilio/callend', methods=['GET', 'POST'])
 def llamada_telefonica_terminada():
-    data = request.form.to_dict()  # Convierte el form data a dict
-    print("Payload en formato JSON:")
-    print(data)
-    dial_status = request.form.get('DialCallStatus')
-    call_direction = request.form.get('CallDirection')
-    from_number = request.form.get('From')
+    data = request.form.to_dict()
+    #print("Payload en formato JSON:")
+    #print(data)
+
+    parent_call_sid = data.get('CallSid')  # El CallSid de esta llamada INBOUND es el Parent de la OUTBOUND
+    call_direction = data.get('CallDirection')
+    from_number = data.get('From')
+
     if from_number and from_number.startswith('+52'):
-        from_number = from_number.replace('+52', '+521', 1)  # Solo el primer '+52'
-    
-    if call_direction and call_direction.startswith('outbound'):
-        if dial_status in ['no-answer', 'busy']:
-            # Aquí envías alerta, guardas en BD, etc.
-            print(f"Llamada no contestada o ocupada: {dial_status}, FROM: {from_number}")
-            #devolver_llamada(from_number)
+        from_number = from_number.replace('+52', '+521', 1)
+
+    if parent_call_sid:
+        child_status = get_child_call_status(parent_call_sid)
+        print(f"Estado de la llamada hija: {child_status}")
+
+        if child_status in ['no-answer', 'busy']:
+            print(f"Llamada NO contestada o ocupada: {child_status}, FROM: {from_number}")
+            devolver_llamada(from_number)
+
     return '<Response></Response>', 200
 
 
@@ -232,7 +238,7 @@ def outgoing_call():
 
     twiml = f"""
     <Response>
-      <Dial callerId="+523359800797">
+      <Dial callerId="+523359800766">
         <Number>{to_number}</Number>
       </Dial>
     </Response>

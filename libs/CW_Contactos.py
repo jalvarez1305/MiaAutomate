@@ -116,28 +116,27 @@ def iniciar_Conv(phone_number,tipo_contacto):
     elif tipo_contacto == "paciente":
         template_id = 'HX74e4965ec8f33d8b086ad6f2b654ae5d'
     query = f"""
-        SELECT  id, phone_number, custom_attributes_nickname
+        SELECT  id, phone_number, coalesce(custom_attributes_nickname,'Hermosa') custom_attributes_nickname
         FROM            CW_Contacts
         where phone_number ='{phone_number}'
     """ 
     SendBlast(template_id, bot_name=None, query=query)
 
 def get_tipo_contacto(phone_number):
-    cmd = f""""
-            SELECT [custom_attributes_es_prospecto]
-            FROM [dbo].[CW_Contacts]
-            where phone_number='{phone_number}'
-        """
+    cmd = f"SELECT [custom_attributes_es_prospecto] FROM [dbo].[CW_Contacts] where phone_number='{phone_number}'"
     prospecto= ExecuteScalar(cmd)
     if prospecto is None:
         print(f"No se encontró el contacto con el número {phone_number}.")
         return "prospecto"
-    elif prospecto == "1":
+    elif prospecto == 'True':
         print(f"El contacto con el número {phone_number} es un prospecto que ya tenia conversaciones antes.")
         return "citado"
-    elif prospecto == "0":
+    elif prospecto == 'False':
         print(f"El contacto con el número {phone_number} es un paciente o citado.")
         return "paciente"
+    else:
+        print(f"El contacto con el número {phone_number} no es un prospecto, paciente o citado.")
+        return "desconocido"
     
 def crear_contacto(phone_number):
     """
