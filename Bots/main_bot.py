@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,Response
 import logging
 import socket
 import os
@@ -21,7 +21,7 @@ sys.path.append(parent_dir)
 from AI.OpenIAHelper import conv_close_sale
 from libs.SaveConversations import Conversacion
 from libs.CW_Conversations import get_AI_conversation_messages
-from libs.CW_Contactos import asignar_a_agente
+from libs.CW_Contactos import asignar_a_agente,devolver_llamada
 
 app = Flask(__name__)
 
@@ -183,9 +183,66 @@ def asignar_nuevas_conversaciones():
         print(f"🚨 Error al asignar la conversación {conversation_id}: {e}")
         return jsonify({"error": "Error al asignar la conversación"}), 500
 
+@app.route('/twilio/callend', methods=['POST'])
+def llamada_telefonica_terminada():
+    data = request.form.to_dict()  # Convierte el form data a dict
+    print("Payload en formato JSON:")
+    print(data)
+    dial_status = request.form.get('DialCallStatus')
+    call_direction = request.form.get('CallDirection')
+    from_number = request.form.get('From')
+    if from_number and from_number.startswith('+52'):
+        from_number = from_number.replace('+52', '+521', 1)  # Solo el primer '+52'
+    
+    if call_direction and call_direction.startswith('outbound'):
+        if dial_status in ['no-answer', 'busy']:
+            # Aquí envías alerta, guardas en BD, etc.
+            print(f"Llamada no contestada o ocupada: {dial_status}, FROM: {from_number}")
+            #devolver_llamada(from_number)
+    return '<Response></Response>', 200
+
+
+@app.route('/calltosip', methods=['GET', 'POST'])
+def call_to_sip():
+    print("Reenviando llamada a SIP")
+    twiml = """<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Dial>
+    <Sip>sip:Zoiper@mia.sip.twilio.com</Sip>
+  </Dial>
+</Response>"""
+    return Response(twiml, mimetype='text/xml')
+
+
+@app.route('/outgoingcall', methods=['POST'])
+def outgoing_call():
+    print("----- Incoming Outgoing Call Request -----")
+    for key, value in request.values.items():
+        print(f"{key}: {value}")
+
+    to_number = request.values.get('To', '')
+    print(f"Destino a marcar: {to_number}")
+
+    # Extraer solo el número en formato E.164 si viene en formato SIP URI
+    if 'sip:' in to_number:
+        to_number = to_number.split(':')[1].split('@')[0]
+
+    if not to_number.startswith('+'):
+        to_number = '+52' + to_number  # ajusta según país si es necesario
+
+    twiml = f"""
+    <Response>
+      <Dial callerId="+523359800797">
+        <Number>{to_number}</Number>
+      </Dial>
+    </Response>
+    """
+    print("TwiML generado:")
+    print(twiml)
+    return Response(twiml, mimetype='text/xml')
 
 if __name__ == '__main__':
-    host_ip = 'localhost'  # Default to localhost
+    host_ip = '0.0.0.0'  # Default to localhost
     try:
         # Intentar enlazar a 74.208.33.184 para ver si está disponible
         test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

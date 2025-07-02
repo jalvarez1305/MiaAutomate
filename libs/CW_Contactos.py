@@ -1,8 +1,11 @@
+import sys
 import requests
 import os
 from dotenv import load_dotenv
 
-from SQL_Helpers import execute_query,update_sql_funnel_state
+from SQL_Helpers import execute_query,update_sql_funnel_state,ExecuteScalar
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../Blast')))
+
 
 # Cargar las variables de entorno desde el archivo .env
 load_dotenv()
@@ -87,6 +90,88 @@ def actualizar_etiqueta(conv_id, label):
     else:
         print(f"Error al actualizar la etiqueta: {response.status_code}")
         print(conv_id)
+
+def devolver_llamada(phone_number):
+    """
+    Cuando se recibe una llamada perdida en el webhoow inicia una conversacion con el contacto si ya existe
+    Si no existe se crea y despues se inicia conversacion
+    Si ya existe pero aun no es paciente se crea una conversacion diferente
+    """
+    tipo_contacto=get_tipo_contacto(phone_number)
+    if tipo_contacto == "paciente" \
+        or tipo_contacto == "citado":
+        iniciar_Conv(phone_number,tipo_contacto)
+    elif tipo_contacto == "prospecto":
+        crear_contacto(phone_number)
+        iniciar_Conv(phone_number,tipo_contacto)
+
+def iniciar_Conv(phone_number,tipo_contacto):
+    """
+    Inicia una conversación en Chatwoot con el contacto dado"""
+    from BlastHelper import SendBlast
+    if tipo_contacto == "prospecto":
+        template_id = 'HX4e3a35af08905947b55d7be6c840654d'   
+    elif tipo_contacto == "citado":
+        template_id = 'HX448ce843951d1867f4eb9531a48c3e85'
+    elif tipo_contacto == "paciente":
+        template_id = 'HX74e4965ec8f33d8b086ad6f2b654ae5d'
+    query = f"""
+        SELECT  id, phone_number, custom_attributes_nickname
+        FROM            CW_Contacts
+        where phone_number ='{phone_number}'
+    """ 
+    SendBlast(template_id, bot_name=None, query=query)
+
+def get_tipo_contacto(phone_number):
+    cmd = f""""
+            SELECT [custom_attributes_es_prospecto]
+            FROM [dbo].[CW_Contacts]
+            where phone_number='{phone_number}'
+        """
+    prospecto= ExecuteScalar(cmd)
+    if prospecto is None:
+        print(f"No se encontró el contacto con el número {phone_number}.")
+        return "prospecto"
+    elif prospecto == "1":
+        print(f"El contacto con el número {phone_number} es un prospecto que ya tenia conversaciones antes.")
+        return "citado"
+    elif prospecto == "0":
+        print(f"El contacto con el número {phone_number} es un paciente o citado.")
+        return "paciente"
+    
+def crear_contacto(phone_number):
+    """
+    Crea un contacto en Chatwoot con el número telefónico dado
+    como nombre y lead_source 'llamada'
+    """
+    url = f"{base_url}/contacts"
+    headers = {
+        "Content-Type": "application/json",
+        "api_access_token": cw_token
+    }
+
+    data = {
+        "name": phone_number,
+        "phone_number": phone_number,
+        "custom_attributes": {
+            "lead_source": "llamada",
+            "interes_en": "https://miaclinicasdelamujer.com/gynecologia",
+            "es_prospecto": "1"
+        }
+    }
+
+    response = requests.post(url, json=data, headers=headers)
+
+    if response.status_code == 200:
+        contact_data = response.json()
+        contact_id = contact_data.get("id")
+        print(f"Contacto creado correctamente con ID {contact_id}.")
+        return contact_id
+    else:
+        print(f"Error al crear el contacto: {response.status_code}")
+        print(response.json())
+        return None
+
 
 def asignar_a_agente(conv_id, agente_id=15):
     # Configuración de la URL y encabezados de autenticación

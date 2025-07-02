@@ -16,6 +16,7 @@ from BlastHelper import SendBlast
 from CW_Conversations import send_conversation_message,send_audio_mp3_via_twilio
 from CW_Contactos import actualizar_etiqueta,asignar_a_agente,actualizar_lead_source
 from SQL_Helpers import GetFreeTime
+from Bots_Config import llamada_msg
 
 
 # Configurar logging
@@ -63,6 +64,8 @@ def BotCommands(Detalles):
             else:
                 time.sleep(20)
                 send_conversation_message(conversation_id,horarios,False)
+        elif last_message_content == llamada_msg:  
+            actualizar_etiqueta(conversation_id,"citagyne") 
     except Exception as e:
         logging.error(f"Error en bot_commands: {str(e)}")  # Manejo de errores con logging
 
