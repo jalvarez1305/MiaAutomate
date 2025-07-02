@@ -248,15 +248,21 @@ def outgoing_call():
     return Response(twiml, mimetype='text/xml')
 
 if __name__ == '__main__':
-    host_ip = '0.0.0.0'  # Default to localhost
+    import socket
+    import logging
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    cert_path = os.path.join(base_dir, 'cert.pem')
+    key_path = os.path.join(base_dir, 'key.pem')
+
+    host_ip = '0.0.0.0'
     try:
-        # Intentar enlazar a 74.208.33.184 para ver si está disponible
         test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        test_socket.bind(('74.208.33.184', 0))  # Usa el puerto 0 para no necesitar uno específico
+        test_socket.bind(('74.208.33.184', 0))
         test_socket.close()
-        host_ip = '74.208.33.184'  # Si funciona, cambia a la IP especificada
+        host_ip = '74.208.33.184'
         logging.info("Ejecutando en 74.208.33.184")
     except Exception as e:
         logging.warning(f"No se puede enlazar a 74.208.33.184, se usará localhost: {e}")
-    
-    app.run(host=host_ip, port=5001)
+
+    app.run(host=host_ip, port=5001, ssl_context=(cert_path, key_path))
