@@ -2,6 +2,7 @@ import sys
 import requests
 import os
 from dotenv import load_dotenv
+import time
 
 from SQL_Helpers import execute_query,update_sql_funnel_state,ExecuteScalar
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../Blast')))
@@ -108,6 +109,7 @@ def devolver_llamada(phone_number):
 def iniciar_Conv(phone_number,tipo_contacto):
     """
     Inicia una conversación en Chatwoot con el contacto dado"""
+    time.sleep(10)
     from BlastHelper import SendBlast
     if tipo_contacto == "prospecto":
         template_id = 'HX4e3a35af08905947b55d7be6c840654d'   
