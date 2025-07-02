@@ -183,7 +183,7 @@ def asignar_nuevas_conversaciones():
         print(f"🚨 Error al asignar la conversación {conversation_id}: {e}")
         return jsonify({"error": "Error al asignar la conversación"}), 500
 
-@app.route('/twilio/callend', methods=['POST'])
+@app.route('/twilio/callend', methods=['GET', 'POST'])
 def llamada_telefonica_terminada():
     data = request.form.to_dict()  # Convierte el form data a dict
     print("Payload en formato JSON:")
