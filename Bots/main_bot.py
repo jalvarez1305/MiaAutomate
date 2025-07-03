@@ -21,7 +21,7 @@ sys.path.append(parent_dir)
 from AI.OpenIAHelper import conv_close_sale
 from libs.SaveConversations import Conversacion
 from libs.CW_Conversations import get_AI_conversation_messages
-from libs.CW_Contactos import asignar_a_agente,devolver_llamada,get_linphone_name
+from libs.CW_Contactos import asignar_a_agente,devolver_llamada,get_linphone_name,get_tipo_contacto,crear_contacto
 from libs.TwilioHandler import get_child_call_status
 
 app = Flask(__name__)
@@ -213,11 +213,16 @@ def call_to_sip():
     from_number = request.values.get('From', '')
     if from_number and from_number.startswith('+52'):
         from_number = from_number.replace('+52', '+521', 1)
-    contacto=get_linphone_name(from_number)
-    print("Reenviando llamada a SIP, contacto:", contacto)
+    tipo_contacto = get_tipo_contacto(from_number)
+    if tipo_contacto == "prospecto":
+        new_contid=crear_contacto(from_number)
+        caller_id=f'Prospecto--{new_contid}'
+    else:
+        caller_id=get_linphone_name(from_number)
+    print("Reenviando llamada a SIP, contacto:", caller_id)
     twiml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Dial callerId="{contacto}">
+  <Dial callerId="{caller_id}">
     <Sip>sip:linphone@mia.sip.twilio.com</Sip>
   </Dial>
 </Response>"""

@@ -192,7 +192,7 @@ def crear_contacto(phone_number):
 
     if response.status_code == 200:
         contact_data = response.json()
-        contact_id = contact_data.get("id")
+        contact_id = contact_data["payload"]["contact"]["id"]
         print(f"Contacto creado correctamente con ID {contact_id}.")
         return contact_id
     else:
