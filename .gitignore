@@ -17,12 +17,10 @@ PyLibrary/.env
 /libs/__pycache__
 /Bots/__pycache__
 *.pyc
-/libs
 /CW_Close_Conversations
 /libs/__pycache__
 /libs/__pycache__
 /libs/__pycache__
-/libs
 /Bots/__pycache__
 *.pyc
 *.pyc
