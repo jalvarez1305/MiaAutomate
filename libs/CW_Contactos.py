@@ -116,11 +116,8 @@ def iniciar_Conv(phone_number,tipo_contacto):
         where phone_number ='{phone_number}'
     """ 
     from BlastHelper import SendBlast
-    if tipo_contacto == "prospecto":
+    if tipo_contacto == "prospecto" or tipo_contacto == "citado":
         template_id = 'HX4e3a35af08905947b55d7be6c840654d'  
-        SendBlast(template_id, bot_name=None, query=query,etiqueta='citagyne')
-    elif tipo_contacto == "citado":
-        template_id = 'HX448ce843951d1867f4eb9531a48c3e85'
         SendBlast(template_id, bot_name=None, query=query,etiqueta='citagyne')
     elif tipo_contacto == "paciente":
         template_id = 'HX74e4965ec8f33d8b086ad6f2b654ae5d'
