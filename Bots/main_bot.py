@@ -210,7 +210,10 @@ def llamada_telefonica_terminada():
 
 @app.route('/calltosip', methods=['GET', 'POST'])
 def call_to_sip():
-    contacto=get_linphone_name(phone_number=request.values.get('From', ''))
+    from_number = request.values.get('From', '')
+    if from_number and from_number.startswith('+52'):
+        from_number = from_number.replace('+52', '+521', 1)
+    contacto=get_linphone_name(from_number)
     print("Reenviando llamada a SIP, contacto:", contacto)
     twiml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Response>
