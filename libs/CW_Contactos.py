@@ -110,19 +110,21 @@ def iniciar_Conv(phone_number,tipo_contacto):
     """
     Inicia una conversación en Chatwoot con el contacto dado"""
     time.sleep(10)
-    from BlastHelper import SendBlast
-    if tipo_contacto == "prospecto":
-        template_id = 'HX4e3a35af08905947b55d7be6c840654d'   
-    elif tipo_contacto == "citado":
-        template_id = 'HX448ce843951d1867f4eb9531a48c3e85'
-    elif tipo_contacto == "paciente":
-        template_id = 'HX74e4965ec8f33d8b086ad6f2b654ae5d'
     query = f"""
         SELECT  id, phone_number, coalesce(custom_attributes_nickname,'Hermosa') custom_attributes_nickname
         FROM            CW_Contacts
         where phone_number ='{phone_number}'
     """ 
-    SendBlast(template_id, bot_name=None, query=query)
+    from BlastHelper import SendBlast
+    if tipo_contacto == "prospecto":
+        template_id = 'HX4e3a35af08905947b55d7be6c840654d'  
+        SendBlast(template_id, bot_name=None, query=query,etiqueta='citagyne')
+    elif tipo_contacto == "citado":
+        template_id = 'HX448ce843951d1867f4eb9531a48c3e85'
+        SendBlast(template_id, bot_name=None, query=query,etiqueta='citagyne')
+    elif tipo_contacto == "paciente":
+        template_id = 'HX74e4965ec8f33d8b086ad6f2b654ae5d'
+        SendBlast(template_id, bot_name=None, query=query,etiueta='llamada_perdida')
 
 def get_tipo_contacto(phone_number):
     cmd = f"SELECT [custom_attributes_es_prospecto] FROM [dbo].[CW_Contacts] where phone_number='{phone_number}'"
@@ -192,7 +194,7 @@ def crear_contacto(phone_number):
 
     if response.status_code == 200:
         contact_data = response.json()
-        contact_id = contact_data.get("id")
+        contact_id = contact_data["payload"]["contact"]["id"]
         print(f"Contacto creado correctamente con ID {contact_id}.")
         return contact_id
     else:

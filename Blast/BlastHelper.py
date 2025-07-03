@@ -9,7 +9,7 @@ from CW_Conversations import ChatwootSenders, envia_mensaje_plantilla
 from SQL_Helpers import GetTemplateDetails, execute_query
 
 
-def SendBlast(template_id, bot_name, query):
+def SendBlast(template_id, bot_name, query,etiqueta=None):
     """
     Envía un mensaje en blast a los contactos obtenidos desde el resultado de la consulta,
     usando la plantilla y parámetros proporcionados.
@@ -39,5 +39,5 @@ def SendBlast(template_id, bot_name, query):
         contacto_id = row[0]  # Primera columna es contacto_id
         phone_number = row[1]  # La segunda columna siempre debe ser el telefono
         if not math.isnan(contacto_id):
-            envia_mensaje_plantilla(contacto_id=contacto_id,phone_number=phone_number, content_sid=template_id, parametros=parametros, buzon=ChatwootSenders.Pacientes, bot_name=bot_name,force_new=False)
+            envia_mensaje_plantilla(contacto_id=contacto_id,phone_number=phone_number, content_sid=template_id, parametros=parametros, buzon=ChatwootSenders.Pacientes, bot_name=bot_name,force_new=False,etiqueta=etiqueta)
             time.sleep(1)

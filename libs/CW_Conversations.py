@@ -137,7 +137,7 @@ def send_audio_mp3_via_twilio(to_phone_number, media_url):
     # Imprimir el SID del mensaje para referencia
     print(f"Mensaje enviado con SID: {message.sid}")
 
-def envia_mensaje_plantilla(contacto_id,phone_number, content_sid, parametros=None, buzon=ChatwootSenders.Pacientes, bot_name=None,force_new=False):
+def envia_mensaje_plantilla(contacto_id,phone_number, content_sid, parametros=None, buzon=ChatwootSenders.Pacientes, bot_name=None,force_new=False,etiqueta=None):
     """
     Envía un mensaje usando una plantilla en Chatwoot.
     
@@ -220,14 +220,20 @@ def envia_mensaje_plantilla(contacto_id,phone_number, content_sid, parametros=No
                     "bot": bot_name  # Atributos personalizados para el bot
                 }
             }
-
+        
         response = requests.post(url, json=conversation_body, headers=headers)
         #print(f"La respuesta al enviar la plantilla fue: {response.json()}")
 
         if response.status_code == 200:
             conversation_response = response.json()
             if conversation_response and conversation_response.get("status") == "resolved":
-                reabrir_conversacion(conversation_response["id"])
+                reabrir_conversacion(conversation_response["id"])            
+            #Etiquetar la conversacion si se proporciona una etiqueta
+            if etiqueta:    
+                conv_id= get_open_conversation(contacto_id)
+                if conv_id:
+                    print(f"Se etiqueta la conversación {conv_id} con {etiqueta}")
+                    actualizar_etiqueta(conv_id, etiqueta)
             print("Mensaje enviado con éxito.")
         else:
             print(f"Error al enviar mensaje: {response.text}")
