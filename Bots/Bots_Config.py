@@ -32,10 +32,8 @@ custom_commands = ["Cita",
                    "★",
                    "★★★",
                    "Hola!"
-                   """Hola hermosa, me encontraba lejos del telefono. 
-Cuéntame un poquito más ✨ ¿Tienes algún tema en especial que te gustaría revisar en la consulta 🩺💖 o ya te toca tu revisión ginecológica anual? 📅🌸"""]
-llamada_msg="""Hola hermosa, me encontraba lejos del telefono. 
-Cuéntame un poquito más ✨ ¿Tienes algún tema en especial que te gustaría revisar en la consulta 🩺💖 o ya te toca tu revisión ginecológica anual? 📅🌸"""
+                   """Hola hermosa, me encontraba lejos del telefono. \r\nCuéntame un poquito más ✨ ¿Tienes algún tema en especial que te gustaría revisar en la consulta 🩺💖 o ya te toca tu revisión ginecológica anual? 📅🌸"""]
+llamada_msg="""Hola hermosa, me encontraba lejos del telefono. \r\nCuéntame un poquito más ✨ ¿Tienes algún tema en especial que te gustaría revisar en la consulta 🩺💖 o ya te toca tu revisión ginecológica anual? 📅🌸"""
 agenda_medico="1.- Ver detalles"
 
 constelaciones_messages = ["Hola vi tu sitio en Google y quiero una consulta de constelaciones familiares. ",
