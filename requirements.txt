@@ -9,3 +9,5 @@ pinecone
 langchain-community
 boto3
 Flask
+langchain
+pinecone-client
