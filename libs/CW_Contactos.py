@@ -139,6 +139,33 @@ def get_tipo_contacto(phone_number):
     else:
         print(f"El contacto con el número {phone_number} no es un prospecto, paciente o citado.")
         return "desconocido"
+def get_linphone_name(phone_number):
+    cmd = f"""SELECT
+                COALESCE(
+                    (
+                    SELECT 
+                        -- Campo 1
+                        CASE 
+                        WHEN custom_attributes_nickname IS NOT NULL THEN custom_attributes_nickname
+                        ELSE LEFT(name, CHARINDEX(' ', name + ' ') - 1)
+                        END
+                        + '--' +
+                        -- Campo 2
+                        CASE 
+                        WHEN custom_attributes_nickname IS NOT NULL THEN 'Paciente'
+                        ELSE 'Contacto'
+                        END
+                        + '--' +
+                        -- Campo 3
+                        CAST(id AS NVARCHAR)
+                    FROM [dbo].[CW_Contacts]
+                    WHERE phone_number = '{phone_number}'
+                    ),
+                    -- Si no existe registro
+                    'Desconocida--Prospecto--{phone_number}'
+                ) AS Resultado"""
+    contact_name= ExecuteScalar(cmd)
+    return contact_name
     
 def crear_contacto(phone_number):
     """

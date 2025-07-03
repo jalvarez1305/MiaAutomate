@@ -21,7 +21,7 @@ sys.path.append(parent_dir)
 from AI.OpenIAHelper import conv_close_sale
 from libs.SaveConversations import Conversacion
 from libs.CW_Conversations import get_AI_conversation_messages
-from libs.CW_Contactos import asignar_a_agente,devolver_llamada
+from libs.CW_Contactos import asignar_a_agente,devolver_llamada,get_linphone_name
 from libs.TwilioHandler import get_child_call_status
 
 app = Flask(__name__)
@@ -210,11 +210,12 @@ def llamada_telefonica_terminada():
 
 @app.route('/calltosip', methods=['GET', 'POST'])
 def call_to_sip():
-    print("Reenviando llamada a SIP")
-    twiml = """<?xml version="1.0" encoding="UTF-8"?>
+    contacto=get_linphone_name(phone_number=request.values.get('From', ''))
+    print("Reenviando llamada a SIP, contacto:", contacto)
+    twiml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Dial>
-    <Sip>sip:Zoiper@mia.sip.twilio.com</Sip>
+  <Dial callerId="{contacto}">
+    <Sip>sip:linphone@mia.sip.twilio.com</Sip>
   </Dial>
 </Response>"""
     return Response(twiml, mimetype='text/xml')

@@ -24,8 +24,8 @@ twilio_from_number = os.getenv('TWILIO_FROM_NUMBER')
 
 # Enumeración en Python para los buzones
 class ChatwootSenders:
-    Medicos = 18  
-    Pacientes = 18  
+    Medicos = 20  
+    Pacientes = 20  
 
 def assign_agent_to_conversation(conversation_id, agent_id):
     """
