@@ -17,18 +17,10 @@ def get_child_call_status(parent_sid: str) -> str:
     calls = client.calls.list(parent_call_sid=parent_sid)
 
     if not calls:
-<<<<<<< Updated upstream
         #print(f"No se encontraron child calls para ParentCallSid: {parent_sid}")
         return "not-found"
 
     child_call = calls[0]
     #print(f"Child Call SID: {child_call.sid}, Status: {child_call.status}")
-=======
-        print(f"No se encontraron child calls para ParentCallSid: {parent_sid}")
-        return "not-found"
-
-    child_call = calls[0]
-    print(f"Child Call SID: {child_call.sid}, Status: {child_call.status}")
->>>>>>> Stashed changes
 
     return child_call.status
