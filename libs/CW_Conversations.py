@@ -10,7 +10,7 @@ from CW_Contactos import actualizar_etiqueta, actualizar_interes_en,asignar_a_ag
 from SQL_Helpers import GetTemplateDetails
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../AI')))
-from GinecologiaAI import ghosted_clasification
+
 
 # Cargar las variables de entorno desde el archivo .env
 load_dotenv()

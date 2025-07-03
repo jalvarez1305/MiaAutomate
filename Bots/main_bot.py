@@ -6,9 +6,10 @@ import sys
 
 # Obtener el directorio padre (donde está ubicado 'libs')
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(parent_dir)
-from libs.CW_Contactos import devolver_llamada
-from libs.TwilioHandler import get_child_call_status
+#sys.path.append(parent_dir)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../libs')))
+from CW_Contactos import devolver_llamada
+from TwilioHandler import get_child_call_status
 
 app = Flask(__name__)
 

@@ -4,10 +4,5 @@ python-dotenv
 numpy
 pymssql
 twilio
-openai
-pinecone
-langchain-community
 boto3
 Flask
-langchain
-pinecone-client
