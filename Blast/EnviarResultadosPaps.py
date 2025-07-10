@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../l
 from SQL_Helpers import execute_query,ExecuteScalar,ejecutar_update
 
 
-template_id = 'HX4c6fc074747b615ccf32d69ab78c75fb'
+template_id = 'HXe020478ee336694dddbd68cba8c369a8'
 bot_name = None  # Si no deseas usar un bot, puedes pasar None
 query = """
         SELECT 
