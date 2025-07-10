@@ -5,67 +5,29 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../l
 from SQL_Helpers import execute_query,ExecuteScalar,ejecutar_update
 
 
-template_id = 'HX309b980d72c86b557050c96a5fec1735'
+template_id = 'HX4c6fc074747b615ccf32d69ab78c75fb'
 bot_name = None  # Si no deseas usar un bot, puedes pasar None
 query = """
-        WITH CTE AS (
-                        SELECT 
-                            Docs.id AS MedicoID, 
-                            Docs.phone_number, 
-                            Docs.custom_attributes_nickname AS Medico, 
-                            COALESCE(Pacs.custom_attributes_nickname, Pacs.name) AS Paciente, 
-                            CONVERT(VARCHAR(10), Paps.[Fecha Consulta], 23) AS Fecha, 
-                            REPLACE(Paps.[presigned url], 'https://papanicolaous.s3.us-east-2.amazonaws.com/', '') AS Url,
-                            ROW_NUMBER() OVER (PARTITION BY Docs.id ORDER BY Paps.[Fecha Consulta] ASC) AS RowNum
-                        FROM dbo.Papanicolaous AS Paps
-                        INNER JOIN dbo.CW_Contacts AS Docs ON Paps.Medico_FK = Docs.id
-                        INNER JOIN dbo.CW_Contacts AS Pacs ON Paps.Paciente_FK = Pacs.id
-                        WHERE 
-                            (
-                                Paps.Estatus = N'Resultado Recibido'
-                                OR (
-                                    Paps.Estatus = N'Enviada al Medico'
-                                    AND Paps.[Fecha Medico] IS NOT NULL
-                                    AND DATEADD(HOUR, 2, Paps.[Fecha Medico]) <= GETDATE()
-                                )
-                            )
-                    )
-                    SELECT MedicoID, 
-                            phone_number, 
-                            Medico, 
-                            Paciente, 
-                            Fecha, 
-                            Url
-                    FROM CTE
-                    WHERE RowNum = 1
+        SELECT 
+            Docs.id AS MedicoID, 
+            Docs.phone_number, 
+            Docs.custom_attributes_nickname AS Medico, 
+            COALESCE(Pacs.custom_attributes_nickname, Pacs.name) AS Paciente, 
+            CONVERT(VARCHAR(10), Paps.[Fecha Consulta], 23) AS Fecha, 
+            Paps.id pap_id
+        FROM dbo.Papanicolaous AS Paps
+        INNER JOIN dbo.CW_Contacts AS Docs ON Paps.Medico_FK = Docs.id
+        INNER JOIN dbo.CW_Contacts AS Pacs ON Paps.Paciente_FK = Pacs.id
+        WHERE Paps.Estatus = N'Resultado Recibido' or Paps.Estatus = N'Enviada al Medico'
         """ 
 def UpdateEstatus():
     update_query="""
-                WITH CTE AS (
-                                SELECT 
-                                    Paps.id AS PapanicolaousID, 
-                                    Docs.id AS MedicoID, 
-                                    ROW_NUMBER() OVER (PARTITION BY Docs.id ORDER BY Paps.[Fecha Consulta] ASC) AS RowNum
-                                FROM dbo.Papanicolaous AS Paps
-                                INNER JOIN dbo.CW_Contacts AS Docs ON Paps.Medico_FK = Docs.id
-                                WHERE 
-                                    (
-                                        Paps.Estatus = N'Resultado Recibido'
-                                        OR (
-                                            Paps.Estatus = N'Enviada al Medico'
-                                            AND Paps.[Fecha Medico] IS NOT NULL
-                                            AND DATEADD(HOUR, 2, Paps.[Fecha Medico]) <= GETDATE()
-                                        )
-                                    )
-                            )
-                            UPDATE Paps
-                            SET 
-                                Paps.[Fecha Medico] = GETDATE(), 
-                                Paps.Estatus = 'Enviada al Medico'
-                            FROM dbo.Papanicolaous AS Paps
-                            INNER JOIN CTE ON Paps.id = CTE.PapanicolaousID
-                            WHERE CTE.RowNum = 1;
-
+                UPDATE Paps
+                SET 
+                    [Fecha Medico] = GETDATE(), 
+                    Estatus = N'Enviada al Medico'
+                FROM dbo.Papanicolaous AS Paps
+                WHERE Estatus = N'Resultado Recibido'
                  """
     ejecutar_update(update_query)
 #El query lleva, contacto, telefono y parametros

@@ -5,7 +5,6 @@ import os
 import sys
 import json
 from datetime import datetime
-from Bot_Paps import BotPaps
 from bot_commands import BotCommands
 from gyne_general import GyneGeneralBot
 from Constelaciones_Bot import Constelaciones_Bot
@@ -46,10 +45,7 @@ def chatwoot_webhook():
     last_message = split_data.get("last_message", {})
     new_msg = last_message.get('Content')
     #evaluemos primero pipelines basados en mensajes
-    if new_msg in paps_messages:
-        logging.info(f"Se ejecuta BOT Paps")
-        BotPaps(split_data)
-    elif new_msg in facebook_messages:
+    if new_msg in facebook_messages:
         logging.info(f"Se ejecuta BOT {split_data.get('bot_attribute', 'GyneGeneralBot')}")
         GyneGeneralBot(split_data)
     elif new_msg in constelaciones_messages:
