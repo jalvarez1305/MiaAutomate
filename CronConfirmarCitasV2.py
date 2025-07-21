@@ -1,7 +1,7 @@
 
 from Blast.BlastHelper import SendBlast
 
-template_id = 'HXf14cab23bd6a7fac42a5e8cd7755d115'
+template_id = 'HX7bfcfcf6148c7cd916faffc57329da8e'
 bot_name = "ConfirmarCitaBot"   # Si no deseas usar un bot, puedes pasar None
 query = """SELECT      [Paciente ID],
 			phone_number,
