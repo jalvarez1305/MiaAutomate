@@ -99,13 +99,31 @@ def devolver_llamada(phone_number):
     Si ya existe pero aun no es paciente se crea una conversacion diferente
     """
     tipo_contacto=get_tipo_contacto(phone_number)
-    if tipo_contacto == "paciente" \
-        or tipo_contacto == "citado":
-        iniciar_Conv(phone_number,tipo_contacto)
-    elif tipo_contacto == "prospecto":
+    if tipo_contacto == "prospecto":
         crear_contacto(phone_number)
-        iniciar_Conv(phone_number,tipo_contacto)
+    
+    crear_tarea(phone_number,tipo_contacto)
 
+def crear_tarea(phone_number,tipo_contacto):
+    cmd=f"""INSERT INTO [dbo].[Tareas]
+           ([Titulo]
+           ,[Descripcion]
+           ,[Comentarios]
+           ,[Fecha de Creacion]
+           ,[Fecha de entrega]
+           ,[Fecha de terminacion]
+           ,[is_finish])
+     VALUES
+           ('Devolver llamada perdida {phone_number} tipo {tipo_contacto}'
+           ,''
+           ,'No alcanzamos a responder esta llamada, se debe devolver la llamada al paciente'
+           ,getdate()
+           ,getdate()
+           ,null
+           ,0)"""
+    ExecuteScalar(cmd)
+    
+    
 def iniciar_Conv(phone_number,tipo_contacto):
     """
     Inicia una conversación en Chatwoot con el contacto dado"""
