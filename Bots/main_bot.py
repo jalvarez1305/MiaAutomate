@@ -83,7 +83,7 @@ def chatwoot_webhook():
         print(f"Etiquetas: {labels} ")
         if "citagyne" in labels:
             print("Esta es una conversacion de ventas de ginecologia")
-            GyneGeneralBot(split_data)
+            #GyneGeneralBot(split_data)
         
 
     return jsonify({"message": "Webhook received!"}), 200
