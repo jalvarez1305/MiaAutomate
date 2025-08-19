@@ -118,8 +118,8 @@ def crear_tarea(phone_number,tipo_contacto):
            ,''
            ,'No alcanzamos a responder esta llamada, se debe devolver la llamada al paciente'
            ,getdate()
-           ,getdate()
            ,null
+           ,getdate()
            ,0)"""
     ExecuteScalar(cmd)
     
