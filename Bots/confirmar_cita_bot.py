@@ -19,8 +19,13 @@ def ConfirmarCitaBot(Detalles):
         conversation_id = Detalles.get('conversation_id')
         contact_id = Detalles.get('contact_id')
        
-        respuesta = """Muchas gracias hermosa 😊, tu cita queda confirmada. 
-                      Que tengas lindo día!"""
+        respuesta = """¡Excelente hermosa! 😊💕 Tu cita queda confirmada.
+
+Te pedimos llegar 10 minutos antes. 
+
+⚠️ IMPORTANTE: Solo tenemos 5 minutos de tolerancia.
+
+¡Gracias por tu comprensión! Que tengas un día maravilloso ��✨"""
 
 
         # Validar que las claves necesarias estén presentes
