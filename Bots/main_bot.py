@@ -62,7 +62,17 @@ def chatwoot_webhook():
         BotCommands(split_data)
 
 
-    
+    if 'bot_attribute' in split_data and 'Sender' in last_message:
+        if split_data['bot_attribute'] != "" and last_message.get('Sender') == "contact":
+            match split_data["bot_attribute"]:
+                case "EncuestaPacienteBot":
+                    logging.info(f"Se ejecuta BOT {split_data['bot_attribute']}")
+                    EncuestaPacienteBot(split_data)
+                case "ConfirmarCitaBot":
+                    logging.info(f"Se ejecuta BOT {split_data['bot_attribute']}")
+                    ConfirmarCitaBot(split_data)
+                case _:                    
+                    logging.warning("Mensaje no reconocido.")
     else:
         logging.error("Faltan datos necesarios en el payload.")    
 
