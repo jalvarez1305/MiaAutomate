@@ -1,6 +1,6 @@
 from Blast.BlastHelper import SendBlast
 
-template_id = 'HXad2c917455923d73ccebce2f9d915f6f'
+template_id = 'HXb5631d6786c4e634bc0f1c339942275f'
 bot_name = None  # Si no deseas usar un bot, puedes pasar None
 query = """SELECT 
                 [Paciente ID], 
