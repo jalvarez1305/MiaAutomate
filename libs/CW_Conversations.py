@@ -283,17 +283,172 @@ def cerrar_conversacion(conv_id):
         print(f"Error al cerrar la conversación: {response.text}")
 
 
+def get_conversation_custom_attributes(conversation_id: int) -> dict:
+    """
+    Obtiene los custom attributes de una conversación Y del contacto asociado.
+    
+    Args:
+        conversation_id: ID de la conversación
+    
+    Returns:
+        dict: Diccionario combinado con atributos de conversación y contacto, o diccionario vacío si hay error
+    """
+    if not cw_token or not base_url:
+        print("❌ No se puede obtener atributos: CW_TOKEN o BASE_URL no configurados")
+        return {}
+    
+    url = f"{base_url}/conversations/{conversation_id}"
+    headers = {
+        "api_access_token": cw_token
+    }
+    
+    try:
+        print(f"[CONV] Obteniendo atributos de conversación {conversation_id}")
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code == 200:
+            data = response.json()
+            print(f"[CONV] Estructura de respuesta: {list(data.keys())}")
+            
+            # Obtener atributos de la conversación
+            conversation_attributes = data.get('custom_attributes', {})
+            print(f"[CONV] Atributos de conversación: {conversation_attributes}")
+            
+            # Obtener atributos del contacto
+            contact_attributes = {}
+            contact_id = data.get('contact', {}).get('id')
+            if contact_id:
+                contact_url = f"{base_url}/contacts/{contact_id}"
+                contact_response = requests.get(contact_url, headers=headers)
+                if contact_response.status_code == 200:
+                    contact_data = contact_response.json()
+                    contact_attributes = contact_data.get('custom_attributes', {})
+                    print(f"[CONV] Atributos del contacto: {contact_attributes}")
+                else:
+                    print(f"❌ Error al obtener atributos del contacto: {contact_response.status_code}")
+            else:
+                print(f"[CONV] No se encontró contact_id en la conversación")
+            
+            # Combinar atributos (conversación tiene prioridad en caso de duplicados)
+            combined_attributes = {**contact_attributes, **conversation_attributes}
+            print(f"[CONV] Atributos combinados: {combined_attributes}")
+            
+            return combined_attributes
+        else:
+            print(f"❌ Error al obtener atributos: {response.status_code} - {response.text}")
+            return {}
+    
+    except Exception as ex:
+        print(f"❌ Excepción al obtener atributos: {str(ex)}")
+        return {}
+
+def update_conversation_custom_attributes_batch(conversation_id: int, all_attributes: dict) -> bool:
+    """
+    Actualiza TODOS los custom attributes de una conversación en Chatwoot de una vez.
+    
+    Args:
+        conversation_id: ID de la conversación
+        all_attributes: Diccionario con TODOS los atributos a guardar
+    
+    Returns:
+        bool: True si se actualizó correctamente, False en caso contrario
+    """
+    if not cw_token or not base_url:
+        print("❌ No se puede actualizar atributos: CW_TOKEN o BASE_URL no configurados")
+        return False
+    
+    url = f"{base_url}/conversations/{conversation_id}/custom_attributes"
+    headers = {
+        "Content-Type": "application/json",
+        "api_access_token": cw_token
+    }
+    
+    data = {
+        "custom_attributes": all_attributes
+    }
+    
+    try:
+        print(f"[CONV] Actualizando TODOS los atributos en conversación {conversation_id}")
+        print(f"[CONV] URL: {url}")
+        print(f"[CONV] Data: {data}")
+        response = requests.post(url, json=data, headers=headers)
+        
+        print(f"[CONV] Response status: {response.status_code}")
+        print(f"[CONV] Response text: {response.text}")
+        
+        if response.status_code == 200:
+            print(f"✅ Todos los atributos actualizados correctamente")
+            # Agregar delay para evitar problemas de timing
+            import time
+            time.sleep(0.5)
+            return True
+        else:
+            print(f"❌ Error al actualizar atributos: {response.status_code} - {response.text}")
+            return False
+    
+    except Exception as ex:
+        print(f"❌ Excepción al actualizar atributos: {str(ex)}")
+        return False
+
 def send_conversation_message(conversation_id, message, is_private=False, buzon=ChatwootSenders.Pacientes):
     """
     Envía un mensaje a una conversación en Chatwoot.
+    Si el atributo 'disclaimer' no está presente o está en False, primero envía el mensaje del disclaimer.
+    Si el atributo 'humano' está presente y en True, envía el mensaje como privado.
     
     :param conversation_id: ID de la conversación.
     :param message: Mensaje a enviar.
-    :param is_private: Si es un mensaje privado o público.
+    :param is_private: Si es un mensaje privado o público (puede ser sobrescrito por el atributo 'humano').
     :param buzon: ID del buzón de Chatwoot.
     """
     print(f"Enviando: {conversation_id} Msg: {message}")
     
+    # Obtener atributos de la conversación
+    attributes = get_conversation_custom_attributes(conversation_id)
+    
+    # Verificar si el atributo 'humano' está en True
+    humano = attributes.get('humano', False)
+    if humano is True or str(humano).lower() == 'true':
+        is_private = True
+        print(f"[CONV] Atributo 'humano' activo, enviando mensaje como privado")
+    
+    # Verificar si necesitamos enviar el disclaimer
+    disclaimer = attributes.get('disclaimer', False)
+    if disclaimer is not True and str(disclaimer).lower() != 'true':
+        # Enviar el mensaje del disclaimer primero
+        disclaimer_msg = """Hola! 😊 Nuestro asistente virtual está aquí para ayudarte y es la forma más rápida de obtener respuestas.
+
+Pero si en cualquier momento quieres hablar con una persona, solo escribe "humano" o "ayuda"."""
+        
+        url = f"{base_url}/conversations/{conversation_id}/messages"
+        headers = {
+            "Content-Type": "application/json",
+            "api_access_token": cw_token
+        }
+        
+        disclaimer_body = {
+            "content": disclaimer_msg,
+            "private": False
+        }
+        
+        response = requests.post(url, json=disclaimer_body, headers=headers)
+        if response.status_code == 200:
+            print(f"Disclaimer enviado con éxito")
+            # Actualizar el atributo disclaimer a True inmediatamente después de enviarlo
+            all_attributes = attributes.copy()
+            all_attributes['disclaimer'] = True
+            update_conversation_custom_attributes_batch(conversation_id, all_attributes)
+            # Esperar 2 segundos antes de enviar el mensaje original
+            import time
+            time.sleep(2)
+        else:
+            print(f"Error al enviar disclaimer: {response.status_code}")
+            # Aún así, intentar actualizar el atributo para evitar múltiples intentos
+            all_attributes = attributes.copy()
+            all_attributes['disclaimer'] = True
+            update_conversation_custom_attributes_batch(conversation_id, all_attributes)
+    
+    # Enviar el mensaje original
     url = f"{base_url}/conversations/{conversation_id}/messages"
     headers = {
         "Content-Type": "application/json",

@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../B
 
 
 from BlastHelper import SendBlast
-from CW_Conversations import send_conversation_message,send_audio_mp3_via_twilio
+from CW_Conversations import send_conversation_message,send_audio_mp3_via_twilio,get_conversation_custom_attributes,update_conversation_custom_attributes_batch
 from CW_Contactos import actualizar_etiqueta,asignar_a_agente,actualizar_lead_source
 from SQL_Helpers import GetFreeTime
 from Bots_Config import llamada_msg
@@ -64,6 +64,17 @@ def BotCommands(Detalles):
             else:
                 time.sleep(20)
                 send_conversation_message(conversation_id,horarios,False)
+        elif last_message_content.lower() == "humano" or last_message_content.lower() == "ayuda":
+            print(f"Solicitud de atención humana")
+            # Obtener atributos actuales de la conversación
+            attributes = get_conversation_custom_attributes(conversation_id)
+            # Actualizar el atributo humano a True
+            attributes['humano'] = True
+            update_conversation_custom_attributes_batch(conversation_id, attributes)
+            # Asignar la conversación a un agente
+            asignar_a_agente(conversation_id)
+            # Enviar mensaje privado
+            send_conversation_message(conversation_id,"Este paciente desea ser atendido por un humano",True)
         elif last_message_content == llamada_msg:  
             actualizar_etiqueta(conversation_id,"citagyne") 
     except Exception as e:
