@@ -17,10 +17,12 @@ facebook_messages = ["¡Hola! Podrías darme más información de…",
                      "Hola! vi tu sitio en Google, quiero informes de la consulta",
                      "Hola vi tu sitio en Google y quiero información",
                      "Hola! Vi su sitio en Google, quiero solicitar informes en MIA clínicas de la Mujer",
+                     "Hola, vi su publicación en la revista y me gustaría agendar una cita",
                      "MandaAudio"]
 google_messages= ["Hola vi tu sitio en Google y quiero una consulta Ginecológica.",
                   "Hola! vi tu sitio en Google, quiero informes de la consulta",
                   "Hola vi tu sitio en Google y quiero información"]
+revista_messages= ["Hola, vi su publicación en la revista y me gustaría agendar una cita"]
 rosario_messages= ["Hola! Vi su sitio en Google, quiero solicitar informes en MIA clínicas de la Mujer"]
 custom_commands = ["Cita",
                    "cita",

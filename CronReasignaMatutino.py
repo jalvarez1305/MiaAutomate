@@ -6,4 +6,5 @@ from CW_Conversations import reasigna_conversaciones
 
 
 for page in range(11):  # 0 a 10 inclusive
-    reasigna_conversaciones(32,29,page)
+    #Mayra 32 y Dayana 33
+    reasigna_conversaciones(32,33,page)

@@ -159,8 +159,8 @@ def asignar_nuevas_conversaciones():
     try:
         if es_cliente:
             if hora_actual < 15:  # Antes de las 3:00 PM
-                print(f"Asigna Orlando - Conversación: {conversation_id}")
-                asignado = 29
+                print(f"Asigna Dayana - Conversación: {conversation_id}")
+                asignado = 33
             else:  # 3:00 PM o posterior
                 print(f"Asigna Mayra - Conversación: {conversation_id}")
                 asignado = 32
