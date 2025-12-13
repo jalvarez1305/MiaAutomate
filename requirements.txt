@@ -8,3 +8,5 @@ openai
 pinecone
 langchain-community
 boto3
+google-cloud-bigquery
+protobuf>=3.19.5,<5.0.0

@@ -476,3 +476,125 @@ def obtener_ultimos_mensajes_usuario(mensajes):
     
     # Invertimos la lista para mantener el orden cronológico original
     return ultimos_mensajes[::-1]
+
+def clasificar_conversacion(ConvMessages):
+    """
+    Clasifica una conversación en una de tres categorías: Ventas, Citas, o Soporte.
+    
+    :param ConvMessages: Lista de mensajes de la conversación
+    :return: String con la clasificación: "Ventas", "Citas", o "Soporte"
+    """
+    if not ConvMessages:
+        return "Soporte"
+    
+    # Construir el contexto de la conversación
+    conversacion_texto = "\n".join([
+        f"{'Agente' if msg['role'] == 'assistant' else 'Paciente'}: {msg.get('content', '')}"
+        for msg in ConvMessages
+    ])
+    
+    prompt = f"""Analiza la siguiente conversación y clasifícala en UNA de estas tres categorías:
+- Ventas: Si la conversación se trata de vender un servicio, procedimiento, o producto
+- Citas: Si la conversación trata sobre horarios, logística de citas, confirmación de citas, o disponibilidad
+- Soporte: Si es un paciente buscando indicaciones, información médica general, o cualquier otra consulta que no sea venta ni citas
+
+Conversación:
+{conversacion_texto}
+
+Responde SOLO con una palabra: Ventas, Citas, o Soporte"""
+
+    try:
+        response = client.chat.completions.create(
+            model=gpt_model,
+            messages=[
+                {"role": "system", "content": "Eres un clasificador de conversaciones. Responde solo con una palabra: Ventas, Citas, o Soporte."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,
+            max_tokens=10
+        )
+        
+        clasificacion = response.choices[0].message.content.strip()
+        
+        # Validar que la respuesta sea una de las categorías esperadas
+        if clasificacion not in ["Ventas", "Citas", "Soporte"]:
+            # Si no es válida, intentar extraer la palabra correcta
+            clasificacion_lower = clasificacion.lower()
+            if "venta" in clasificacion_lower:
+                return "Ventas"
+            elif "cita" in clasificacion_lower:
+                return "Citas"
+            else:
+                return "Soporte"
+        
+        return clasificacion
+    except Exception as e:
+        print(f"Error en clasificación: {e}")
+        return "Soporte"
+
+def analizar_sentimiento(ConvMessages):
+    """
+    Analiza el sentimiento del paciente en la conversación y retorna un score del 1 al 10.
+    
+    :param ConvMessages: Lista de mensajes de la conversación
+    :return: Float entre 1 y 10, donde 10 es muy feliz/satisfecho
+    """
+    if not ConvMessages:
+        return 5.0
+    
+    # Filtrar solo mensajes del paciente
+    mensajes_paciente = [
+        msg.get('content', '') 
+        for msg in ConvMessages 
+        if msg.get('role') == 'user'  # En get_AI_conversation_messages, 'user' es el paciente
+    ]
+    
+    if not mensajes_paciente:
+        return 5.0
+    
+    conversacion_paciente = "\n".join(mensajes_paciente)
+    
+    prompt = f"""Analiza el sentimiento y nivel de satisfacción del paciente en esta conversación.
+Evalúa qué tan feliz, satisfecho o contento está el paciente basándote en su tono, palabras, y expresiones.
+
+Mensajes del paciente:
+{conversacion_paciente}
+
+Califica del 1 al 10, donde:
+- 1-3: Muy insatisfecho, molesto, frustrado
+- 4-5: Neutral, indiferente
+- 6-7: Satisfecho, contento
+- 8-10: Muy feliz, muy satisfecho, entusiasta
+
+Responde SOLO con un número del 1 al 10 (puede ser decimal como 7.5)."""
+
+    try:
+        response = client.chat.completions.create(
+            model=gpt_model,
+            messages=[
+                {"role": "system", "content": "Eres un analista de sentimientos. Responde solo con un número del 1 al 10."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,
+            max_tokens=5
+        )
+        
+        score_text = response.choices[0].message.content.strip()
+        
+        # Extraer el número
+        try:
+            score = float(score_text)
+            # Asegurar que esté en el rango 1-10
+            score = max(1.0, min(10.0, score))
+            return score
+        except ValueError:
+            # Si no se puede convertir, buscar un número en el texto
+            import re
+            numbers = re.findall(r'\d+\.?\d*', score_text)
+            if numbers:
+                score = float(numbers[0])
+                return max(1.0, min(10.0, score))
+            return 5.0
+    except Exception as e:
+        print(f"Error en análisis de sentimiento: {e}")
+        return 5.0

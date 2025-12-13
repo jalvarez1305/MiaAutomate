@@ -834,3 +834,64 @@ def get_last_message_date(conversation_id):
     ultimo = mensajes[-1]["created_at"]
 
     return ultimo
+
+def get_conversation_messages_with_agents(conversation_id, include_private=False):
+    """
+    Obtiene todos los mensajes de una conversación con información completa de agentes y timestamps.
+    
+    :param conversation_id: ID de la conversación
+    :param include_private: Si incluir mensajes privados
+    :return: Lista de mensajes con información completa
+    """
+    all_messages = []
+    headers = {"api_access_token": cw_token}
+    before = None
+    first_iteration = True
+
+    while True:
+        url = f"{base_url}/conversations/{conversation_id}/messages"
+        params = {} if first_iteration else {"before": before}
+
+        response = requests.get(url, headers=headers, params=params)
+        if response.status_code != 200:
+            break
+
+        data = response.json()
+        messages = data.get("payload", [])
+        if not messages:
+            break
+
+        for msg in messages:
+            sender = msg.get("sender", {})
+            sender_type = sender.get("type")
+            
+            if not sender_type:
+                continue
+
+            if not include_private and msg.get("private", False):
+                continue
+
+            # En Chatwoot: "user" = agente, "contact" = paciente
+            # Extraer información del agente si es un mensaje de agente
+            agent_id = None
+            if sender_type == "user":  # En Chatwoot, "user" es el agente
+                agent_id = sender.get("id")
+            
+            # Determinar el role para las métricas
+            role = "agent" if sender_type == "user" else "contact"
+            
+            all_messages.append({
+                "role": role,
+                "content": msg.get("content", ""),
+                "created_at": msg.get("created_at", 0),
+                "agent_id": agent_id,
+                "message_id": msg.get("id"),
+                "private": msg.get("private", False)
+            })
+
+        before = min(msg["id"] for msg in messages)
+        first_iteration = False
+
+    # Ordenar los mensajes por created_at
+    all_messages.sort(key=lambda msg: msg["created_at"])
+    return all_messages

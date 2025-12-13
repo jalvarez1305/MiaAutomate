@@ -17,11 +17,13 @@ from Bots_Config import paps_messages,facebook_messages,custom_commands,agenda_m
 # Obtener el directorio padre (donde está ubicado 'libs')
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(parent_dir)
-from AI.OpenIAHelper import conv_close_sale
+from AI.OpenIAHelper import conv_close_sale, clasificar_conversacion, analizar_sentimiento
 from libs.SaveConversations import Conversacion
-from libs.CW_Conversations import get_AI_conversation_messages
+from libs.CW_Conversations import get_AI_conversation_messages, get_conversation_messages_with_agents, get_conversation_by_id
 from libs.CW_Contactos import asignar_a_agente,devolver_llamada,get_linphone_name,get_tipo_contacto,crear_contacto
 from libs.TwilioHandler import get_child_call_status
+from libs.ConversationMetrics import calcular_metricas_completas
+from libs.BigQueryHelper import initialize_bigquery, insert_conversation
 
 app = Flask(__name__)
 
@@ -30,6 +32,13 @@ logging.basicConfig(level=logging.INFO)
 
 # Objeto
 conversacion = Conversacion()
+
+# Inicializar BigQuery al iniciar la aplicación
+try:
+    initialize_bigquery()
+    print("✅ BigQuery inicializado correctamente")
+except Exception as e:
+    print(f"⚠️ Error al inicializar BigQuery: {e}")
 
 @app.route('/webhook/chatwoot', methods=['POST'])
 def chatwoot_webhook():
@@ -105,28 +114,93 @@ def save_conversation():
         print("❌ Falta el ID de la conversación")
         return jsonify({"error": "Missing conversation ID"}), 400
 
-    # Solo continuar si el estatus es 'closed'
+    # Solo continuar si el estatus es 'resolved' (cerrada)
     if status != 'resolved':
-        print(f"ℹ️ Conversación {conversation_id} ignorada porque su estatus no es 'closed'.")
+        print(f"ℹ️ Conversación {conversation_id} ignorada porque su estatus no es 'resolved'.")
         return jsonify({"message": "Conversación no cerrada, no se almacena"}), 200
 
-    # Almacenar conversación si está cerrada
+    # Procesar y guardar conversación en BigQuery
     try:
+        # Obtener información de la conversación
+        conversation_data = get_conversation_by_id(conversation_id)
+        if not conversation_data:
+            print(f"❌ No se pudo obtener información de la conversación {conversation_id}")
+            return jsonify({"error": "No se pudo obtener la conversación"}), 500
+        
+        # Extraer información del contacto
+        contact_info = conversation_data.get('contact', {})
+        contact_id = contact_info.get('id')
+        contact_name = contact_info.get('name', 'Sin nombre')
+        
+        # Obtener mensajes con información completa de agentes
+        mensajes_completos = get_conversation_messages_with_agents(conversation_id, include_private=False)
+        
+        if not mensajes_completos:
+            print(f"⚠️ No se encontraron mensajes para la conversación {conversation_id}")
+            mensajes_completos = []
+        
+        # Obtener mensajes para análisis de IA (formato simplificado)
+        msg_arr = get_AI_conversation_messages(conversation_id)
+        
+        # Clasificar la conversación
+        print(f"📊 Clasificando conversación {conversation_id}...")
+        clasificacion = clasificar_conversacion(msg_arr)
+        print(f"✅ Clasificación: {clasificacion}")
+        
+        # Analizar sentimiento
+        print(f"😊 Analizando sentimiento de conversación {conversation_id}...")
+        sentiment_score = analizar_sentimiento(msg_arr)
+        print(f"✅ Sentiment Score: {sentiment_score}")
+        
+        # Calcular métricas de tiempo
+        print(f"⏱️ Calculando métricas de conversación {conversation_id}...")
+        metricas = calcular_metricas_completas(mensajes_completos)
+        print(f"✅ Métricas calculadas")
+        
+        # Obtener labels
+        labels = data.get("labels", [])
+        if not labels:
+            labels = conversation_data.get("labels", [])
+        
+        # Preparar datos para BigQuery
+        bigquery_data = {
+            "conversation_id": conversation_id,
+            "contact_id": contact_id,
+            "contact_name": contact_name,
+            "payload": data,  # Payload completo en JSON
+            "clasificacion": clasificacion,
+            "sentiment_score": sentiment_score,
+            "labels": labels if isinstance(labels, list) else [labels] if labels else [],
+            **metricas
+        }
+        
+        # Guardar en BigQuery
+        print(f"💾 Guardando conversación {conversation_id} en BigQuery...")
+        insert_conversation(bigquery_data)
+        print(f"✅ Conversación {conversation_id} guardada en BigQuery exitosamente")
+        
+        # Mantener la lógica original para Pinecone (solo ventas que terminaron en venta)
         split_data = parse_conversation_payload(data)
-        msg_arr=get_AI_conversation_messages(conversation_id)
-        labels = data.get("labels", [None])   
-        print(f"Etiquetas: {labels}")
-        vendio= conv_close_sale(msg_arr)
+        vendio = conv_close_sale(msg_arr)
         print(f"Vendio: {vendio}")
-        # Solamente aqueyas conversaciones de ventas que terminaron en venta
-        if "citagyne" in labels and vendio==True:
+        
+        if "citagyne" in labels and vendio == True:
             conversacion.almacenar_conv_pinecone(data)
-            print("✅ Conversación guardada correctamente")
-            return jsonify({"message": "Conversación guardada correctamente"}), 200
+            print("✅ Conversación también guardada en Pinecone")
+        
+        return jsonify({
+            "message": "Conversación guardada correctamente",
+            "conversation_id": conversation_id,
+            "clasificacion": clasificacion,
+            "sentiment_score": sentiment_score
+        }), 200
+        
     except Exception as e:
         logging.error(f"🚨 Error al guardar la conversación {conversation_id}: {e}")
         print(f"🚨 Error al guardar la conversación {conversation_id}: {e}")
-        return jsonify({"error": "Error al guardar la conversación"}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Error al guardar la conversación: {str(e)}"}), 500
 
 @app.route('/AsignarNuevasConversaciones', methods=['POST'])
 def asignar_nuevas_conversaciones():
