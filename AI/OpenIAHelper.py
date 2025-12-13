@@ -534,13 +534,13 @@ Responde SOLO con una palabra: Ventas, Citas, o Soporte"""
 
 def analizar_sentimiento(ConvMessages):
     """
-    Analiza el sentimiento del paciente en la conversación y retorna un score del 1 al 10.
+    Analiza el sentimiento del paciente en la conversación y retorna una categoría.
     
     :param ConvMessages: Lista de mensajes de la conversación
-    :return: Float entre 1 y 10, donde 10 es muy feliz/satisfecho
+    :return: String con categoría: "Feliz", "Neutral", o "Molesta"
     """
     if not ConvMessages:
-        return 5.0
+        return "Neutral"
     
     # Filtrar solo mensajes del paciente
     mensajes_paciente = [
@@ -550,51 +550,44 @@ def analizar_sentimiento(ConvMessages):
     ]
     
     if not mensajes_paciente:
-        return 5.0
+        return "Neutral"
     
     conversacion_paciente = "\n".join(mensajes_paciente)
     
-    prompt = f"""Analiza el sentimiento y nivel de satisfacción del paciente en esta conversación.
-Evalúa qué tan feliz, satisfecho o contento está el paciente basándote en su tono, palabras, y expresiones.
+    prompt = f"""Analiza el sentimiento del paciente en esta conversación.
+Evalúa el tono, palabras y expresiones del paciente para clasificar su estado emocional.
 
 Mensajes del paciente:
 {conversacion_paciente}
 
-Califica del 1 al 10, donde:
-- 1-3: Muy insatisfecho, molesto, frustrado
-- 4-5: Neutral, indiferente
-- 6-7: Satisfecho, contento
-- 8-10: Muy feliz, muy satisfecho, entusiasta
+Clasifica el sentimiento en UNA de estas tres categorías:
+- Feliz: El paciente muestra satisfacción, alegría, agradecimiento, entusiasmo, o está contento
+- Neutral: El paciente muestra un tono neutro, indiferente, o simplemente informativo sin emociones fuertes
+- Molesta: El paciente muestra insatisfacción, molestia, frustración, enojo, o está descontento
 
-Responde SOLO con un número del 1 al 10 (puede ser decimal como 7.5)."""
+Responde SOLO con una palabra: Feliz, Neutral, o Molesta"""
 
     try:
         response = client.chat.completions.create(
             model=gpt_model,
             messages=[
-                {"role": "system", "content": "Eres un analista de sentimientos. Responde solo con un número del 1 al 10."},
+                {"role": "system", "content": "Eres un analista de sentimientos. Responde solo con una palabra: Feliz, Neutral, o Molesta."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.3,
-            max_tokens=5
+            max_tokens=10
         )
         
-        score_text = response.choices[0].message.content.strip()
+        sentimiento = response.choices[0].message.content.strip()
         
-        # Extraer el número
-        try:
-            score = float(score_text)
-            # Asegurar que esté en el rango 1-10
-            score = max(1.0, min(10.0, score))
-            return score
-        except ValueError:
-            # Si no se puede convertir, buscar un número en el texto
-            import re
-            numbers = re.findall(r'\d+\.?\d*', score_text)
-            if numbers:
-                score = float(numbers[0])
-                return max(1.0, min(10.0, score))
-            return 5.0
+        # Validar que la respuesta sea una de las categorías esperadas
+        sentimiento_lower = sentimiento.lower()
+        if "feliz" in sentimiento_lower or "contento" in sentimiento_lower or "satisfecho" in sentimiento_lower:
+            return "Feliz"
+        elif "molest" in sentimiento_lower or "enoj" in sentimiento_lower or "frustr" in sentimiento_lower or "insatisf" in sentimiento_lower:
+            return "Molesta"
+        else:
+            return "Neutral"
     except Exception as e:
         print(f"Error en análisis de sentimiento: {e}")
-        return 5.0
+        return "Neutral"

@@ -127,10 +127,27 @@ def save_conversation():
             print(f"❌ No se pudo obtener información de la conversación {conversation_id}")
             return jsonify({"error": "No se pudo obtener la conversación"}), 500
         
-        # Extraer información del contacto
+        # Extraer información del contacto - Intentar múltiples formas
+        contact_id = None
+        contact_name = 'Sin nombre'
+        
+        # Forma 1: Desde conversation_data.contact
         contact_info = conversation_data.get('contact', {})
-        contact_id = contact_info.get('id')
-        contact_name = contact_info.get('name', 'Sin nombre')
+        if contact_info:
+            contact_id = contact_info.get('id')
+            contact_name = contact_info.get('name', 'Sin nombre')
+        
+        # Forma 2: Desde meta.sender (estructura más común en Chatwoot)
+        if not contact_id:
+            meta = conversation_data.get('meta', {})
+            sender = meta.get('sender', {})
+            if sender:
+                contact_id = sender.get('id')
+                contact_name = sender.get('name', 'Sin nombre')
+                print(f"📋 Contacto obtenido desde meta.sender - ID: {contact_id}, Name: {contact_name}")
+        
+        if not contact_id:
+            print(f"⚠️ ADVERTENCIA: No se pudo obtener contact_id para conversación {conversation_id}")
         
         # Obtener mensajes con información completa de agentes
         mensajes_completos = get_conversation_messages_with_agents(conversation_id, include_private=False)
