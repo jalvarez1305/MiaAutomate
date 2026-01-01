@@ -40,3 +40,25 @@ def parse_conversation_payload(payload):
         conversation_info["last_message"] = None  # Si no hay mensajes, establecer como None
 
     return conversation_info
+
+def es_primer_mensaje_usuario(conversation_id, contact_id):
+    """
+    Verifica si es el primer mensaje del usuario en la conversación.
+    
+    :param conversation_id: ID de la conversación
+    :param contact_id: ID del contacto/usuario
+    :return: True si es el primer mensaje del usuario, False en caso contrario
+    """
+    try:
+        messages = get_conversation_messages(conversation_id)
+        if not messages:
+            return True
+        
+        # Filtrar solo mensajes del usuario (contact)
+        user_messages = [m for m in messages if m.get('Sender') == 'contact']
+        
+        # Si hay exactamente 1 mensaje del usuario, es el primero
+        return len(user_messages) == 1
+    except Exception as e:
+        print(f"Error al verificar primer mensaje: {str(e)}")
+        return False

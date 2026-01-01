@@ -306,7 +306,35 @@ def conv_clasification(ConvMessages):
    ## NOTA IMPORTANTE: 
     - Si cumple estas condiciones, clasifica SOLO como "Ubicación" y no consideres otras categorías
 
-16. Agradecimiento
+16. Saludo inicial
+   #EVALUACIÓN: INCLUDE_HISTORY
+   ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
+   - Es uno de los primeros mensajes del usuario en la conversación (pocos mensajes previos del usuario)
+   - El agente/bot NO ha enviado aún el mensaje de bienvenida o información inicial
+   - NO se ha proporcionado precio aún
+   - NO se ha ofrecido horario aún
+   ## EVALUAR ESTAS REGLAS EN ULTIMO MENSAJE DEL USUARIO:
+   ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE AL MENOS UNA DE ESTAS CONDICIONES:  
+   - Contiene un saludo (Hola, Buenos días, Buenas tardes, Buenas noches, etc.)
+   - Solicita información general sobre servicios
+   - Pide información inicial o básica
+   - Menciona palabras como "información", "info", "informes", "consultar", "consulta", "saber más", "conocer"
+   - Es un mensaje que indica interés inicial en los servicios de ginecología
+   ### EJEMPLOS:
+   - Hola
+   - Buenos días, necesito información
+   - Quiero información sobre sus servicios
+   - Necesito info
+   - Quiero saber más
+   - Me gustaría conocer sus servicios
+   - Información por favor
+   - Buenas, necesito consultar algo
+   ## NOTA IMPORTANTE: 
+    - Si cumple estas condiciones, clasifica SOLO como "Saludo inicial" y no consideres otras categorías
+    - Esta categoría tiene menor prioridad que las otras, úsala solo si no encaja en ninguna otra categoría anterior
+
+17. Agradecimiento
    #EVALUACIÓN: INCLUDE_HISTORY
    ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
    ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
@@ -324,7 +352,7 @@ def conv_clasification(ConvMessages):
    ## NOTA IMPORTANTE: 
    - Si cumple estas condiciones, clasifica SOLO como "Agradecimiento" y no consideres otras categorías
 
-17. Otro
+18. Otro
    ## Condiciones para clasificar como "Otro":
    ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE AL MENOS UNA DE ESTAS CONDICIONES:
    - La conversación NO encaja en ninguna de las categorías anteriores.

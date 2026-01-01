@@ -12,12 +12,14 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../A
 
 from GinecologiaAI import ResolverPadecimiento,ResolverProcedimiento
 from OpenIAHelper import conv_clasification,get_requested_date
-from CW_Conversations import send_conversation_message, ChatwootSenders,send_audio_mp3_via_twilio, envia_mensaje_plantilla, remove_bot_attribute,get_AI_conversation_messages,segundos_entre_ultimos_mensajes
+from CW_Conversations import send_conversation_message, ChatwootSenders,send_audio_mp3_via_twilio, envia_mensaje_plantilla, remove_bot_attribute,get_AI_conversation_messages,segundos_entre_ultimos_mensajes,get_conversation_custom_attributes,update_conversation_custom_attributes_batch
 from CW_Contactos import actualizar_interes_en,actualizar_etiqueta,asignar_a_agente,actualizar_lead_source
 from SQL_Helpers import GetFreeTime,GetFreeTimeForDate
 from CW_Automations import send_content
 from Bots_Config import audio_gyne,facebook_messages,google_messages,rosario_messages,revista_messages
 from datetime import datetime
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__))))
+from helper import es_primer_mensaje_usuario
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -93,6 +95,7 @@ def GyneGeneralBot(Detalles):
         if conversation_id is None:
             logging.error("conversation_id no está presente en Detalles.")
             return
+        # Si el mensaje está en las listas conocidas, enviar audio normalmente
         if last_message_content in facebook_messages or last_message_content == audio_gyne:
             MandarMensajeSaludo(conversation_id,contact_phone,contact_id)
             if last_message_content in audio_gyne:
@@ -110,9 +113,29 @@ def GyneGeneralBot(Detalles):
             else:
                 logging.info(f"Actualizando el lead source a Facebook")
                 actualizar_lead_source(contact_id,"Facebook")
-
+        # Si NO está en las listas, verificar con IA si es un saludo inicial nuevo
         else:
-            if tiempo > segundos_buffer:
+            # Verificar si ya se envió el audio (para evitar duplicados)
+            conv_attributes = get_conversation_custom_attributes(conversation_id)
+            audio_enviado = conv_attributes.get('audio_enviado', False)
+            audio_fue_enviado_en_esta_iteracion = False
+            
+            # Verificar si es primer mensaje o mensaje temprano y aún no se ha enviado audio
+            if not audio_enviado and es_primer_mensaje_usuario(conversation_id, contact_id):
+                # Clasificar el mensaje con IA
+                msg_arr = get_AI_conversation_messages(conversation_id)
+                respuesta = conv_clasification(msg_arr)
+                
+                # Si clasifica como "Saludo inicial", enviar audio
+                if respuesta == "Saludo inicial":
+                    print(f"🎵 Detectado saludo inicial nuevo, enviando audio a conversación {conversation_id}")
+                    MandarMensajeSaludo(conversation_id, contact_phone, contact_id)
+                    audio_fue_enviado_en_esta_iteracion = True
+                    logging.info(f"Actualizando el lead source a Otro (saludo detectado por IA)")
+                    actualizar_lead_source(contact_id,"Otro")
+            
+            # Continuar con el procesamiento normal solo si no se envió el audio en esta iteración
+            if not audio_fue_enviado_en_esta_iteracion and tiempo > segundos_buffer:
                 time.sleep(segundos_buffer)            
                 msg_arr=get_AI_conversation_messages(conversation_id)
                 respuesta=conv_clasification(msg_arr)
@@ -173,9 +196,22 @@ def MandarMensajeSaludo(conversation_id,contact_phone,contact_id):
     # Actualiza el interes del contacto para que entre al funel
     send_conversation_message(conversation_id,"Esperare 30 segundos antes de enviar el audio de bien venida",True)
     actualizar_interes_en(contact_id, "https://miaclinicasdelamujer.com/gynecologia")
-    actualizar_etiqueta(conversation_id,"citagyne")
+    
+    # Verificar si la etiqueta ya existe antes de asignarla (evitar duplicados)
+    from libs.CW_Conversations import get_conversation_by_id
+    conv_data = get_conversation_by_id(conversation_id)
+    if conv_data:
+        labels = conv_data.get('labels', [])
+        if "citagyne" not in labels:
+            actualizar_etiqueta(conversation_id,"citagyne")
 
     time.sleep(30)
     #despues de esperar lo necesario se manda el audio
     send_audio_mp3_via_twilio(contact_phone,"https://ik.imagekit.io/etqfkh9q2/AudioBienvenidaMp3.mp3")   
     send_conversation_message(conversation_id,"Cuéntame un poquito más ✨ ¿Tienes algún tema en especial que te gustaría revisar en la consulta 🩺💖 o ya te toca tu revisión ginecológica anual? 📅🌸",True)
+    
+    # Marcar que el audio ya se envió
+    conv_attributes = get_conversation_custom_attributes(conversation_id)
+    all_attributes = conv_attributes.copy()
+    all_attributes['audio_enviado'] = True
+    update_conversation_custom_attributes_batch(conversation_id, all_attributes)

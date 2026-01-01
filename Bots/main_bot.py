@@ -19,8 +19,10 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(parent_dir)
 from AI.OpenIAHelper import conv_close_sale, clasificar_conversacion, analizar_sentimiento
 from libs.SaveConversations import Conversacion
-from libs.CW_Conversations import get_AI_conversation_messages, get_conversation_messages_with_agents, get_conversation_by_id
-from libs.CW_Contactos import asignar_a_agente,devolver_llamada,get_linphone_name,get_tipo_contacto,crear_contacto
+from libs.CW_Conversations import get_AI_conversation_messages, get_conversation_messages_with_agents, get_conversation_by_id, get_conversation_custom_attributes, update_conversation_custom_attributes_batch
+from helper import es_primer_mensaje_usuario
+from libs.CW_Contactos import actualizar_etiqueta
+from libs.CW_Contactos import asignar_a_agente,devolver_llamada,get_linphone_name,get_tipo_contacto,crear_contacto,obtener_atributos_contacto
 from libs.TwilioHandler import get_child_call_status
 from libs.ConversationMetrics import calcular_metricas_completas
 from libs.BigQueryHelper import initialize_bigquery, insert_conversation
@@ -85,10 +87,37 @@ def chatwoot_webhook():
     else:
         logging.error("Faltan datos necesarios en el payload.")    
 
-    #Revisamos despues los bots de ventas
+    # Verificar primer mensaje y asignar citagyne si corresponde
     if last_message.get('Sender') == "contact":
-        print(f"Las sender contact")
+        conversation_id = split_data.get('conversation_id')
+        contact_id = split_data.get('contact_id')
         labels = data['conversation']['labels']
+        
+        # Obtener atributos de la conversación para verificar primer_mensaje_procesado
+        conv_attributes = get_conversation_custom_attributes(conversation_id)
+        primer_mensaje_procesado = conv_attributes.get('primer_mensaje_procesado', False)
+        
+        # Si no se ha procesado el primer mensaje y no tiene la etiqueta citagyne
+        if not primer_mensaje_procesado and "citagyne" not in labels:
+            # Verificar si es el primer mensaje del usuario
+            if es_primer_mensaje_usuario(conversation_id, contact_id):
+                # Obtener atributos del contacto para verificar servicios_recibidos
+                contact_attrs = obtener_atributos_contacto(contact_id)
+                servicios_recibidos = contact_attrs.get('servicios_recibidos', '')
+                
+                # Si servicios_recibidos está vacío o no existe, asignar etiqueta citagyne
+                if not servicios_recibidos or servicios_recibidos.strip() == '':
+                    print(f"🔖 Asignando etiqueta citagyne a conversación {conversation_id} (primer mensaje, sin servicios recibidos)")
+                    actualizar_etiqueta(conversation_id, "citagyne")
+                
+                # Marcar que ya se procesó el primer mensaje
+                all_attributes = conv_attributes.copy()
+                all_attributes['primer_mensaje_procesado'] = True
+                update_conversation_custom_attributes_batch(conversation_id, all_attributes)
+                print(f"✅ Primer mensaje procesado para conversación {conversation_id}")
+        
+        # Revisamos los bots de ventas si tiene la etiqueta citagyne
+        print(f"Las sender contact")
         print(f"Etiquetas: {labels} ")
         if "citagyne" in labels:
             print("Esta es una conversacion de ventas de ginecologia")

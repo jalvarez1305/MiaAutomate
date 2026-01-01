@@ -270,3 +270,27 @@ def actualizar_funel_states(query=None,new_state=None):
         # 5. Llamar a la función send_content_builder
         actualizar_funel_state(contacto_id, new_state)
     print("Contactos actualizados")
+
+def obtener_atributos_contacto(contact_id):
+    """
+    Obtiene los atributos personalizados de un contacto.
+    
+    :param contact_id: ID del contacto
+    :return: Diccionario con los atributos personalizados, o diccionario vacío si hay error
+    """
+    url = f"{base_url}/contacts/{contact_id}"
+    headers = {
+        "api_access_token": cw_token
+    }
+    
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            contact_data = response.json()
+            return contact_data.get('custom_attributes', {})
+        else:
+            print(f"Error al obtener atributos del contacto {contact_id}: {response.status_code}")
+            return {}
+    except Exception as e:
+        print(f"Error al obtener atributos del contacto {contact_id}: {str(e)}")
+        return {}
