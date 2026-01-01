@@ -50,7 +50,7 @@ No hormonales , que existen actualmente
 
 Todo esto para ayudarte a vivir esta etapa sin síntomas molestos que deterioran tu salud y tus relaciones personales
 
-El precio de la consulta es de 650 pesos. Y puedes pagar en efectivo , tarjeta o transferencia 😃"""
+El precio de la consulta es de 750 pesos. Y puedes pagar en efectivo , tarjeta o transferencia 😃"""
 precio_consulta="""La consulta ginecológica 🌺 consiste en:
 
 1-Historial médico completo para conocerte💻
@@ -71,11 +71,11 @@ Y en caso de requerir Haremos un
 
 😃 Y no te preocupes lo haremos sin ningún costo extra! 🙌🏻😃Siempre y cuando se realice el mismo día de la consulta!!☺
 
-El Precio de la consulta ginecológica es de $650 pesos !!
+El Precio de la consulta ginecológica es de $750 pesos !!
 
 Y puedes pagar en efectivo, transferencia o tarjeta*!! 💳
 
-***en caso de requerir Papanicolaou sería un costo adicional de $200 pesos !"""
+***en caso de requerir Papanicolaou sería un costo adicional de $220 pesos !"""
 
 segundos_buffer = 30
 
