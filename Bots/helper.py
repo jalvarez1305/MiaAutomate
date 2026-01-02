@@ -41,6 +41,18 @@ def parse_conversation_payload(payload):
 
     return conversation_info
 
+def nombre_contiene_numeros(nombre):
+    """
+    Verifica si un nombre contiene números.
+    
+    :param nombre: Nombre del contacto (string)
+    :return: True si el nombre contiene números, False si es un nombre propio sin números
+    """
+    if not nombre or not isinstance(nombre, str):
+        return False
+    
+    return any(char.isdigit() for char in nombre)
+
 def es_primer_mensaje_usuario(conversation_id, contact_id):
     """
     Verifica si es el primer mensaje del usuario en la conversación.

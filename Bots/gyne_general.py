@@ -19,7 +19,7 @@ from CW_Automations import send_content
 from Bots_Config import audio_gyne,facebook_messages,google_messages,rosario_messages,revista_messages
 from datetime import datetime
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__))))
-from helper import es_primer_mensaje_usuario
+from helper import es_primer_mensaje_usuario, nombre_contiene_numeros
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -122,17 +122,58 @@ def GyneGeneralBot(Detalles):
             
             # Verificar si es primer mensaje o mensaje temprano y aún no se ha enviado audio
             if not audio_enviado and es_primer_mensaje_usuario(conversation_id, contact_id):
-                # Clasificar el mensaje con IA
-                msg_arr = get_AI_conversation_messages(conversation_id)
-                respuesta = conv_clasification(msg_arr)
+                # Obtener el contenido del primer mensaje del usuario para análisis
+                # (será actualizado con el contenido real del primer mensaje encontrado)
+                primer_mensaje_content_temp = last_message_content.lower() if last_message_content else ""
                 
-                # Si clasifica como "Saludo inicial", enviar audio
-                if respuesta == "Saludo inicial":
+                # Obtener mensajes para clasificar con IA
+                msg_arr = get_AI_conversation_messages(conversation_id)
+                respuesta = None
+                
+                # Si es el primer mensaje, crear un array solo con ese mensaje para clasificarlo
+                # Esto evita el problema de que conv_clasification requiera que el último mensaje sea del usuario
+                if msg_arr:
+                    # Buscar el primer mensaje del usuario
+                    primer_msg_usuario = None
+                    for msg in msg_arr:
+                        if msg.get("role") == "user":
+                            primer_msg_usuario = msg
+                            break
+                    
+                    # Si encontramos el primer mensaje del usuario, crear un array solo con ese mensaje
+                    if primer_msg_usuario:
+                        msg_arr_solo_primer = [primer_msg_usuario]
+                        primer_mensaje_content = primer_msg_usuario.get('content', '').lower()
+                        print(f"🎯 Clasificando primer mensaje del usuario: '{primer_msg_usuario.get('content', '')[:50]}...'")
+                        try:
+                            respuesta = conv_clasification(msg_arr_solo_primer)
+                        except Exception as e:
+                            print(f"⚠️ Error al clasificar con IA: {str(e)}")
+                            respuesta = None
+                    else:
+                        # Si no encontramos mensaje del usuario, usar todo el array
+                        try:
+                            respuesta = conv_clasification(msg_arr)
+                        except Exception as e:
+                            print(f"⚠️ Error al clasificar con IA: {str(e)}")
+                            respuesta = None
+                
+                # Decidir si enviar audio: solo si IA clasifica como "Saludo inicial"
+                # La IA ahora está mejorada para detectar casos como "Disculpa para sacar una cita"
+                deberia_enviar_audio = respuesta == "Saludo inicial"
+                if deberia_enviar_audio:
+                    print(f"🎵 IA clasificó como 'Saludo inicial'")
+                
+                if deberia_enviar_audio:
                     print(f"🎵 Detectado saludo inicial nuevo, enviando audio a conversación {conversation_id}")
                     MandarMensajeSaludo(conversation_id, contact_phone, contact_id)
                     audio_fue_enviado_en_esta_iteracion = True
-                    logging.info(f"Actualizando el lead source a Otro (saludo detectado por IA)")
+                    logging.info(f"Actualizando el lead source a Otro (saludo detectado por IA o palabras clave)")
                     actualizar_lead_source(contact_id,"Otro")
+                elif respuesta:
+                    print(f"📝 Clasificación del primer mensaje: '{respuesta}' (no es 'Saludo inicial' ni contiene palabras clave)")
+                else:
+                    print(f"📝 No se pudo clasificar el mensaje y no contiene palabras clave reconocidas")
             
             # Continuar con el procesamiento normal solo si no se envió el audio en esta iteración
             if not audio_fue_enviado_en_esta_iteracion and tiempo > segundos_buffer:
@@ -203,7 +244,25 @@ def MandarMensajeSaludo(conversation_id,contact_phone,contact_id):
     if conv_data:
         labels = conv_data.get('labels', [])
         if "citagyne" not in labels:
-            actualizar_etiqueta(conversation_id,"citagyne")
+            # Obtener el nombre del contacto para verificar si contiene números
+            contact_name = None
+            contact_info = conv_data.get('contact', {})
+            if contact_info:
+                contact_name = contact_info.get('name')
+            if not contact_name:
+                meta = conv_data.get('meta', {})
+                sender = meta.get('sender', {})
+                if sender:
+                    contact_name = sender.get('name')
+            
+            # Solo asignar la etiqueta si el nombre contiene números (no es un nombre propio)
+            if contact_name and nombre_contiene_numeros(contact_name):
+                actualizar_etiqueta(conversation_id,"citagyne")
+            elif contact_name:
+                print(f"⏭️ No se asigna etiqueta citagyne: el nombre '{contact_name}' no contiene números (nombre propio)")
+            else:
+                # Si no se puede obtener el nombre, asignar la etiqueta por defecto
+                actualizar_etiqueta(conversation_id,"citagyne")
 
     time.sleep(30)
     #despues de esperar lo necesario se manda el audio

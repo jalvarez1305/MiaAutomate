@@ -310,17 +310,19 @@ def conv_clasification(ConvMessages):
    #EVALUACIÓN: INCLUDE_HISTORY
    ## EVALUAR ESTAS REGLAS EN EL HISTORIAL:
    ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE TODAS ESTAS CONDICIONES:
-   - Es uno de los primeros mensajes del usuario en la conversación (pocos mensajes previos del usuario)
+   - Es uno de los primeros mensajes del usuario en la conversación (pocos mensajes previos del usuario, preferentemente el primero)
    - El agente/bot NO ha enviado aún el mensaje de bienvenida o información inicial
    - NO se ha proporcionado precio aún
    - NO se ha ofrecido horario aún
    ## EVALUAR ESTAS REGLAS EN ULTIMO MENSAJE DEL USUARIO:
    ### CLASIFICAR EN ESTA CATEGORIA SI CUMPLE AL MENOS UNA DE ESTAS CONDICIONES:  
-   - Contiene un saludo (Hola, Buenos días, Buenas tardes, Buenas noches, etc.)
+   - Contiene un saludo (Hola, Buenos días, Buenas tardes, Buenas noches, Disculpa, Disculpe, etc.)
    - Solicita información general sobre servicios
    - Pide información inicial o básica
-   - Menciona palabras como "información", "info", "informes", "consultar", "consulta", "saber más", "conocer"
+   - Solicita agendar o sacar una cita (especialmente si es el primer mensaje)
+   - Menciona palabras relacionadas con solicitar servicios: "información", "info", "informes", "consultar", "consulta", "saber más", "conocer", "cita", "sacar cita", "agendar"
    - Es un mensaje que indica interés inicial en los servicios de ginecología
+   - Contiene frases como "para sacar una cita", "quiero cita", "necesito cita", "agendar cita", "sacar cita"
    ### EJEMPLOS:
    - Hola
    - Buenos días, necesito información
@@ -330,9 +332,17 @@ def conv_clasification(ConvMessages):
    - Me gustaría conocer sus servicios
    - Información por favor
    - Buenas, necesito consultar algo
+   - Disculpa para sacar una cita
+   - Disculpe, quiero sacar una cita
+   - Para sacar una cita
+   - Necesito agendar una cita
+   - Quiero una cita
+   - Necesito información sobre la consulta
+   - Quiero saber sobre sus servicios
    ## NOTA IMPORTANTE: 
     - Si cumple estas condiciones, clasifica SOLO como "Saludo inicial" y no consideres otras categorías
     - Esta categoría tiene menor prioridad que las otras, úsala solo si no encaja en ninguna otra categoría anterior
+    - IMPORTANTE: Si el mensaje solicita explícitamente una cita o información en el primer mensaje, clasifica como "Saludo inicial" aunque contenga palabras como "sacar" o "cita"
 
 17. Agradecimiento
    #EVALUACIÓN: INCLUDE_HISTORY
