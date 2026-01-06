@@ -36,6 +36,7 @@ custom_commands = ["Cita",
                    "Hola!",
                    "humano",
                    "ayuda",
+                   "tarea",
                    """Hola hermosa, me encontraba lejos del telefono. \r\nCuéntame un poquito más ✨ ¿Tienes algún tema en especial que te gustaría revisar en la consulta 🩺💖 o ya te toca tu revisión ginecológica anual? 📅🌸"""]
 llamada_msg="""Hola hermosa, me encontraba lejos del telefono. \r\nCuéntame un poquito más ✨ ¿Tienes algún tema en especial que te gustaría revisar en la consulta 🩺💖 o ya te toca tu revisión ginecológica anual? 📅🌸"""
 agenda_medico="1.- Ver detalles"
