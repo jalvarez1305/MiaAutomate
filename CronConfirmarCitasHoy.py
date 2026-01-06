@@ -12,8 +12,8 @@ query = """SELECT      [Paciente ID],
 			[MedicoNickName],
 			case 
 				when Especialidad = 'Ginecologia' then 'Ropa ligera como vestido y zapatos facil de retirar como sandalia'
-				when Especialidad = 'Cita Nutricion' then ''
-				else ''
+				when Especialidad = 'Cita Nutricion' then 'No aplica'
+				else 'No Aplica'
 			END as Recomendaciones
 FROM        dbo.vwCalendario
 WHERE       (CONVERT(date, start_datetime) = CONVERT(date, GETDATE()))
