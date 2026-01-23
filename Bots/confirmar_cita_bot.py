@@ -39,6 +39,25 @@ Te pedimos llegar 10 minutos antes.
             cmd=f"UPDATE [cal].[CalendarEvents] SET LocalUpdate=1,[summary]= REPLACE([summary], 'Agendada', 'Confirmada') WHERE ID='{ultima_cita}'"
             ejecutar_update(cmd)
             #print(f"update query: {cmd}")
+            cmd=f"SELECT [start_datetime],[end_datetime],[LinkReunion] FROM [cal].[CalendarEvents] WHERE ID='{ultima_cita}'"
+            cita_data = execute_query(cmd)
+            if cita_data and len(cita_data) > 0:
+                start_dt = cita_data[0].get('start_datetime')
+                end_dt = cita_data[0].get('end_datetime')
+                link_reunion = cita_data[0].get('LinkReunion')
+                if start_dt and end_dt:
+                    duracion_minutos = (end_dt - start_dt).total_seconds() / 60
+                    if duracion_minutos < 6:
+                        link_reunion = link_reunion or ""
+                        respuesta = f"""¡Excelente hermosa! 😊💕 Tu cita queda confirmada.
+
+Te pedimos conectarte 5 minutos antes. 
+
+{link_reunion}
+
+⚠️ IMPORTANTE: Las citas virtuales no tienen tolerancia.
+
+¡Gracias por tu comprensión! Que tengas un día maravilloso ��✨"""
             send_conversation_message(conversation_id, respuesta, is_private=False, buzon=ChatwootSenders.Pacientes)
             RevisaFormularios(conversation_id,contact_id)
         elif last_message_content =="No, reagendar":
