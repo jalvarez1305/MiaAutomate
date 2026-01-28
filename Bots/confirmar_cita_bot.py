@@ -41,11 +41,37 @@ Te pedimos llegar 10 minutos antes.
             #print(f"update query: {cmd}")
             cmd=f"SELECT [start_datetime],[end_datetime],[LinkReunion] FROM [cal].[CalendarEvents] WHERE ID='{ultima_cita}'"
             cita_data = execute_query(cmd)
-            if cita_data and len(cita_data) > 0:
-                start_dt = cita_data[0].get('start_datetime')
-                end_dt = cita_data[0].get('end_datetime')
-                link_reunion = cita_data[0].get('LinkReunion')
-                if start_dt and end_dt:
+            if cita_data is None:
+                registros = []
+            elif hasattr(cita_data, "to_dict"):
+                registros = cita_data.to_dict("records")
+            elif isinstance(cita_data, list):
+                registros = cita_data
+            else:
+                try:
+                    registros = list(cita_data)
+                except TypeError:
+                    registros = []
+
+            if len(registros) == 0:
+                send_conversation_message(
+                    conversation_id,
+                    "No se encontró información de la cita para validar fecha y tipo de confirmación.",
+                    is_private=True,
+                    buzon=ChatwootSenders.Pacientes
+                )
+            else:
+                start_dt = registros[0].get('start_datetime')
+                end_dt = registros[0].get('end_datetime')
+                link_reunion = registros[0].get('LinkReunion')
+                if not start_dt or not end_dt:
+                    send_conversation_message(
+                        conversation_id,
+                        "Faltan start_datetime/end_datetime en la cita para validar tipo de confirmación.",
+                        is_private=True,
+                        buzon=ChatwootSenders.Pacientes
+                    )
+                else:
                     duracion_minutos = (end_dt - start_dt).total_seconds() / 60
                     if duracion_minutos < 6:
                         link_reunion = link_reunion or ""
