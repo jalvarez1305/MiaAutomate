@@ -285,29 +285,30 @@ def asignar_nuevas_conversaciones():
 
     # Obtener el atributo cliente desde la ruta correcta en el payload
     cliente = data.get('meta', {}).get('sender', {}).get('custom_attributes', {}).get('cliente')
-    
-    # Verificar si el atributo "cliente" está presente
     es_cliente = cliente is not None
-    
-    # Obtener la hora actual - CORREGIDO
+
+    # IDs de agentes (Lina=34, Mayra=32, Yaneth=15)
+    LINA_ID = 34
+    MAYRA_ID = 32
+    YANETH_ID = 15
+
+    # Obtener la hora actual
     hora_actual = datetime.datetime.now().hour
-    
-    # Aplicar reglas de asignación
+
+    # Lógica híbrida: 08:00-16:00 todas a Lina; fuera de horario según paciente
     try:
-        if es_cliente:
-            if hora_actual < 15:  # Antes de las 3:00 PM
-                print(f"Asigna Dayana - Conversación: {conversation_id}")
-                asignado = 33
-            else:  # 3:00 PM o posterior
-                print(f"Asigna Mayra - Conversación: {conversation_id}")
-                asignado = 32
+        if 8 <= hora_actual < 16:
+            print(f"Asigna Lina - Conversación: {conversation_id} (horario 8-16h)")
+            asignado = LINA_ID
         else:
-            print(f"Asigna Yanet - Conversación: {conversation_id}")
-            asignado = 15
-        
-        # Aquí podrías agregar código para hacer la asignación real en Chatwoot
-        # Por ejemplo, llamar a la API de Chatwoot para asignar el agente correspondiente
-        asignar_a_agente(conversation_id,asignado)
+            if es_cliente:
+                print(f"Asigna Mayra - Conversación: {conversation_id} (paciente, fuera de horario)")
+                asignado = MAYRA_ID
+            else:
+                print(f"Asigna Yaneth - Conversación: {conversation_id} (no paciente, fuera de horario)")
+                asignado = YANETH_ID
+
+        asignar_a_agente(conversation_id, asignado)
         return jsonify({
             "message": f"Conversación {conversation_id} asignada a {asignado}",
             "assigned_to": asignado

@@ -5,6 +5,7 @@ Esta carpeta contiene herramientas para debuggear problemas relacionados con:
 - Asignación de etiqueta `citagyne`
 - Detección de saludos iniciales
 - Procesamiento del primer mensaje
+- IDs de agentes para asignación de conversaciones
 
 ## Archivos
 
@@ -41,6 +42,20 @@ python debug/debug_verificar_listas.py "Hola, necesito información"
 - Compara el mensaje exacto con todas las listas
 - Muestra en cuál lista está (si está)
 - Útil para agregar nuevos mensajes a las listas
+
+### `debug_listar_agentes.py`
+Script para listar agentes de Chatwoot y localizar sus IDs.
+
+**Uso:**
+```bash
+python debug/debug_listar_agentes.py
+```
+
+**Qué hace:**
+- Consulta la API de Chatwoot para obtener todos los agentes
+- Muestra una tabla con ID, nombre y email de cada agente
+- Destaca los IDs de Lina y Yaneth para la asignación de conversaciones
+- Útil cuando se modifican las reglas de asignación en `AsignarNuevasConversaciones`
 
 ## Flujo de Decisión del Audio
 
@@ -99,12 +114,13 @@ source .venv/bin/activate
    ```bash
    python debug/debug_verificar_listas.py "tu mensaje aquí"
    ```
-   Ejemplo:
+
+3. **Para listar agentes de Chatwoot:**
    ```bash
-   python debug/debug_verificar_listas.py "Hola, necesito información"
+   python debug/debug_listar_agentes.py
    ```
 
-3. **Revisar los logs:**
+4. **Revisar los logs:**
    - Buscar mensajes con `🔖`, `🎵`, `✅` que indican acciones del sistema
    - Buscar errores con `❌` o `ERROR`
 
