@@ -287,26 +287,26 @@ def asignar_nuevas_conversaciones():
     cliente = data.get('meta', {}).get('sender', {}).get('custom_attributes', {}).get('cliente')
     es_cliente = cliente is not None
 
-    # IDs de agentes (Lina=34, Mayra=32, Yaneth=15)
-    LINA_ID = 34
-    MAYRA_ID = 32
-    YANETH_ID = 15
+    # IDs de agentes recepción (Dayana matutino, Mayra vespertino) y Yaneth
+    DAYANA_ID = 33   # Recepción turno matutino
+    MAYRA_ID = 32   # Recepción turno vespertino
+    YANETH_ID = 15  # No pacientes
 
-    # Obtener la hora actual
     hora_actual = datetime.datetime.now().hour
 
-    # Lógica híbrida: 08:00-16:00 todas a Lina; fuera de horario según paciente
     try:
-        if 8 <= hora_actual < 16:
-            print(f"Asigna Lina - Conversación: {conversation_id} (horario 8-16h)")
-            asignado = LINA_ID
-        else:
-            if es_cliente:
-                print(f"Asigna Mayra - Conversación: {conversation_id} (paciente, fuera de horario)")
-                asignado = MAYRA_ID
+        if es_cliente:
+            # Paciente -> recepción según turno
+            if hora_actual < 15:
+                asignado = DAYANA_ID
+                print(f"Asigna Dayana - Conversación: {conversation_id} (paciente, turno matutino)")
             else:
-                print(f"Asigna Yaneth - Conversación: {conversation_id} (no paciente, fuera de horario)")
-                asignado = YANETH_ID
+                asignado = MAYRA_ID
+                print(f"Asigna Mayra - Conversación: {conversation_id} (paciente, turno vespertino)")
+        else:
+            # No paciente -> Yaneth
+            asignado = YANETH_ID
+            print(f"Asigna Yaneth - Conversación: {conversation_id} (no paciente)")
 
         asignar_a_agente(conversation_id, asignado)
         return jsonify({
