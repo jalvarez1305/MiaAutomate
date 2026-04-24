@@ -216,9 +216,9 @@ def CrearTarea(conversation_id, contact_id):
         descripcion_escaped = descripcion_completa.replace("'", "''")
         
         insert_query = f"""INSERT INTO [dbo].[Tareas] 
-                           ([Titulo], [Descripcion], [Comentarios], [Fecha de Creacion], [Fecha de entrega], [is_finish])
+                           ([Titulo], [Descripcion], [Comentarios], [Fecha de Creacion], [Fecha de entrega], [Fecha de terminacion], [is_finish])
                            VALUES 
-                           ('{titulo_escaped}', '{descripcion_escaped}', NULL, GETDATE(), DATEADD(HOUR, 1, GETDATE()), 0)"""
+                           ('{titulo_escaped}', '{descripcion_escaped}', NULL, GETDATE(), NULL, GETDATE(), 0)"""
         
         # 8. Ejecutar el INSERT
         ejecutar_update(insert_query)
