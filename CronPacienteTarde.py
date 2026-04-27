@@ -7,7 +7,7 @@ query = """SELECT
 				phone_number,
                 LEFT([Paciente], CHARINDEX(' ', [Paciente] + ' ') - 1) AS PrimerNombre
             FROM 
-                [dbo].[vwCalendario]
+                [dbo].[vwCalendario_v2]
             WHERE 
                 DATEDIFF(MINUTE, [start_datetime], GETDATE()) > 3
                 AND DATEDIFF(MINUTE, [start_datetime], GETDATE()) < 15

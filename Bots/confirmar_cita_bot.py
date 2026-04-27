@@ -98,7 +98,7 @@ Te pedimos conectarte 5 minutos antes.
         logging.error(f"Error en AgendaBot: {str(e)}")  # Manejo de errores con logging
 
 def RevisaFormularios(conversation_id,contact_id):
-    cmd=f"SELECT [MedicoID] FROM [dbo].[vwCalendario] where [Paciente ID] = {contact_id} order by start_datetime desc"
+    cmd=f"SELECT [MedicoID] FROM [dbo].[vwCalendario_v2] where [Paciente ID] = {contact_id} order by start_datetime desc"
     medico_cita=ExecuteScalar(cmd)
     match medico_cita:
         case 190:  # El ID de chatwoot de la paciente  

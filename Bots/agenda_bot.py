@@ -47,7 +47,7 @@ Saludos!"""
 								Notas
                             ) AS Citas
                         FROM 
-                            [dbo].[vwCalendario]
+                            [dbo].[vwCalendario_v2]
                         WHERE 
                             MedicoId = {contact_id} 
                             AND {dia_condition} 

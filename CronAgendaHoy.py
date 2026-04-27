@@ -8,7 +8,7 @@ query = """SELECT        MedicoId,
                     'Hoy' as Dia,
                     MIN(FORMAT(start_datetime, 'HH:mm'))  AS Inicio,
                     MAX(FORMAT(end_datetime, 'HH:mm'))  AS Fin
-        FROM            dbo.vwCalendario
+        FROM            dbo.vwCalendario_v2
         WHERE        (CONVERT(date, start_datetime) = CONVERT(date, GETDATE()))
         GROUP BY MedicoID,medico_phone,MedicoNickName""" 
 

@@ -15,7 +15,7 @@ query = """SELECT      [Paciente ID],
 				when Especialidad = 'Cita Nutricion' then 'No aplica'
 				else 'No aplica'
 			END as Recomendaciones
-FROM        dbo.vwCalendario
+FROM        dbo.vwCalendario_v2
 WHERE       (CONVERT(date, start_datetime) = CONVERT(date, GETDATE() + 1))
 		and Not [Paciente ID] is null
 		and not phone_number is null
