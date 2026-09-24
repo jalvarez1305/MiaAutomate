@@ -619,6 +619,7 @@ def get_conversation_messages(conversation_id):
 # Constante para la duración de inactividad permitida
 DURACION_INACTIVIDAD = timedelta(hours=15)
 GHOSTED_INACTIVIDAD = timedelta(hours=1)
+CIERRE_REASIGNACION_INACTIVIDAD = timedelta(hours=2)
 
 def cerrar_conversaciones_inactivas(page=0):
     """
@@ -686,6 +687,14 @@ def cerrar_conversaciones_inactivas(page=0):
     except Exception as ex:
         print(f"Error al cerrar conversaciones inactivas: {str(ex)}")
         
+def get_last_message_info(conversation_id, include_private=True):
+    mensajes = get_conversation_messages_with_agents(conversation_id, include_private=include_private)
+
+    if len(mensajes) < 1:
+        return None
+
+    return mensajes[-1]
+
 def reasigna_conversaciones(old,new,page=0):
     """
     Verifica todas las conversaciones y si están asignadas al agente ID old,
@@ -708,15 +717,34 @@ def reasigna_conversaciones(old,new,page=0):
                 for conversation in conversations['payload']:
                     conv_id = conversation.get('id')
                     
-                    # Verificar si la conversación está asignada al agente ID 29
+                    # Verificar si la conversación está asignada al agente actual.
                     assignee_id = None
                     meta = conversation.get("meta", {})
                     if meta and "assignee" in meta and meta["assignee"] is not None:
                         assignee_id = meta["assignee"].get("id")
                     
-                    # Si está asignada al agente ID 29, imprimir mensaje de cambio
+                    # Si está asignada al agente ID old, reasignar o cerrar según el último remitente.
                     if assignee_id == old:
-                        print(f"🔄 Cambiar asignación de conversación {conv_id} del agente ID 29 al agente ID {new}")
+                        last_message = get_last_message_info(conv_id)
+
+                        if not last_message:
+                            print(f"Conversacion {conv_id} sin mensajes; se reasigna al agente ID {new}")
+                            asignar_a_agente(conv_id,new)
+                            continue
+
+                        last_sender = last_message.get("role")
+                        last_message_at = last_message.get("created_at")
+
+                        if last_sender != "contact" and last_message_at:
+                            last_message_time = datetime.utcfromtimestamp(last_message_at)
+                            inactivity_duration = datetime.utcnow() - last_message_time
+
+                            if inactivity_duration >= CIERRE_REASIGNACION_INACTIVIDAD:
+                                print(f"Cerrando conversacion {conv_id}: ultimo mensaje de agente y {inactivity_duration} sin actividad.")
+                                cerrar_conversacion(conv_id)
+                                continue
+
+                        print(f"Cambiar asignacion de conversacion {conv_id} del agente ID {old} al agente ID {new}")
                         asignar_a_agente(conv_id,new)
                 
             except ValueError as json_error:
